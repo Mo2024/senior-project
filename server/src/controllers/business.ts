@@ -84,6 +84,7 @@ export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown>
     }
 
 }
+
 interface DeleteBranchBody {
     branchId?: Schema.Types.ObjectId,
 }
@@ -125,6 +126,39 @@ export const deleteBranch: RequestHandler<unknown, unknown, DeleteBranchBody, un
             throw createHttpError(401, 'Your business is locked!')
         }
         await branch.deleteOne();
+        res.sendStatus(204);
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface DeleteBusinessBody {
+    businessId?: Schema.Types.ObjectId,
+}
+
+
+export const deleteBusiness: RequestHandler<unknown, unknown, DeleteBusinessBody, unknown> = async (req, res, next) => {
+    const { businessId } = req.body;
+    const authenticatedUserId = req.session.userId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!businessId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(businessId)) {
+            throw createHttpError(404, 'Invalid business id!')
+        }
+        const business = await BusinessModel.findById(businessId).exec();
+
+        if (!business) {
+            throw createHttpError(404, 'Business not found!')
+        }
+
+        if (!business.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        await BusinessModel.findOneAndDelete({ _id: businessId }).exec();
         res.sendStatus(204);
     } catch (error) {
         next(error)

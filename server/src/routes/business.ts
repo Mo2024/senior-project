@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get('/', BusinessContoller.getBusinesses);
 router.post('/create', BusinessContoller.createBusiness);
+router.delete('/delete', BusinessContoller.deleteBusiness);
 router.post('/create/branch', BusinessContoller.createBranch);
 router.delete('/delete/branch', BusinessContoller.deleteBranch);
 
