@@ -2,9 +2,8 @@ import bcrypt from 'bcrypt';
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-import { OwnerModel, UserModel } from '../models/user';
-import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex } from "../util/regex";
-
+import { CustomerModel, OwnerModel, UserModel } from '../models/user';
+import { generatePassword, validateOwnerRegex, validateUserRegex } from '../util/functions';
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
     const authenticatedUser = req.session.userId;
     try {
@@ -14,44 +13,11 @@ export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
         next(error)
     }
 }
-interface SignUpBody {
+interface SignUpOwnerBody {
     username?: string,
     email?: string,
     password?: string,
-
-}
-export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown> = async (req, res, next) => {
-    // const { username, email, password } = req.body;
-
-    // try {
-    //     if (!username || !email || !password) {
-    //         throw createHttpError(400, "Parameter Missing")
-    //     }
-
-    //     const existingUsername = await UserModel.findOne({ username }).exec();
-    //     if (existingUsername) {
-    //         throw createHttpError(409, "Username already taken. Please choose a diffrent one.")
-    //     }
-    //     const existingEmail = await UserModel.findOne({ email }).exec();
-    //     if (existingEmail) {
-    //         throw createHttpError(409, "Email already taken. Please choose a diffrent one.")
-    //     }
-
-    //     const passwordHashed = await bcrypt.hash(password, 10);
-    //     const newUser = await UserModel.create({ username, email, password: passwordHashed });
-
-    //     // req.session.userId = newUser._id;
-
-    //     res.status(201).json(newUser)
-
-    // } catch (error) {
-    //     next(error)
-    // }
-}
-interface SignUpClientBody {
-    username?: string,
-    email?: string,
-    password?: string,
+    confirmPassword?: string,
     fullName?: string,
     telephone?: string,
     area?: string,
@@ -60,11 +26,12 @@ interface SignUpClientBody {
     building?: string,
     ownerCpr?: number,
 }
-export const signUpClient: RequestHandler<unknown, unknown, SignUpClientBody, unknown> = async (req, res, next) => {
+export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unknown> = async (req, res, next) => {
     const {
         username,
         email,
         password,
+        confirmPassword,
         fullName,
         telephone,
         area,
@@ -74,32 +41,22 @@ export const signUpClient: RequestHandler<unknown, unknown, SignUpClientBody, un
         ownerCpr,
     } = req.body;
     try {
-        if (!username || !email || !password) {
+        if (!username || !email || !password || !confirmPassword || !fullName || !telephone || !area || !road || !block || !building || !ownerCpr) {
             throw createHttpError(400, "Parameter Missing");
         }
 
-        if (!usernameRegex.test(username)) {
-            throw createHttpError(400, "Invalid username format");
+        if (password !== confirmPassword) {
+            throw createHttpError(400, "Passwords Do not match!");
         }
 
-        if (!emailRegex.test(email)) {
-            throw createHttpError(400, "Invalid email format");
-        }
-
-        if (!passwordRegex.test(password)) {
-            throw createHttpError(400, "Invalid password format");
-        }
-
-        if (ownerCpr && !ownerCprRegex.test(ownerCpr.toString())) {
-            throw createHttpError(400, "Invalid owner CPR format");
-        }
-
-        const existingUsername = await OwnerModel.findOne({ username }).exec();
+        validateUserRegex(username, email, password, confirmPassword, fullName, telephone)
+        validateOwnerRegex(area, road, block, building, ownerCpr)
+        const existingUsername = await UserModel.findOne({ username }).exec();
         if (existingUsername) {
             throw createHttpError(409, "Username already taken. Please choose a different one.");
         }
 
-        const existingEmail = await OwnerModel.findOne({ email }).exec();
+        const existingEmail = await UserModel.findOne({ email }).exec();
         if (existingEmail) {
             throw createHttpError(409, "Email already taken. Please choose a different one.");
         }
@@ -121,6 +78,59 @@ export const signUpClient: RequestHandler<unknown, unknown, SignUpClientBody, un
         req.session.userId = newOwner._id as mongoose.Types.ObjectId;
 
         res.status(201).json(newOwner);
+    } catch (error) {
+        next(error);
+    }
+};
+
+interface SignUpCustomerBody {
+    username?: string,
+    email?: string,
+    password?: string,
+    confirmPassword?: string,
+    fullName?: string,
+    telephone?: string,
+
+}
+export const signUpCustomer: RequestHandler<unknown, unknown, SignUpCustomerBody, unknown> = async (req, res, next) => {
+    const {
+        username,
+        email,
+        password,
+        confirmPassword,
+        fullName,
+        telephone,
+    } = req.body;
+    try {
+        if (!username || !email || !password || !confirmPassword || !fullName || !telephone) {
+            throw createHttpError(400, "Parameter Missing");
+        }
+
+        validateUserRegex(username, email, password, confirmPassword, fullName, telephone)
+
+
+        const existingUsername = await UserModel.findOne({ username }).exec();
+        if (existingUsername) {
+            throw createHttpError(409, "Username already taken. Please choose a different one.");
+        }
+
+        const existingEmail = await UserModel.findOne({ email }).exec();
+        if (existingEmail) {
+            throw createHttpError(409, "Email already taken. Please choose a different one.");
+        }
+
+        const passwordHashed = await bcrypt.hash(password, 10);
+        const newCustomer = await CustomerModel.create({
+            username,
+            email,
+            password: passwordHashed,
+            fullName,
+            telephone,
+        });
+
+        req.session.userId = newCustomer._id as mongoose.Types.ObjectId;
+
+        res.status(201).json(newCustomer);
     } catch (error) {
         next(error);
     }
