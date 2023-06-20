@@ -4,8 +4,9 @@ import express, { NextFunction, Request, Response } from 'express';
 import session from "express-session";
 import createHttpError, { isHttpError } from "http-errors";
 import morgan from 'morgan';
-import { requiresAuth } from './middleware/auth';
+import { requiresAuth, isOwner } from './middleware/auth';
 import userRoutes from './routes/users';
+import businessRoutes from './routes/business';
 import env from './util/validateEnv';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(session({
 }))
 
 app.use('/api/users', userRoutes);
+app.use('/api/business', requiresAuth, isOwner, businessRoutes);
 
 app.use((req, res, next) => {
     next(createHttpError(404, "Endpoint not found"))

@@ -5,3 +5,5 @@ export const ownerCprRegex = /^\d{9}$/;
 export const fullNameRegex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;
 export const telephoneRegex = /^\d{8}$/;
 export const addressRegex = /^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$/;
+export const businessNameRegex = /^(?! )[a-zA-Z0-9\s]+$/;
+export const descriptionRegex = /^(?=.*[a-zA-Z]).{1,50}$/;

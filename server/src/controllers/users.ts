@@ -3,11 +3,11 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import { CustomerModel, OwnerModel, UserModel } from '../models/user';
-import { generatePassword, validateOwnerRegex, validateUserRegex } from '../util/functions';
+import { validateOwnerRegex, validateUserRegex } from '../util/functions';
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
-    const authenticatedUser = req.session.userId;
+    const authenticatedUserId = req.session.userId;
     try {
-        const user = await UserModel.findById(authenticatedUser).select('+email').exec();
+        const user = await UserModel.findById(authenticatedUserId).select('+email').exec();
         res.status(201).json(user)
     } catch (error) {
         next(error)

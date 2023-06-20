@@ -1,4 +1,4 @@
-import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex } from "../util/regex";
+import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex } from "../util/regex";
 import createHttpError from "http-errors";
 
 export function generatePassword(length = 10) {
@@ -46,5 +46,13 @@ export function validateUserRegex(username: string, email: string, password: str
     }
     if (!telephoneRegex.test(telephone)) {
         throw createHttpError(400, 'Telephone input must be only 8 digits');
+    }
+}
+export function validateBusinessRegex(name: string, description: string) {
+    if (!businessNameRegex.test(name)) {
+        throw createHttpError(400, 'Invalid Business name');
+    }
+    if (!descriptionRegex.test(description)) {
+        throw createHttpError(400, 'Description can be at most 50 letters');
     }
 }
