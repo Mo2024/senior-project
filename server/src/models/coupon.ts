@@ -1,5 +1,10 @@
 import { Schema, model } from "mongoose";
 
+export enum couponType {
+    Type1 = "percentage",
+    Type2 = "amount",
+}
+
 const couponSchema = new Schema({
     name: {
         type: String,
@@ -10,11 +15,14 @@ const couponSchema = new Schema({
         ref: 'Business',
         required: true
     },
-    percentage: {
+    amount: {
         type: Number,
+        required: true
     },
-    amountDiscounted: {
-        type: Number,
+    type: {
+        type: String,
+        enum: Object.values(couponType),
+        required: true,
     },
 });
 const CouponModel = model("Coupon", couponSchema);

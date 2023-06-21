@@ -1,4 +1,5 @@
-import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex } from "../util/regex";
+import mongoose, { Schema } from "mongoose";
+import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex } from "../util/regex";
 import createHttpError from "http-errors";
 
 export function generatePassword(length = 10) {
@@ -55,4 +56,24 @@ export function validateBusinessRegex(name: string, description: string) {
     if (!descriptionRegex.test(description)) {
         throw createHttpError(400, 'Description can be at most 50 letters');
     }
+}
+export function validateCouponRegex(name: string, businessId: Schema.Types.ObjectId, amount: number, type: string) {
+    if (!couponNameRegex.test(name)) {
+        throw createHttpError(400, 'Coupon must be at most 15 letters and only alphabet letters');
+    }
+    if (!mongoose.isValidObjectId(businessId)) {
+        throw createHttpError(404, 'Invalid business id!')
+    }
+    if (type == "percentage") {
+        if (!couponPercentageRegex.test(amount.toString())) {
+            throw createHttpError(400, 'Percentage must be greater than 0 and at most 100!');
+        }
+    } else if (type == "amount") {
+        if (!couponAmounteRegex.test(amount.toString())) {
+            throw createHttpError(400, 'Amount must be a number only!');
+        }
+    } else {
+        throw createHttpError(400, 'Invalid coupon type!');
+    }
+
 }

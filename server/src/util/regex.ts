@@ -7,3 +7,7 @@ export const telephoneRegex = /^\d{8}$/;
 export const addressRegex = /^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$/;
 export const businessNameRegex = /^(?! )[a-zA-Z0-9\s]+$/;
 export const descriptionRegex = /^(?=.*[a-zA-Z]).{1,50}$/;
+export const couponTypeRegex = /^(percentage|amount)$/;
+export const couponNameRegex = /^[A-Za-z]{1,15}$/;
+export const couponPercentageRegex = /^(0\.[1-9]\d*|0?\.0*[1-9]\d*|1(\.0+)?)$/;
+export const couponAmounteRegex = /^(0*[1-9]\d*|0+\.\d+)$/;
