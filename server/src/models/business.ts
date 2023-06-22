@@ -26,6 +26,10 @@ const businessSchema = new Schema({
             ref: 'Branch',
         },
     ],
+    filename: {
+        type: String,
+        default: null
+    }
 
 });
 

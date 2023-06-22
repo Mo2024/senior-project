@@ -77,3 +77,10 @@ export function validateCouponRegex(name: string, businessId: Schema.Types.Objec
     }
 
 }
+
+
+export function isImageFile(imageName: string): boolean {
+    const fileExtension = imageName.split('.').pop();
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    return allowedExtensions.includes(fileExtension?.toLowerCase() || '');
+}

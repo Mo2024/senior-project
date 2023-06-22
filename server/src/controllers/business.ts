@@ -8,6 +8,8 @@ import mongoose, { ObjectId, Schema, Document, Types } from "mongoose";
 import { BranchModel } from "../models/branch";
 import { CouponModel, couponType } from "../models/coupon";
 
+
+//this is only for the user himself, we need an all businesses one!
 export const getBusinesses: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
 
@@ -21,26 +23,76 @@ export const getBusinesses: RequestHandler = async (req, res, next) => {
     }
 
 }
-export const getBranches: RequestHandler = async (req, res, next) => {
+export const getBusiness: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
+    const { businessId } = req.params
     const authenticatedUserId = req.session.userId;
-    const { businessId } = req.body
 
     try {
         assertIsDefined(authenticatedUserId)
-        const branchModels = await BranchModel.find({ businessId: businessId });
+        if (!businessId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(businessId)) {
+            throw createHttpError(404, 'Invalid business id!')
+        }
+        const business = await BusinessModel.findOne({ _id: businessId }).exec();
+        if (!business) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!business.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        res.status(201).json(business)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+
+export const getBranches: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const { businessId } = req.params
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!businessId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(businessId)) {
+            throw createHttpError(404, 'Invalid business id!')
+        }
+        const branchModels = await BranchModel.find({ businessId: businessId })
+            .populate({ path: 'businessId', select: 'ownerId status' }) as Array<IbranchPopulate> | null;
+        if (!branchModels) {
+            throw createHttpError(404, 'Branches not found!')
+        }
+        if (!branchModels[0].businessId.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+
         res.status(201).json(branchModels)
     } catch (error) {
         next(error)
     }
 
 }
-export const getCoupons: RequestHandler = async (req, res, next) => {
+export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
-    const { businessId } = req.body
+    const { businessId } = req.params
 
     try {
         assertIsDefined(authenticatedUserId)
+        if (!businessId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(businessId)) {
+            throw createHttpError(404, 'Invalid business id!')
+        }
         const coupons = await CouponModel.find({ businessId: businessId });
+        if (!coupons) {
+            throw createHttpError(404, 'Coupons not found!')
+        }
         res.status(201).json(coupons)
     } catch (error) {
         next(error)
@@ -63,8 +115,10 @@ export const createBusiness: RequestHandler<unknown, unknown, BusinessBody, unkn
         if (!name || !description) {
             throw createHttpError(400, "Parameter Missing")
         }
+
         validateBusinessRegex(name, description)
-        const newBusiness = await BusinessModel.create({ name, description, ownerId: authenticatedUserId });
+        const filename = req.file?.filename;
+        const newBusiness = await BusinessModel.create({ name, description, ownerId: authenticatedUserId, filename });
 
         res.status(201).json(newBusiness)
     } catch (error) {

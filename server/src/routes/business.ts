@@ -1,13 +1,20 @@
 import express from 'express';
 import * as BusinessContoller from "../controllers/business";
+import multer from 'multer';
+import { storage } from '../util/multer';
 
 const router = express.Router();
 
+
+//remember to put validaiton for images
+const upload = multer({ storage });
+
 router.get('/', BusinessContoller.getBusinesses);
-router.get('/branches', BusinessContoller.getBranches);
+router.get('/:businessId', BusinessContoller.getBusiness);
+router.get('/branches/:businessId', BusinessContoller.getBranches);
 router.get('/coupons', BusinessContoller.getCoupons);
 
-router.post('/create', BusinessContoller.createBusiness);
+router.post('/create', upload.single('image'), BusinessContoller.createBusiness);
 router.post('/create/branch', BusinessContoller.createBranch);
 router.post('/create/coupon', BusinessContoller.createCoupon);
 

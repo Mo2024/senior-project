@@ -8,8 +8,10 @@ import { requiresAuth, isOwner } from './middleware/auth';
 import userRoutes from './routes/users';
 import businessRoutes from './routes/business';
 import env from './util/validateEnv';
+import fileUpload from 'express-fileupload';
 
 const app = express();
+// app.use(fileUpload());
 app.use(morgan('dev'));
 app.use(express.json());
 
