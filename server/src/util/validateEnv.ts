@@ -5,4 +5,6 @@ export default cleanEnv(process.env, {
     mongo_connection: str(),
     port: port(),
     session_secret: str(),
+    smtpEmail: str(),
+    smtpPassword: str(),
 }) 

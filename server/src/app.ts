@@ -11,7 +11,6 @@ import employeesRoutes from './routes/employees';
 import env from './util/validateEnv';
 
 const app = express();
-// app.use(fileUpload());
 app.use(morgan('dev'));
 app.use(express.json());
 

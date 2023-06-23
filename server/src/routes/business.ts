@@ -12,10 +12,12 @@ router.get('/', BusinessContoller.getBusinesses);
 router.get('/:businessId', BusinessContoller.getBusiness);
 router.get('/branches/:businessId', BusinessContoller.getBranches);
 router.get('/coupons', BusinessContoller.getCoupons);
+router.get('/employees/:branchId', BusinessContoller.getEmployees);
 
 router.post('/create', upload.single('image'), BusinessContoller.createBusiness);
 router.post('/create/branch', BusinessContoller.createBranch);
 router.post('/create/coupon', BusinessContoller.createCoupon);
+router.post('/employees', BusinessContoller.createEmployee);
 
 router.delete('/delete', BusinessContoller.deleteBusiness);
 router.delete('/delete/branch', BusinessContoller.deleteBranch);

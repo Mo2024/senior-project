@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex, openingClosingTimeRegex } from "../util/regex";
 import createHttpError from "http-errors";
+import nodemailer from 'nodemailer';
+import env from '../util/validateEnv';
 
 export function generatePassword(length = 10) {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-';
@@ -57,6 +59,26 @@ export function validateBusinessRegex(name: string, description: string) {
         throw createHttpError(400, 'Description can be at most 50 letters');
     }
 }
+export function validateEmployeeRegex(brandId: Schema.Types.ObjectId, cpr: number, username: string, email: string, fullName: string, telephone: string) {
+    if (!usernameRegex.test(username)) {
+        throw createHttpError(400, 'Invalid username format');
+    }
+    if (!emailRegex.test(email)) {
+        throw createHttpError(400, 'Invalid email format');
+    }
+    if (!fullNameRegex.test(fullName)) {
+        throw createHttpError(400, 'Invalid area format');
+    }
+    if (!telephoneRegex.test(telephone)) {
+        throw createHttpError(400, 'Telephone input must be only 8 digits');
+    }
+    if (cpr && !ownerCprRegex.test(cpr.toString())) {
+        throw createHttpError(400, 'Invalid owner CPR format');
+    }
+    if (!mongoose.isValidObjectId(brandId)) {
+        throw createHttpError(404, 'Invalid business id!')
+    }
+}
 export function validateBranchRegex(name: string, businessId: Schema.Types.ObjectId, openingTime: string, closingTime: string, lateTime: string) {
     if (!mongoose.isValidObjectId(businessId)) {
         throw createHttpError(404, 'Invalid business id!')
@@ -101,3 +123,32 @@ export function isImageFile(imageName: string): boolean {
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
     return allowedExtensions.includes(fileExtension?.toLowerCase() || '');
 }
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: env.smtpEmail,
+        pass: env.smtpPassword,
+    },
+});
+
+export const sendEmail = async (to: string, subject: string, text: string) => {
+    try {
+
+        const mailOptions = {
+            from: 'Senior Project',
+            to,
+            subject,
+            text,
+        };
+
+        await transporter.sendMail(mailOptions);
+        return true
+
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return false
+    }
+};

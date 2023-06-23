@@ -80,6 +80,10 @@ const employeeSchema = new Schema({
         required: true,
         select: false,
     },
+    branchId: {
+        type: Schema.Types.ObjectId,
+        required: true
+    }
 });
 
 employeeSchema.add(userSchema);

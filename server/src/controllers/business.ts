@@ -2,11 +2,13 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import { BusinessModel } from '../models/business';
 import { assertIsDefined } from '../util/assertIsDefined';
-import { validateBranchRegex, validateBusinessRegex, validateCouponRegex } from "../util/functions";
+import { generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateCouponRegex, validateEmployeeRegex, validateUserRegex } from "../util/functions";
 import mongoose, { ObjectId, Schema, Document, Types } from "mongoose";
 import { BranchModel } from "../models/branch";
 import { CouponModel, couponType } from "../models/coupon";
 import { v4 as uuidv4 } from 'uuid';
+import { EmployeeModel, UserModel } from "../models/user";
+import bcrypt from 'bcrypt';
 
 
 export const getBusinesses: RequestHandler = async (req, res, next) => {
@@ -99,6 +101,28 @@ export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> 
     }
 
 }
+export const getEmployees: RequestHandler<IBranchId, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const { branchId } = req.params
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!branchId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(branchId)) {
+            throw createHttpError(404, 'Invalid branch id!')
+        }
+        const employees = await EmployeeModel.find({ branchId: branchId });
+        if (!employees) {
+            throw createHttpError(404, 'employees not found!')
+        }
+        res.status(201).json(employees)
+    } catch (error) {
+        next(error)
+    }
+
+}
 
 
 interface BusinessBody {
@@ -165,6 +189,79 @@ export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown>
         ).exec();
 
         res.status(201).json(newBranch)
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface EmployeeBody {
+    username?: string
+    email?: string
+    fullName?: string
+    telephone?: string
+    employeeCpr?: number
+    branchId?: Schema.Types.ObjectId
+}
+
+export const createEmployee: RequestHandler<unknown, unknown, EmployeeBody, unknown> = async (req, res, next) => {
+    const {
+        username,
+        email,
+        fullName,
+        telephone,
+        employeeCpr,
+        branchId
+
+    } = req.body;
+    const authenticatedUserId = req.session.userId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!username || !email || !fullName || !telephone || !employeeCpr || !branchId) {
+
+            throw createHttpError(400, "Parameter Missing")
+        }
+        validateEmployeeRegex(branchId, employeeCpr, username, email, fullName, telephone)
+        const branch = await BranchModel.findById(branchId)
+            .populate({ path: 'businessId', select: 'ownerId status' })
+            .exec() as IbranchPopulate | null;
+        if (!branch) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!branch.businessId.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!branch.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+
+        const existingUsername = await UserModel.findOne({ username }).exec();
+        if (existingUsername) {
+            throw createHttpError(409, "Username already taken. Please choose a different one.");
+        }
+
+        const existingEmail = await UserModel.findOne({ email }).exec();
+        if (existingEmail) {
+            throw createHttpError(409, "Email already taken. Please choose a different one.");
+        }
+        const generatedPassword = generatePassword();
+        const passwordHashed = await bcrypt.hash(generatedPassword, 10)
+        const newEmployee = await EmployeeModel.create({
+            username,
+            email,
+            passwordHashed,
+            fullName,
+            telephone,
+            password: passwordHashed,
+            employeeCpr,
+            branchId
+        });
+        const subject = "New employee"
+        const text = `Your username is ${username} & password is ${generatedPassword}`
+        if (!sendEmail(email, subject, text)) {
+            throw createHttpError(500, 'Failed to send email.');
+        }
+        res.status(201).json(newEmployee)
     } catch (error) {
         next(error)
     }
