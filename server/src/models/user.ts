@@ -94,6 +94,26 @@ type EmployeeType = InferSchemaType<typeof Employee.schema>;
 
 const EmployeeModel = model<EmployeeType>("Employee", Employee.schema);
 
+const adminSchema = new Schema({
+    adminCpr: {
+        type: Number,
+        required: true,
+        select: false,
+    },
+    businessId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Business',
+        required: true
+    }
+});
+
+adminSchema.add(userSchema);
+
+const Admin = User.discriminator("Admin", adminSchema);
+type AdminType = InferSchemaType<typeof Admin.schema>;
+
+const AdminModel = model<AdminType>("Admin", Admin.schema);
+
 const customerSchema = new Schema({
     verified: {
         type: Boolean,
@@ -137,4 +157,4 @@ type CustomerType = InferSchemaType<typeof Customer.schema>;
 
 const CustomerModel = model<CustomerType>("Customer", Customer.schema);
 
-export { UserModel, OwnerModel, EmployeeModel, CustomerModel }
+export { UserModel, OwnerModel, EmployeeModel, CustomerModel, AdminModel }

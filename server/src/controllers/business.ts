@@ -3,11 +3,11 @@ import createHttpError from "http-errors";
 import { BusinessModel } from '../models/business';
 import { assertIsDefined } from '../util/assertIsDefined';
 import { generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateCouponRegex, validateEmployeeRegex } from "../util/functions";
-import mongoose, { ObjectId, Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 import { BranchModel } from "../models/branch";
 import { CouponModel, couponType } from "../models/coupon";
 import { v4 as uuidv4 } from 'uuid';
-import { EmployeeModel, UserModel } from "../models/user";
+import { EmployeeModel, UserModel, AdminModel } from "../models/user";
 import bcrypt from 'bcrypt';
 
 
@@ -16,7 +16,7 @@ export const getBusinesses: RequestHandler = async (req, res, next) => {
 
     try {
         assertIsDefined(authenticatedUserId)
-        const businessModels = await BusinessModel.find({ ownerId: authenticatedUserId }).populate('branches').exec();
+        const businessModels = await BusinessModel.findOne({ ownerId: authenticatedUserId }).populate('branches').exec();
 
         res.status(201).json(businessModels)
     } catch (error) {
@@ -37,7 +37,7 @@ export const getBusiness: RequestHandler<IBusinessId, unknown, unknown, unknown>
         if (!mongoose.isValidObjectId(businessId)) {
             throw createHttpError(404, 'Invalid business id!')
         }
-        const business = await BusinessModel.findOne({ _id: businessId }).exec();
+        const business = await BusinessModel.findById({ _id: businessId }).exec();
         if (!business) {
             throw createHttpError(404, 'Business not found!')
         }
@@ -45,6 +45,38 @@ export const getBusiness: RequestHandler<IBusinessId, unknown, unknown, unknown>
             throw createHttpError(401, 'You cannot access this business!')
         }
         res.status(201).json(business)
+    } catch (error) {
+        next(error)
+    }
+
+}
+export const getAdmins: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
+    const { businessId } = req.params
+    const authenticatedUserId = req.session.userId;
+    // console.log(businessId)
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!businessId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(businessId)) {
+            throw createHttpError(404, 'Invalid business id!')
+        }
+        const business = await BusinessModel.findById({ _id: businessId }).exec();
+        if (!business) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!business.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        const admins = await AdminModel.find({ businessId })
+            .populate({ path: 'businessId', select: "ownerId" }).exec();
+        if (!admins) {
+            throw createHttpError(404, 'Admin not found!')
+        }
+
+        res.status(201).json(admins)
     } catch (error) {
         next(error)
     }
@@ -64,13 +96,17 @@ export const getBranches: RequestHandler<IBusinessId, unknown, unknown, unknown>
         if (!mongoose.isValidObjectId(businessId)) {
             throw createHttpError(404, 'Invalid business id!')
         }
+        const business = await BusinessModel.findById({ _id: businessId }).exec();
+        if (!business) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!business.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
         const branchModels = await BranchModel.find({ businessId: businessId })
             .populate({ path: 'businessId', select: 'ownerId status' }) as Array<IbranchPopulate> | null;
         if (!branchModels) {
             throw createHttpError(404, 'Branches not found!')
-        }
-        if (!branchModels[0].businessId.ownerId.equals(authenticatedUserId)) {
-            throw createHttpError(401, 'You cannot access this business!')
         }
 
         res.status(201).json(branchModels)
@@ -91,7 +127,7 @@ export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> 
         if (!mongoose.isValidObjectId(businessId)) {
             throw createHttpError(404, 'Invalid business id!')
         }
-        const coupons = await CouponModel.find({ businessId: businessId });
+        const coupons = await CouponModel.findOne({ businessId: businessId });
         if (!coupons) {
             throw createHttpError(404, 'Coupons not found!')
         }
@@ -112,6 +148,14 @@ export const getEmployees: RequestHandler<IBranchId, unknown, unknown, unknown> 
         }
         if (!mongoose.isValidObjectId(branchId)) {
             throw createHttpError(404, 'Invalid branch id!')
+        }
+        const branchModels = await BranchModel.findById({ branchId })
+            .populate({ path: 'businessId', select: 'ownerId status' }) as IbranchPopulate | null;
+        if (!branchModels) {
+            throw createHttpError(404, 'Branches not found!')
+        }
+        if (!branchModels.businessId.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
         }
         const employees = await EmployeeModel.find({ branchId: branchId });
         if (!employees) {
@@ -226,7 +270,7 @@ export const createEmployee: RequestHandler<unknown, unknown, EmployeeBody, unkn
             .populate({ path: 'businessId', select: 'ownerId status' })
             .exec() as IbranchPopulate | null;
         if (!branch) {
-            throw createHttpError(404, 'Business not found!')
+            throw createHttpError(404, 'Branch not found!')
         }
         if (!branch.businessId.ownerId.equals(authenticatedUserId)) {
             throw createHttpError(401, 'You cannot access this business!')
@@ -257,6 +301,78 @@ export const createEmployee: RequestHandler<unknown, unknown, EmployeeBody, unkn
             branchId
         });
         const subject = "New employee"
+        const text = `Your username is ${username} & password is ${generatedPassword}`
+        if (!sendEmail(email, subject, text)) {
+            throw createHttpError(500, 'Failed to send email.');
+        }
+        res.status(201).json(newEmployee)
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface AdminBody {
+    username?: string
+    email?: string
+    fullName?: string
+    telephone?: string
+    adminCpr?: number
+    businessId?: Schema.Types.ObjectId
+}
+
+export const createAdmin: RequestHandler<unknown, unknown, AdminBody, unknown> = async (req, res, next) => {
+    const {
+        username,
+        email,
+        fullName,
+        telephone,
+        adminCpr,
+        businessId
+
+    } = req.body;
+    const authenticatedUserId = req.session.userId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!username || !email || !fullName || !telephone || !adminCpr || !businessId) {
+
+            throw createHttpError(400, "Parameter Missing")
+        }
+        validateEmployeeRegex(businessId, adminCpr, username, email, fullName, telephone)
+
+        const business = await BusinessModel.findById(businessId).exec()
+        if (!business) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!business.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!business.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+
+        const existingUsername = await UserModel.findOne({ username }).exec();
+        if (existingUsername) {
+            throw createHttpError(409, "Username already taken. Please choose a different one.");
+        }
+
+        const existingEmail = await UserModel.findOne({ email }).exec();
+        if (existingEmail) {
+            throw createHttpError(409, "Email already taken. Please choose a different one.");
+        }
+        const generatedPassword = generatePassword();
+        const passwordHashed = await bcrypt.hash(generatedPassword, 10)
+        const newEmployee = await AdminModel.create({
+            username,
+            email,
+            passwordHashed,
+            fullName,
+            telephone,
+            password: passwordHashed,
+            adminCpr,
+            businessId
+        });
+        const subject = "New Admin"
         const text = `Your username is ${username} & password is ${generatedPassword}`
         if (!sendEmail(email, subject, text)) {
             throw createHttpError(500, 'Failed to send email.');
@@ -387,6 +503,37 @@ export const deleteBusiness: RequestHandler<unknown, unknown, IBusinessId, unkno
             throw createHttpError(401, 'You cannot access this business!')
         }
         await BusinessModel.findOneAndDelete({ _id: businessId }).exec();
+        res.sendStatus(204);
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface IAdminId {
+    adminId?: Schema.Types.ObjectId,
+}
+export const deleteAdmin: RequestHandler<unknown, unknown, IAdminId, unknown> = async (req, res, next) => {
+    const { adminId } = req.body;
+    const authenticatedUserId = req.session.userId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!adminId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(adminId)) {
+            throw createHttpError(404, 'Invalid admin id!')
+        }
+        const admin = await AdminModel.findById({ _id: adminId })
+            .populate({ path: 'businessId', select: "ownerId" }).exec();
+        if (!admin) {
+            throw createHttpError(404, 'Admin not found!')
+        }
+
+        if (!admin.businessId.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        await admin.deleteOne();
         res.sendStatus(204);
     } catch (error) {
         next(error)
