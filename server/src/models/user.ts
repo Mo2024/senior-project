@@ -82,6 +82,7 @@ const employeeSchema = new Schema({
     },
     branchId: {
         type: Schema.Types.ObjectId,
+        ref: 'Branch',
         required: true
     }
 });

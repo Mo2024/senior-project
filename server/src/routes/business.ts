@@ -26,6 +26,7 @@ router.delete('/delete/coupon', BusinessContoller.deleteCoupon);
 router.patch('/edit', BusinessContoller.editBusiness);
 router.patch('/edit/branch', BusinessContoller.editBranch);
 router.patch('/edit/coupon', BusinessContoller.editCoupon);
+router.patch('/employees/transferBranch', BusinessContoller.editEmployeeBranch);
 
 
 export default router;

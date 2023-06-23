@@ -309,10 +309,10 @@ interface IBranchId {
     branchId?: Schema.Types.ObjectId,
 }
 
- interface IbranchPopulate extends Document {
+interface IbranchPopulate extends Document {
     name: string,
     businessId: {
-        _id: ObjectId;
+        _id: Types.ObjectId;
         ownerId: Types.ObjectId;
         status: boolean;
     }
@@ -401,7 +401,7 @@ interface ICouponId {
 interface IcouponPopulate extends Document {
     name: string,
     businessId: {
-        _id: ObjectId;
+        _id: Types.ObjectId;
         ownerId: Types.ObjectId;
         status: boolean;
     },
@@ -570,6 +570,60 @@ export const editCoupon: RequestHandler<unknown, unknown, EditCouponBody, unknow
         await coupon.save();
 
         res.status(200).json(coupon)
+    } catch (error) {
+        next(error)
+    }
+
+
+}
+
+interface IEditEmployee extends IBranchId {
+    employeeId?: Types.ObjectId
+}
+export const editEmployeeBranch: RequestHandler<unknown, unknown, IEditEmployee, unknown> = async (req, res, next) => {
+    const { branchId, employeeId } = req.body;
+    const authenticatedUserId = req.session.userId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!branchId || !employeeId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(branchId)) {
+            throw createHttpError(404, 'Invalid branch id!')
+        }
+        if (!mongoose.isValidObjectId(employeeId)) {
+            throw createHttpError(404, 'Invalid employee id!')
+        }
+        const branch = await BranchModel.findById(branchId)
+            .populate({ path: 'businessId', select: 'ownerId status' })
+            .exec() as IbranchPopulate | null;
+
+        if (!branch) {
+            throw createHttpError(404, 'Branch not found!')
+        }
+
+        if (!branch.businessId.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!branch.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+
+        const employee = await EmployeeModel.findById(employeeId).populate({ path: 'branchId', select: 'businessId' }).exec();
+
+        if (!employee) {
+            throw createHttpError(404, 'Employee not found!')
+        }
+
+
+        if (!branch.businessId._id.equals(employee.branchId.businessId)) {
+            throw createHttpError(401, 'Employee does not belong to this business!')
+        }
+        employee.branchId = branchId;
+        await employee.save();
+
+        res.status(200).json(employee)
     } catch (error) {
         next(error)
     }
