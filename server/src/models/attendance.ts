@@ -6,9 +6,13 @@ const attendanceSchema = new Schema({
         ref: 'Employee',
         required: true
     },
-    businessId: {
+    branchId: {
         type: Schema.Types.ObjectId,
         ref: 'Business',
+        required: true
+    },
+    isLate: {
+        type: Boolean,
         required: true
     }
 }, { timestamps: true });

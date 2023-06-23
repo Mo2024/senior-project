@@ -6,7 +6,6 @@ import { storage } from '../util/multer';
 const router = express.Router();
 
 
-//remember to put validaiton for images
 const upload = multer({ storage });
 
 router.get('/', BusinessContoller.getBusinesses);

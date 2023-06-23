@@ -9,6 +9,22 @@ const branchSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Business',
         required: true
+    },
+    openingTime: {
+        type: String,
+        required: true
+    },
+    closingTime: {
+        type: String,
+        required: true
+    },
+    lateTime: {
+        type: String,
+        required: true
+    },
+    attendanceCode: {
+        type: String,
+        required: true
     }
 });
 //it has weak entities

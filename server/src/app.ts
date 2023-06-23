@@ -8,7 +8,6 @@ import { requiresAuth, isOwner } from './middleware/auth';
 import userRoutes from './routes/users';
 import businessRoutes from './routes/business';
 import env from './util/validateEnv';
-import fileUpload from 'express-fileupload';
 
 const app = express();
 // app.use(fileUpload());

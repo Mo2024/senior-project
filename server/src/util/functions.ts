@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex } from "../util/regex";
+import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex, openingClosingTimeRegex } from "../util/regex";
 import createHttpError from "http-errors";
 
 export function generatePassword(length = 10) {
@@ -55,6 +55,23 @@ export function validateBusinessRegex(name: string, description: string) {
     }
     if (!descriptionRegex.test(description)) {
         throw createHttpError(400, 'Description can be at most 50 letters');
+    }
+}
+export function validateBranchRegex(name: string, businessId: Schema.Types.ObjectId, openingTime: string, closingTime: string, lateTime: string) {
+    if (!mongoose.isValidObjectId(businessId)) {
+        throw createHttpError(404, 'Invalid business id!')
+    }
+    if (!businessNameRegex.test(name)) {
+        throw createHttpError(400, 'Invalid Branch name');
+    }
+    if (!openingClosingTimeRegex.test(openingTime)) {
+        throw createHttpError(400, 'Invalid opening time!');
+    }
+    if (!openingClosingTimeRegex.test(closingTime)) {
+        throw createHttpError(400, 'Invalid closing time!');
+    }
+    if (!openingClosingTimeRegex.test(lateTime)) {
+        throw createHttpError(400, 'Invalid late time!');
     }
 }
 export function validateCouponRegex(name: string, businessId: Schema.Types.ObjectId, amount: number, type: string) {

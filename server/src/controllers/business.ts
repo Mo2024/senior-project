@@ -2,11 +2,11 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import { BusinessModel } from '../models/business';
 import { assertIsDefined } from '../util/assertIsDefined';
-import { validateBusinessRegex, validateCouponRegex } from "../util/functions";
-import { businessNameRegex } from "../util/regex";
+import { validateBranchRegex, validateBusinessRegex, validateCouponRegex } from "../util/functions";
 import mongoose, { ObjectId, Schema, Document, Types } from "mongoose";
 import { BranchModel } from "../models/branch";
 import { CouponModel, couponType } from "../models/coupon";
+import { v4 as uuidv4 } from 'uuid';
 
 
 export const getBusinesses: RequestHandler = async (req, res, next) => {
@@ -129,23 +129,22 @@ export const createBusiness: RequestHandler<unknown, unknown, BusinessBody, unkn
 interface BranchBody {
     name?: string,
     businessId?: Schema.Types.ObjectId,
+    openingTime?: string,
+    closingTime?: string,
+    lateTime?: string,
 }
 
 export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown> = async (req, res, next) => {
-    const { name, businessId } = req.body;
+    const { name, businessId, openingTime, closingTime, lateTime } = req.body;
     const authenticatedUserId = req.session.userId;
 
     try {
         assertIsDefined(authenticatedUserId)
-        if (!name || !businessId) {
+        if (!name || !businessId || !openingTime || !closingTime || !lateTime) {
             throw createHttpError(400, "Parameter Missing")
         }
-        if (!mongoose.isValidObjectId(businessId)) {
-            throw createHttpError(404, 'Invalid business id!')
-        }
-        if (!businessNameRegex.test(name)) {
-            throw createHttpError(400, 'Invalid Branch name');
-        }
+
+        validateBranchRegex(name, businessId, openingTime, closingTime, lateTime)
 
         const business = await BusinessModel.findById(businessId).exec();
 
@@ -158,7 +157,8 @@ export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown>
         if (!business.status) {
             throw createHttpError(401, 'Your business is locked!')
         }
-        const newBranch = await BranchModel.create({ name, businessId });
+
+        const newBranch = await BranchModel.create({ name, businessId, attendanceCode: uuidv4(), openingTime, closingTime, lateTime });
         await BusinessModel.updateOne(
             { _id: businessId },
             { $push: { branches: newBranch._id } }
@@ -219,7 +219,9 @@ interface IbranchPopulate extends Document {
         ownerId: Types.ObjectId;
         status: boolean;
     }
-
+    openingTime?: string,
+    closingTime?: string,
+    lateTime?: string
 }
 
 export const deleteBranch: RequestHandler<unknown, unknown, IBranchId, unknown> = async (req, res, next) => {
@@ -389,23 +391,22 @@ export const editBusiness: RequestHandler<unknown, unknown, EditBusinessBody, un
 interface EditCouponBody {
     name?: string,
     branchId?: Schema.Types.ObjectId,
+    openingTime?: string,
+    closingTime?: string,
+    lateTime?: string
 }
 
 export const editBranch: RequestHandler<unknown, unknown, EditCouponBody, unknown> = async (req, res, next) => {
-    const { name, branchId } = req.body;
+    const { name, branchId, openingTime, closingTime, lateTime } = req.body;
     const authenticatedUserId = req.session.userId;
 
     try {
         assertIsDefined(authenticatedUserId)
-        if (!branchId || !name) {
+        if (!name || !branchId || !openingTime || !closingTime || !lateTime) {
             throw createHttpError(400, "Parameter Missing")
         }
-        if (!mongoose.isValidObjectId(branchId)) {
-            throw createHttpError(404, 'Invalid branch id!')
-        }
-        if (!businessNameRegex.test(name)) {
-            throw createHttpError(400, 'Invalid Branch name');
-        }
+        validateBranchRegex(name, branchId, openingTime, closingTime, lateTime)
+
         const branch = await BranchModel.findById(branchId)
             .populate({ path: 'businessId', select: 'ownerId status' })
             .exec() as IbranchPopulate | null;
@@ -422,6 +423,9 @@ export const editBranch: RequestHandler<unknown, unknown, EditCouponBody, unknow
         }
 
         branch.name = name;
+        branch.openingTime = openingTime;
+        branch.closingTime = closingTime;
+        branch.lateTime = lateTime;
         await branch.save();
 
         res.status(200).json(branch)
