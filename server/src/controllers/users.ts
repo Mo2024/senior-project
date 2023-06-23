@@ -4,6 +4,7 @@ import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import { CustomerModel, OwnerModel, UserModel } from '../models/user';
 import { validateOwnerRegex, validateUserRegex } from '../util/functions';
+import { BusinessModel } from '../models/business';
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
     try {
@@ -82,7 +83,17 @@ export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unkn
         next(error);
     }
 };
+export const getAllBusinesses: RequestHandler = async (req, res, next) => {
 
+    try {
+        const businessModels = await BusinessModel.find().populate('branches').exec();
+
+        res.status(201).json(businessModels)
+    } catch (error) {
+        next(error)
+    }
+
+}
 interface SignUpCustomerBody {
     username?: string,
     email?: string,

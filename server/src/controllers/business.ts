@@ -9,7 +9,6 @@ import { BranchModel } from "../models/branch";
 import { CouponModel, couponType } from "../models/coupon";
 
 
-//this is only for the user himself, we need an all businesses one!
 export const getBusinesses: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
 
@@ -23,6 +22,7 @@ export const getBusinesses: RequestHandler = async (req, res, next) => {
     }
 
 }
+
 export const getBusiness: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
     const { businessId } = req.params
     const authenticatedUserId = req.session.userId;
