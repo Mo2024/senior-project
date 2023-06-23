@@ -12,3 +12,4 @@ export const couponNameRegex = /^[A-Za-z]{1,15}$/;
 export const couponPercentageRegex = /^(0\.[1-9]\d*|0?\.0*[1-9]\d*|1(\.0+)?)$/;
 export const couponAmounteRegex = /^(0*[1-9]\d*|0+\.\d+)$/;
 export const openingClosingTimeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

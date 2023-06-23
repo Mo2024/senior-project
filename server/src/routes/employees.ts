@@ -3,6 +3,6 @@ import * as EmployeesContoller from "../controllers/employees";
 
 const router = express.Router();
 
-router.get('/', EmployeesContoller.getBusinesses);
+router.post('/attendance', EmployeesContoller.attendance);
 
 export default router;

@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const branchSchema = new Schema({
+export const branchSchema = new Schema({
     name: {
         type: String,
         required: true,

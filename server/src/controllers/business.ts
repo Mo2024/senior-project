@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import { BusinessModel } from '../models/business';
 import { assertIsDefined } from '../util/assertIsDefined';
-import { generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateCouponRegex, validateEmployeeRegex, validateUserRegex } from "../util/functions";
+import { generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateCouponRegex, validateEmployeeRegex } from "../util/functions";
 import mongoose, { ObjectId, Schema, Document, Types } from "mongoose";
 import { BranchModel } from "../models/branch";
 import { CouponModel, couponType } from "../models/coupon";
@@ -309,7 +309,7 @@ interface IBranchId {
     branchId?: Schema.Types.ObjectId,
 }
 
-interface IbranchPopulate extends Document {
+ interface IbranchPopulate extends Document {
     name: string,
     businessId: {
         _id: ObjectId;

@@ -153,6 +153,16 @@ interface LoginBody {
 
 }
 
+interface IUser {
+    _id: mongoose.Types.ObjectId;
+    branchId: mongoose.Types.ObjectId;
+    username: string;
+    email: string;
+    password: string;
+    __t: 'Employee' | 'Owner' | 'Customer';
+    __v: number;
+}
+
 export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async (req, res, next) => {
     const { username, password } = req.body;
 
@@ -161,7 +171,8 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
             throw createHttpError(400, "Parameter Missing")
         }
 
-        const user = await UserModel.findOne({ username }).select('+password +email').exec();
+        const user = await UserModel.findOne({ username })
+            .select('+password +email').exec() as IUser | null;
         if (!user) {
             throw createHttpError(401, "Invalid credentials")
         }
@@ -170,6 +181,10 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
 
         if (!passwordMatch) {
             throw createHttpError(401, "Invalid credentials")
+        }
+
+        if (user.__t === "Employee") {
+            req.session.branchId = user.branchId;
         }
 
         req.session.userId = user._id;

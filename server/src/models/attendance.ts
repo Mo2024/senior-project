@@ -8,7 +8,7 @@ const attendanceSchema = new Schema({
     },
     branchId: {
         type: Schema.Types.ObjectId,
-        ref: 'Business',
+        ref: 'Branch',
         required: true
     },
     isLate: {
