@@ -1,14 +1,14 @@
+import bcrypt from 'bcrypt';
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
+import mongoose, { Document, Schema, Types } from "mongoose";
+import { v4 as uuidv4 } from 'uuid';
+import { BranchModel } from "../models/branch";
 import { BusinessModel } from '../models/business';
+import { CouponModel, couponType } from "../models/coupon";
+import { AdminModel, EmployeeModel, UserModel } from "../models/user";
 import { assertIsDefined } from '../util/assertIsDefined';
 import { generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateCouponRegex, validateEmployeeRegex } from "../util/functions";
-import mongoose, { Schema, Document, Types } from "mongoose";
-import { BranchModel } from "../models/branch";
-import { CouponModel, couponType } from "../models/coupon";
-import { v4 as uuidv4 } from 'uuid';
-import { EmployeeModel, UserModel, AdminModel } from "../models/user";
-import bcrypt from 'bcrypt';
 
 
 export const getBusinesses: RequestHandler = async (req, res, next) => {

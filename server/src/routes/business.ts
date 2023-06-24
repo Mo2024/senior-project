@@ -1,35 +1,45 @@
 import express from 'express';
-import * as BusinessContoller from "../controllers/business";
 import multer from 'multer';
+import * as BusinessController from '../controllers/business';
 import { storage } from '../util/multer';
 
 const router = express.Router();
-
-
 const upload = multer({ storage });
 
-router.get('/', BusinessContoller.getBusinesses);
-router.get('/:businessId', BusinessContoller.getBusiness);
-router.get('/branches/:businessId', BusinessContoller.getBranches);
-router.get('/coupons', BusinessContoller.getCoupons);
-router.get('/employees/:branchId', BusinessContoller.getEmployees);
-router.get('/admin/:businessId', BusinessContoller.getAdmins);
+// Businesses
+router.route('/')
+    .get(BusinessController.getBusinesses)
+    .post(upload.single('image'), BusinessController.createBusiness)
+    .delete(BusinessController.deleteBusiness)
+    .patch(BusinessController.editBusiness);
 
-router.post('/create', upload.single('image'), BusinessContoller.createBusiness);
-router.post('/create/branch', BusinessContoller.createBranch);
-router.post('/create/coupon', BusinessContoller.createCoupon);
-router.post('/employees', BusinessContoller.createEmployee);
-router.post('/admin', BusinessContoller.createAdmin);
+router.get('/:businessId', BusinessController.getBusiness);
 
-router.delete('/delete', BusinessContoller.deleteBusiness);
-router.delete('/delete/branch', BusinessContoller.deleteBranch);
-router.delete('/delete/coupon', BusinessContoller.deleteCoupon);
-router.delete('/delete/admin', BusinessContoller.deleteAdmin);
+// Branches
+router.route('/branch')
+    .post(BusinessController.createBranch)
+    .delete(BusinessController.deleteBranch)
+    .patch(BusinessController.editBranch);
 
-router.patch('/edit', BusinessContoller.editBusiness);
-router.patch('/edit/branch', BusinessContoller.editBranch);
-router.patch('/edit/coupon', BusinessContoller.editCoupon);
-router.patch('/employees/transferBranch', BusinessContoller.editEmployeeBranch);
+router.get('/branches/:businessId', BusinessController.getBranches);
 
+// Coupons
+router.route('/coupon')
+    .post(BusinessController.createCoupon)
+    .delete(BusinessController.deleteCoupon)
+    .patch(BusinessController.editCoupon);
+
+router.get('/coupons', BusinessController.getCoupons);
+
+// Employees
+router.get('/employees/:branchId', BusinessController.getEmployees);
+router.post('/employees', BusinessController.createEmployee);
+router.patch('/employees/transferBranch', BusinessController.editEmployeeBranch);
+
+// Admins
+router.get('/admin/:businessId', BusinessController.getAdmins);
+router.route('/admin')
+    .post(BusinessController.createAdmin)
+    .delete(BusinessController.deleteAdmin);
 
 export default router;
