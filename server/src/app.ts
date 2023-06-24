@@ -4,10 +4,11 @@ import express, { NextFunction, Request, Response } from 'express';
 import session from "express-session";
 import createHttpError, { isHttpError } from "http-errors";
 import morgan from 'morgan';
-import { requiresAuth, isOwner, isEmployee } from './middleware/auth';
+import { requiresAuth, isOwner, isEmployee, isAdminOrOwner } from './middleware/auth';
 import userRoutes from './routes/users';
 import businessRoutes from './routes/business';
 import employeesRoutes from './routes/employees';
+import adminRoutes from './routes/admins';
 import env from './util/validateEnv';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(session({
 
 app.use('/api/users', userRoutes);
 app.use('/api/employees', requiresAuth, isEmployee, employeesRoutes);
+app.use('/api/admins', requiresAuth, isAdminOrOwner, adminRoutes);
 app.use('/api/business', requiresAuth, isOwner, businessRoutes);
 
 app.use((req, res, next) => {

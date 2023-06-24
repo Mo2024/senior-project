@@ -23,14 +23,6 @@ router.route('/branch')
 
 router.get('/branches/:businessId', BusinessController.getBranches);
 
-// Coupons
-router.route('/coupon')
-    .post(BusinessController.createCoupon)
-    .delete(BusinessController.deleteCoupon)
-    .patch(BusinessController.editCoupon);
-
-router.get('/coupons', BusinessController.getCoupons);
-
 // Employees
 router.route('/employee')
     .post(BusinessController.createEmployee)
