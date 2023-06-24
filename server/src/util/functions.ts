@@ -96,12 +96,9 @@ export function validateBranchRegex(name: string, businessId: Schema.Types.Objec
         throw createHttpError(400, 'Invalid late time!');
     }
 }
-export function validateCouponRegex(name: string, businessId: Schema.Types.ObjectId, amount: number, type: string) {
+export function validateCouponRegex(name: string, amount: number, type: string) {
     if (!couponNameRegex.test(name)) {
         throw createHttpError(400, 'Coupon must be at most 15 letters and only alphabet letters');
-    }
-    if (!mongoose.isValidObjectId(businessId)) {
-        throw createHttpError(404, 'Invalid business id!')
     }
     if (type == "percentage") {
         if (!couponPercentageRegex.test(amount.toString())) {

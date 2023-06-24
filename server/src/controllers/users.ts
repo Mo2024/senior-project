@@ -156,10 +156,11 @@ interface LoginBody {
 interface IUser {
     _id: mongoose.Types.ObjectId;
     branchId: mongoose.Types.ObjectId;
+    businessId: mongoose.Types.ObjectId;
     username: string;
     email: string;
     password: string;
-    __t: 'Employee' | 'Owner' | 'Customer';
+    __t: 'Employee' | 'Owner' | 'Customer' | "Admin";
     __v: number;
 }
 
@@ -186,8 +187,12 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
         if (user.__t === "Employee") {
             req.session.branchId = user.branchId;
         }
+        if (user.__t === "Admin") {
+            req.session.businessId = user.businessId;
+        }
 
         req.session.userId = user._id;
+        req.session.role = user.__t;
         res.status(201).json(user)
     } catch (error) {
         next(error)

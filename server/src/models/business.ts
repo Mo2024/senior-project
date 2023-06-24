@@ -1,6 +1,7 @@
 import { InferSchemaType, Schema, model } from "mongoose";
 import { BranchModel } from "./branch";
 import { CouponModel } from "./coupon";
+import { CategoryModel } from "./category";
 
 const businessSchema = new Schema({
     name: {
@@ -37,6 +38,7 @@ businessSchema.post('findOneAndDelete', async function (doc) {
     const deletedBusiness = doc;
     await BranchModel.deleteMany({ businessId: deletedBusiness._id });
     await CouponModel.deleteMany({ businessId: deletedBusiness._id });
+    await CategoryModel.deleteMany({ businessId: deletedBusiness._id });
 });
 
 type BusinessType = InferSchemaType<typeof businessSchema>;

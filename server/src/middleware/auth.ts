@@ -30,12 +30,11 @@ export const isEmployee: RequestHandler = async (req, res, next) => {
         next(createHttpError(401, 'User not Authorized'))
     }
 }
-export const isAdminOrOwner: RequestHandler = async (req, res, next) => {
+export const isAdmin: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
     const admin = await AdminModel.findById(authenticatedUserId).exec();
-    const owner = await OwnerModel.findById(authenticatedUserId).exec();
 
-    if (!admin && !owner) {
+    if (!admin) {
         next(createHttpError(401, 'User not Authorized'))
     }
     next()
