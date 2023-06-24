@@ -32,9 +32,12 @@ router.route('/coupon')
 router.get('/coupons', BusinessController.getCoupons);
 
 // Employees
+router.route('/employee')
+    .post(BusinessController.createEmployee)
+    .delete(BusinessController.deleteEmployee)
+
 router.get('/employees/:branchId', BusinessController.getEmployees);
-router.post('/employees', BusinessController.createEmployee);
-router.patch('/employees/transferBranch', BusinessController.editEmployeeBranch);
+router.patch('/employee/transferBranch', BusinessController.editEmployeeBranch);
 
 // Admins
 router.get('/admin/:businessId', BusinessController.getAdmins);

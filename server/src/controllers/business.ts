@@ -149,7 +149,7 @@ export const getEmployees: RequestHandler<IBranchId, unknown, unknown, unknown> 
         if (!mongoose.isValidObjectId(branchId)) {
             throw createHttpError(404, 'Invalid branch id!')
         }
-        const branchModels = await BranchModel.findById({ branchId })
+        const branchModels = await BranchModel.findById({ _id: branchId })
             .populate({ path: 'businessId', select: 'ownerId status' }) as IbranchPopulate | null;
         if (!branchModels) {
             throw createHttpError(404, 'Branches not found!')
@@ -540,6 +540,36 @@ export const deleteAdmin: RequestHandler<unknown, unknown, IAdminId, unknown> = 
     }
 
 }
+export const deleteEmployee: RequestHandler<unknown, unknown, IEmployeeId, unknown> = async (req, res, next) => {
+    const { employeeId } = req.body;
+    const authenticatedUserId = req.session.userId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        if (!employeeId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(employeeId)) {
+            throw createHttpError(404, 'Invalid employee id!')
+        }
+        const employee = await EmployeeModel.findById({ _id: employeeId })
+            .populate({ path: 'branchId', select: 'businessId' })
+            .exec();
+        if (!employee) {
+            throw createHttpError(404, 'Employee not found!')
+        }
+        const business = await BusinessModel.findById({ _id: employee.branchId.businessId })
+
+        if (!business?.ownerId.equals(authenticatedUserId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        await employee.deleteOne();
+        res.sendStatus(204);
+    } catch (error) {
+        next(error)
+    }
+
+}
 
 interface ICouponId {
     couponId?: Schema.Types.ObjectId,
@@ -724,10 +754,10 @@ export const editCoupon: RequestHandler<unknown, unknown, EditCouponBody, unknow
 
 }
 
-interface IEditEmployee extends IBranchId {
+interface IEmployeeId extends IBranchId {
     employeeId?: Types.ObjectId
 }
-export const editEmployeeBranch: RequestHandler<unknown, unknown, IEditEmployee, unknown> = async (req, res, next) => {
+export const editEmployeeBranch: RequestHandler<unknown, unknown, IEmployeeId, unknown> = async (req, res, next) => {
     const { branchId, employeeId } = req.body;
     const authenticatedUserId = req.session.userId;
 
