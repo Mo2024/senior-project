@@ -8,6 +8,7 @@ import { validateCouponRegex } from "../util/functions";
 import { BusinessModel } from "../models/business";
 import { businessNameRegex } from "../util/regex";
 import { CategoryModel } from "../models/category";
+import { ItemModel } from "../models/item";
 
 export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
@@ -169,7 +170,7 @@ export const createCoupon: RequestHandler<unknown, unknown, INameBody, unknown> 
 
 interface INameBody {
     name?: string,
-}//interface for create actaegeory etc!
+}
 export const createCategory: RequestHandler<unknown, unknown, INameBody, unknown> = async (req, res, next) => {
     const { name } = req.body;
     const authenticatedUserId = req.session.userId;
@@ -278,6 +279,179 @@ interface IEditCategory extends INameBody {
 }
 
 export const editCategory: RequestHandler<unknown, unknown, IEditCategory, unknown> = async (req, res, next) => {
+    const { name, categoryId } = req.body;
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!name) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!businessNameRegex.test(name)) {
+            throw createHttpError(400, 'Invalid Branch name');
+        }
+        if (!mongoose.isValidObjectId(categoryId)) {
+            throw createHttpError(404, 'Invalid coupon id!')
+        }
+
+        const category = await CategoryModel.findById(categoryId)
+            .populate({ path: 'businessId', select: 'ownerId status' })
+            .exec() as ICategoryPopulate | null;
+
+        if (!category) {
+            throw createHttpError(404, 'Coupon not found!')
+        }
+        if (!category.businessId._id.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!category.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+
+        category.name = name;
+        await category.save();
+
+        res.status(200).json(category)
+    } catch (error) {
+        next(error)
+    }
+
+
+}
+
+interface ICreateItemBody {
+    name?: string,
+    description?: string,
+    price?: number,
+    categoryId: Types.ObjectId
+}
+export const createItem: RequestHandler<unknown, unknown, INameBody, unknown> = async (req, res, next) => {
+    const { name, description, price, categoryId } = req.body;
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!name) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!businessNameRegex.test(name)) {
+            throw createHttpError(400, 'Invalid Business name');
+        }
+
+        const business = await BusinessModel.findById(adminBusinessId).exec();
+
+        if (!business) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!business._id.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!business.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+
+        const newCategory = await CategoryModel.create({ name, businessId: adminBusinessId });
+
+        res.status(201).json(newCategory)
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface ICategoryPopulate extends Document {
+    save(): unknown;
+    deleteOne(): unknown;
+    name: string,
+    businessId: {
+        _id: Types.ObjectId;
+        ownerId: Types.ObjectId;
+        status: boolean;
+    },
+}
+export const getItems: RequestHandler = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        // const categories = await CategoryModel.find({ businessId: adminBusinessId })
+        //     .populate({ path: "businessId", select: "ownerId" }) as Array<ICategoryPopulate> | null;
+        const items = await ItemModel.aggregate([
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'categoryId',
+                    foreignField: '_id',
+                    as: 'category',
+                },
+            },
+            {
+                $unwind: '$category',
+            },
+            {
+                $match: {
+                    'category.businessId': adminBusinessId,
+                },
+            },
+        ]);
+        if (!items) {
+            throw createHttpError(404, 'Items not found!')
+        }
+
+        res.status(201).json(items)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface IdeleteCategory {
+    categoryId: Types.ObjectId
+}
+export const deleteItem: RequestHandler<unknown, unknown, IdeleteCategory, unknown> = async (req, res, next) => {
+    const { categoryId } = req.body;
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!categoryId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(categoryId)) {
+            throw createHttpError(404, 'Invalid category id!')
+        }
+
+        const category = await CategoryModel.findById({ _id: categoryId })
+            .populate({ path: "businessId", select: "ownerId status" }) as ICategoryPopulate | null;
+
+        if (!category) {
+            throw createHttpError(404, 'Coupon not found!')
+        }
+
+        if (!category.businessId._id.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!category.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+        await category.deleteOne();
+        res.sendStatus(204);
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface IEditItem extends INameBody {
+    categoryId: Types.ObjectId
+}
+
+export const editItem: RequestHandler<unknown, unknown, IEditCategory, unknown> = async (req, res, next) => {
     const { name, categoryId } = req.body;
     const authenticatedUserId = req.session.userId;
     const adminBusinessId = req.session.businessId;

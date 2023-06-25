@@ -17,4 +17,11 @@ router.route('/category')
     .post(AdminContoller.createCategory)
     .delete(AdminContoller.deleteCategory)
     .patch(AdminContoller.editCategory);
+
+//items
+router.route('/item')
+    .get(AdminContoller.getItems)
+    .post(AdminContoller.createItem)
+    .delete(AdminContoller.deleteItem)
+    .patch(AdminContoller.editItem);
 export default router;

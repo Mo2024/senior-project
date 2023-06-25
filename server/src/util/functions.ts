@@ -113,6 +113,16 @@ export function validateCouponRegex(name: string, amount: number, type: string) 
     }
 
 }
+export function validateItemRegex(name: string, description: string, price: number, categoryId: Schema.Types.ObjectId) {
+    if (!businessNameRegex.test(name)) {
+        throw createHttpError(400, 'Invalid Business name');
+    }
+    if (!descriptionRegex.test(description)) {
+        throw createHttpError(400, 'Description can be at most 50 letters');
+    }
+    
+
+}
 
 
 export function isImageFile(imageName: string): boolean {
@@ -126,7 +136,7 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: env.smtpEmail,
+        user: env.smtpEmail,~
         pass: env.smtpPassword,
     },
 });
