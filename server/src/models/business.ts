@@ -2,6 +2,8 @@ import { InferSchemaType, Schema, model } from "mongoose";
 import { BranchModel } from "./branch";
 import { CouponModel } from "./coupon";
 import { CategoryModel } from "./category";
+import { ItemModel } from "./item";
+import { AdminModel, EmployeeModel } from "./user";
 
 const businessSchema = new Schema({
     name: {
@@ -36,9 +38,18 @@ const businessSchema = new Schema({
 
 businessSchema.post('findOneAndDelete', async function (doc) {
     const deletedBusiness = doc;
+
+    await AdminModel.deleteMany({ businessId: deletedBusiness._id });
+    const matchingBranches = await BranchModel.find({ businessId: deletedBusiness._id })
+    const result = await EmployeeModel.deleteMany({ branchId: { $in: matchingBranches } })
+    console.log(result)
     await BranchModel.deleteMany({ businessId: deletedBusiness._id });
     await CouponModel.deleteMany({ businessId: deletedBusiness._id });
+
+    const categoryIds = await CategoryModel.find({ businessId: deletedBusiness._id }).distinct('_id');
+    await ItemModel.deleteMany({ categoryId: { $in: categoryIds } });
     await CategoryModel.deleteMany({ businessId: deletedBusiness._id });
+
 });
 
 type BusinessType = InferSchemaType<typeof businessSchema>;

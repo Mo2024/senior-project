@@ -344,7 +344,6 @@ export const createItem: RequestHandler<unknown, unknown, ICreateItemBody, unkno
         const category = await CategoryModel.findById(categoryId)
             .populate({ path: "businessId", select: "status" })
             .exec() as ICategoryPopulate | null;
-        console.log(category)
         if (!category) {
             throw createHttpError(404, 'Category not found!')
         }

@@ -3,3 +3,5 @@ For multer stuff, please change it to aws bucket or azure blobs when deploying
 email for cloud too if possible
 
 in react naitve once the qr code attendance is made pls make it refresh somehow
+
+pls check why it returns null in get my businesses
