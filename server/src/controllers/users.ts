@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { CustomerModel, OwnerModel, UserModel } from '../models/user';
 import { validateOwnerRegex, validateUserRegex } from '../util/functions';
 import { BusinessModel } from '../models/business';
+import { BranchModel } from '../models/branch';
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
     try {
@@ -185,7 +186,9 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
         }
 
         if (user.__t === "Employee") {
+            const branch = await BranchModel.findById(user.branchId).exec()
             req.session.branchId = user.branchId;
+            req.session.businessId = branch?.businessId;
         }
         if (user.__t === "Admin") {
             req.session.businessId = user.businessId;

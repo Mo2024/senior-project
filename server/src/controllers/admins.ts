@@ -398,7 +398,7 @@ export const getItems: RequestHandler = async (req, res, next) => {
 interface IdeleteCategory {
     itemId?: Types.ObjectId
 }
-interface IitemPopulate {
+export interface IitemPopulate extends Document {
     deleteOne(): unknown;
     _id: Types.ObjectId;
     name: string;

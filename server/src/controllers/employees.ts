@@ -1,10 +1,15 @@
 import { RequestHandler } from "express";
 import { assertIsDefined } from "../util/assertIsDefined";
-import { uuidRegex } from "../util/regex";
+import { qtyRegex, uuidRegex } from "../util/regex";
 import createHttpError from "http-errors";
 import { BranchModel } from "../models/branch";
 import AttendanceModel from "../models/attendance";
 import { v4 as uuidv4 } from 'uuid';
+import { CategoryModel } from "../models/category";
+import { ItemModel } from "../models/item";
+import mongoose, { Types } from "mongoose";
+import { IitemPopulate } from "./admins";
+import { ItemInBranchModel } from "../models/itemInBranch";
 
 interface attendanceBody {
     attendanceCode: string;
@@ -84,6 +89,174 @@ export const attendance: RequestHandler<unknown, unknown, attendanceBody, unknow
         throw createHttpError(400, "Failed to verify attendance");
 
 
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const getItems: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const businessId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(businessId)
+
+        const matchingCategories = await CategoryModel.find({ businessId }).exec();
+        const items = await ItemModel.find({ categoryId: { $in: matchingCategories } });
+
+        if (!items) {
+            throw createHttpError(404, 'Items not found!')
+        }
+        res.status(201).json(items)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface IitemIdBody {
+    itemId?: Types.ObjectId,
+    qty?: number
+}
+
+export const updateStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = async (req, res, next) => {
+    const { itemId, qty } = req.body
+    const authenticatedUserId = req.session.userId;
+    const userBusinessId = req.session.businessId;
+    const userBranchId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(userBranchId)
+        assertIsDefined(userBusinessId)
+
+        if (!itemId || !qty) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!qtyRegex.test(qty.toString())) {
+            throw createHttpError(400, 'Quantity must be a positive integer!');
+        }
+        if (!mongoose.isValidObjectId(itemId)) {
+            throw createHttpError(404, 'Invalid item id!')
+        }
+
+        const item = await ItemModel.findById(itemId)
+            .populate({ path: "categoryId", select: "businessId" }) as IitemPopulate | null
+
+        if (!item) {
+            throw createHttpError(404, 'Item not found!')
+        }
+        if (!item.categoryId.businessId._id.equals(userBusinessId)) {
+            throw createHttpError(401, 'You update stock to an item outside your business!')
+        }
+
+        const itemInBranch = await ItemInBranchModel.findOne({ branchId: userBranchId, itemId: item._id })
+
+        if (!itemInBranch) {
+            throw createHttpError(404, 'Item in branch not found!')
+        }
+        itemInBranch.quantity = qty
+        await itemInBranch.save();
+
+        res.status(201).json(itemInBranch)
+    } catch (error) {
+        next(error)
+    }
+
+}
+export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = async (req, res, next) => {
+    const { itemId, qty } = req.body
+    const authenticatedUserId = req.session.userId;
+    const userBusinessId = req.session.businessId;
+    const userBranchId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(userBranchId)
+        assertIsDefined(userBusinessId)
+
+        if (!itemId || !qty) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!qtyRegex.test(qty.toString())) {
+            throw createHttpError(400, 'Quantity must be a positive integer!');
+        }
+        if (!mongoose.isValidObjectId(itemId)) {
+            throw createHttpError(404, 'Invalid item id!')
+        }
+
+        const item = await ItemModel.findById(itemId)
+            .populate({ path: "categoryId", select: "businessId" }) as IitemPopulate | null
+
+        if (!item) {
+            throw createHttpError(404, 'Item not found!')
+        }
+        if (!item.categoryId.businessId._id.equals(userBusinessId)) {
+            throw createHttpError(401, 'You update stock to an item outside your business!')
+        }
+
+        const itemInBranch = await ItemInBranchModel.findOne({ branchId: userBranchId, itemId: item._id })
+
+        if (itemInBranch) {
+            throw createHttpError(409, 'Item in branch already exists!')
+        }
+
+        const newItemInBranch = await ItemInBranchModel.create({ branchId: userBranchId, itemId: item._id, quantity: qty })
+
+        res.status(201).json(newItemInBranch)
+    } catch (error) {
+        next(error)
+    }
+
+}
+export const getStocks: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const userBranchId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(userBranchId)
+        const itemsInBranch = await ItemInBranchModel.find({ branchId: userBranchId })
+        res.status(201).json(itemsInBranch)
+    } catch (error) {
+        next(error)
+    }
+
+}
+export const deleteStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = async (req, res, next) => {
+    const { itemId } = req.body
+    const authenticatedUserId = req.session.userId;
+    const userBusinessId = req.session.businessId;
+    const userBranchId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(userBranchId)
+        assertIsDefined(userBusinessId)
+
+        if (!itemId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(itemId)) {
+            throw createHttpError(404, 'Invalid item id!')
+        }
+
+        const item = await ItemModel.findById(itemId)
+            .populate({ path: "categoryId", select: "businessId" }) as IitemPopulate | null
+
+        if (!item) {
+            throw createHttpError(404, 'Item not found!')
+        }
+        if (!item.categoryId.businessId._id.equals(userBusinessId)) {
+            throw createHttpError(401, 'You update stock to an item outside your business!')
+        }
+
+        const itemInBranch = await ItemInBranchModel.findOne({ branchId: userBranchId, itemId: item._id })
+
+        if (!itemInBranch) {
+            throw createHttpError(404, 'Item in branch not found!')
+        }
+
+        await itemInBranch.deleteOne();
+
+        res.sendStatus(204);
     } catch (error) {
         next(error)
     }
