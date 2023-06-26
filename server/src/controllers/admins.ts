@@ -1,16 +1,16 @@
 import { RequestHandler } from "express";
-import { assertIsDefined } from "../util/assertIsDefined";
-import { IBranchId, IBusinessId, IbranchPopulate } from "./business";
 import createHttpError from "http-errors";
 import mongoose, { Schema, Types } from "mongoose";
-import { CouponModel, couponType } from "../models/coupon";
-import { validateCouponRegex, validateEditItemRegex, validateItemRegex } from "../util/functions";
-import { BusinessModel } from "../models/business";
-import { businessNameRegex } from "../util/regex";
-import { CategoryModel } from "../models/category";
-import { ItemModel } from "../models/item";
 import { BranchModel } from "../models/branch";
+import { BusinessModel } from "../models/business";
+import { CategoryModel } from "../models/category";
+import { CouponModel, couponType } from "../models/coupon";
+import { ItemModel } from "../models/item";
 import { TableModel } from "../models/table";
+import { assertIsDefined } from "../util/assertIsDefined";
+import { validateCouponRegex, validateEditItemRegex, validateItemRegex } from "../util/functions";
+import { businessNameRegex } from "../util/regex";
+import { IBranchId, IBusinessId, IbranchPopulate } from "./business";
 
 export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;

@@ -1,15 +1,15 @@
 import { RequestHandler } from "express";
-import { assertIsDefined } from "../util/assertIsDefined";
-import { qtyRegex, uuidRegex } from "../util/regex";
 import createHttpError from "http-errors";
-import { BranchModel } from "../models/branch";
-import AttendanceModel from "../models/attendance";
+import mongoose, { Types } from "mongoose";
 import { v4 as uuidv4 } from 'uuid';
+import AttendanceModel from "../models/attendance";
+import { BranchModel } from "../models/branch";
 import { CategoryModel } from "../models/category";
 import { ItemModel } from "../models/item";
-import mongoose, { Types } from "mongoose";
-import { IitemPopulate } from "./admins";
 import { ItemInBranchModel } from "../models/itemInBranch";
+import { assertIsDefined } from "../util/assertIsDefined";
+import { qtyRegex, uuidRegex } from "../util/regex";
+import { IitemPopulate } from "./admins";
 
 interface attendanceBody {
     attendanceCode: string;
