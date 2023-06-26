@@ -4,7 +4,7 @@ import { IBusinessId } from "./business";
 import createHttpError from "http-errors";
 import mongoose, { Schema, Types } from "mongoose";
 import { CouponModel, couponType } from "../models/coupon";
-import { validateCouponRegex } from "../util/functions";
+import { validateCouponRegex, validateEditItemRegex, validateItemRegex } from "../util/functions";
 import { BusinessModel } from "../models/business";
 import { businessNameRegex } from "../util/regex";
 import { CategoryModel } from "../models/category";
@@ -324,9 +324,9 @@ interface ICreateItemBody {
     name?: string,
     description?: string,
     price?: number,
-    categoryId: Types.ObjectId
+    categoryId?: Types.ObjectId
 }
-export const createItem: RequestHandler<unknown, unknown, INameBody, unknown> = async (req, res, next) => {
+export const createItem: RequestHandler<unknown, unknown, ICreateItemBody, unknown> = async (req, res, next) => {
     const { name, description, price, categoryId } = req.body;
     const authenticatedUserId = req.session.userId;
     const adminBusinessId = req.session.businessId;
@@ -334,28 +334,30 @@ export const createItem: RequestHandler<unknown, unknown, INameBody, unknown> = 
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(adminBusinessId)
-        if (!name) {
+
+        if (!name || !description || !price || !categoryId) {
             throw createHttpError(400, "Parameter Missing")
         }
-        if (!businessNameRegex.test(name)) {
-            throw createHttpError(400, 'Invalid Business name');
-        }
 
-        const business = await BusinessModel.findById(adminBusinessId).exec();
+        validateItemRegex(name, description, price, categoryId)
 
-        if (!business) {
-            throw createHttpError(404, 'Business not found!')
+        const category = await CategoryModel.findById(categoryId)
+            .populate({ path: "businessId", select: "status" })
+            .exec() as ICategoryPopulate | null;
+        console.log(category)
+        if (!category) {
+            throw createHttpError(404, 'Category not found!')
         }
-        if (!business._id.equals(adminBusinessId)) {
+        if (!category.businessId._id.equals(adminBusinessId)) {
             throw createHttpError(401, 'You cannot access this business!')
         }
-        if (!business.status) {
+        if (!category.businessId.status) {
             throw createHttpError(401, 'Your business is locked!')
         }
 
-        const newCategory = await CategoryModel.create({ name, businessId: adminBusinessId });
+        const newItem = await ItemModel.create({ name, categoryId, description, price });
 
-        res.status(201).json(newCategory)
+        res.status(201).json(newItem)
     } catch (error) {
         next(error)
     }
@@ -378,26 +380,9 @@ export const getItems: RequestHandler = async (req, res, next) => {
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(adminBusinessId)
-        // const categories = await CategoryModel.find({ businessId: adminBusinessId })
-        //     .populate({ path: "businessId", select: "ownerId" }) as Array<ICategoryPopulate> | null;
-        const items = await ItemModel.aggregate([
-            {
-                $lookup: {
-                    from: 'categories',
-                    localField: 'categoryId',
-                    foreignField: '_id',
-                    as: 'category',
-                },
-            },
-            {
-                $unwind: '$category',
-            },
-            {
-                $match: {
-                    'category.businessId': adminBusinessId,
-                },
-            },
-        ]);
+        const matchingCategories = await CategoryModel.find({ businessId: adminBusinessId }).exec();
+        const items = await ItemModel.find({ categoryId: { $in: matchingCategories } });
+
         if (!items) {
             throw createHttpError(404, 'Items not found!')
         }
@@ -410,36 +395,56 @@ export const getItems: RequestHandler = async (req, res, next) => {
 }
 
 interface IdeleteCategory {
-    categoryId: Types.ObjectId
+    itemId?: Types.ObjectId
+}
+interface IitemDelete {
+    deleteOne(): unknown;
+    _id: Types.ObjectId;
+    name: string;
+    description: string;
+    price: number;
+    categoryId: {
+        _id: Types.ObjectId;
+        businessId: {
+            _id: Types.ObjectId;
+            status: boolean;
+        };
+    };
 }
 export const deleteItem: RequestHandler<unknown, unknown, IdeleteCategory, unknown> = async (req, res, next) => {
-    const { categoryId } = req.body;
+    const { itemId } = req.body;
     const authenticatedUserId = req.session.userId;
     const adminBusinessId = req.session.businessId;
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(adminBusinessId)
-        if (!categoryId) {
+        if (!itemId) {
             throw createHttpError(400, "Parameter Missing")
         }
-        if (!mongoose.isValidObjectId(categoryId)) {
-            throw createHttpError(404, 'Invalid category id!')
+        if (!mongoose.isValidObjectId(itemId)) {
+            throw createHttpError(404, 'Invalid item id!')
         }
 
-        const category = await CategoryModel.findById({ _id: categoryId })
-            .populate({ path: "businessId", select: "ownerId status" }) as ICategoryPopulate | null;
-
-        if (!category) {
-            throw createHttpError(404, 'Coupon not found!')
+        const item = await ItemModel.findById({ _id: itemId })
+            .populate({
+                path: 'categoryId',
+                select: 'businessId',
+                populate: {
+                    path: 'businessId',
+                    select: 'status',
+                },
+            }) as IitemDelete | null;
+        if (!item) {
+            throw createHttpError(404, 'Item not found!')
         }
 
-        if (!category.businessId._id.equals(adminBusinessId)) {
+        if (!item.categoryId.businessId._id.equals(adminBusinessId)) {
             throw createHttpError(401, 'You cannot access this business!')
         }
-        if (!category.businessId.status) {
+        if (!item.categoryId.businessId.status) {
             throw createHttpError(401, 'Your business is locked!')
         }
-        await category.deleteOne();
+        await item.deleteOne();
         res.sendStatus(204);
     } catch (error) {
         next(error)
@@ -448,32 +453,28 @@ export const deleteItem: RequestHandler<unknown, unknown, IdeleteCategory, unkno
 }
 
 interface IEditItem extends INameBody {
-    categoryId: Types.ObjectId
+    itemId?: Types.ObjectId
+    name?: string,
+    description?: string,
+    price?: number,
+    categoryId?: Types.ObjectId
 }
-
-export const editItem: RequestHandler<unknown, unknown, IEditCategory, unknown> = async (req, res, next) => {
-    const { name, categoryId } = req.body;
+export const editItem: RequestHandler<unknown, unknown, IEditItem, unknown> = async (req, res, next) => {
+    const { itemId, name, description, categoryId, price } = req.body;
     const authenticatedUserId = req.session.userId;
     const adminBusinessId = req.session.businessId;
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(adminBusinessId)
-        if (!name) {
+        if (!itemId || !name || !description || !price || !categoryId) {
             throw createHttpError(400, "Parameter Missing")
         }
-        if (!businessNameRegex.test(name)) {
-            throw createHttpError(400, 'Invalid Branch name');
-        }
-        if (!mongoose.isValidObjectId(categoryId)) {
-            throw createHttpError(404, 'Invalid coupon id!')
-        }
+        validateEditItemRegex(name, description, price, categoryId, itemId)
 
         const category = await CategoryModel.findById(categoryId)
-            .populate({ path: 'businessId', select: 'ownerId status' })
-            .exec() as ICategoryPopulate | null;
-
+            .populate({ path: "businessId", select: "status" }) as ICategoryPopulate | null;
         if (!category) {
-            throw createHttpError(404, 'Coupon not found!')
+            throw createHttpError(404, 'Category not found!')
         }
         if (!category.businessId._id.equals(adminBusinessId)) {
             throw createHttpError(401, 'You cannot access this business!')
@@ -482,10 +483,19 @@ export const editItem: RequestHandler<unknown, unknown, IEditCategory, unknown> 
             throw createHttpError(401, 'Your business is locked!')
         }
 
-        category.name = name;
-        await category.save();
+        const item = await ItemModel.findById(itemId).exec()
 
-        res.status(200).json(category)
+        if (!item) {
+            throw createHttpError(404, 'Item not found!')
+        }
+
+        item.name = name;
+        item.description = description;
+        item.price = price;
+        item.categoryId = categoryId;
+        await item.save();
+
+        res.status(200).json(item)
     } catch (error) {
         next(error)
     }

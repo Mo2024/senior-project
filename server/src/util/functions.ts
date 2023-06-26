@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex, openingClosingTimeRegex } from "../util/regex";
 import createHttpError from "http-errors";
 import nodemailer from 'nodemailer';
@@ -106,22 +106,43 @@ export function validateCouponRegex(name: string, amount: number, type: string) 
         }
     } else if (type == "amount") {
         if (!couponAmounteRegex.test(amount.toString())) {
-            throw createHttpError(400, 'Amount must be a number only!');
+            throw createHttpError(400, 'Amount must be a number only & two decimal places max!');
         }
     } else {
         throw createHttpError(400, 'Invalid coupon type!');
     }
 
 }
-export function validateItemRegex(name: string, description: string, price: number, categoryId: Schema.Types.ObjectId) {
+export function validateItemRegex(name: string, description: string, price: number, categoryId: Types.ObjectId) {
     if (!businessNameRegex.test(name)) {
         throw createHttpError(400, 'Invalid Business name');
     }
     if (!descriptionRegex.test(description)) {
         throw createHttpError(400, 'Description can be at most 50 letters');
     }
-    
-
+    if (!couponAmounteRegex.test(price.toString())) {
+        throw createHttpError(400, 'Amount must be a number only & two decimal places max!');
+    }
+    if (!mongoose.isValidObjectId(categoryId)) {
+        throw createHttpError(404, 'Invalid category id!')
+    }
+}
+export function validateEditItemRegex(name: string, description: string, price: number, categoryId: Types.ObjectId, itemId: Types.ObjectId) {
+    if (!businessNameRegex.test(name)) {
+        throw createHttpError(400, 'Invalid Business name');
+    }
+    if (!descriptionRegex.test(description)) {
+        throw createHttpError(400, 'Description can be at most 50 letters');
+    }
+    if (!couponAmounteRegex.test(price.toString())) {
+        throw createHttpError(400, 'Amount must be a number only & two decimal places max!');
+    }
+    if (!mongoose.isValidObjectId(categoryId)) {
+        throw createHttpError(404, 'Invalid category id!')
+    }
+    if (!mongoose.isValidObjectId(itemId)) {
+        throw createHttpError(404, 'Invalid item id!')
+    }
 }
 
 
@@ -136,7 +157,7 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: env.smtpEmail,~
+        user: env.smtpEmail,
         pass: env.smtpPassword,
     },
 });
