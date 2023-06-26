@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { assertIsDefined } from "../util/assertIsDefined";
-import { IBusinessId } from "./business";
+import { IBranchId, IBusinessId, IbranchPopulate } from "./business";
 import createHttpError from "http-errors";
 import mongoose, { Schema, Types } from "mongoose";
 import { CouponModel, couponType } from "../models/coupon";
@@ -9,6 +9,8 @@ import { BusinessModel } from "../models/business";
 import { businessNameRegex } from "../util/regex";
 import { CategoryModel } from "../models/category";
 import { ItemModel } from "../models/item";
+import { BranchModel } from "../models/branch";
+import { TableModel } from "../models/table";
 
 export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
@@ -396,7 +398,7 @@ export const getItems: RequestHandler = async (req, res, next) => {
 interface IdeleteCategory {
     itemId?: Types.ObjectId
 }
-interface IitemDelete {
+interface IitemPopulate {
     deleteOne(): unknown;
     _id: Types.ObjectId;
     name: string;
@@ -432,7 +434,7 @@ export const deleteItem: RequestHandler<unknown, unknown, IdeleteCategory, unkno
                     path: 'businessId',
                     select: 'status',
                 },
-            }) as IitemDelete | null;
+            }) as IitemPopulate | null;
         if (!item) {
             throw createHttpError(404, 'Item not found!')
         }
@@ -499,5 +501,207 @@ export const editItem: RequestHandler<unknown, unknown, IEditItem, unknown> = as
         next(error)
     }
 
+
+}
+interface ICreateTable extends INameBody {
+    branchId?: Types.ObjectId
+}
+export const createTable: RequestHandler<unknown, unknown, ICreateTable, unknown> = async (req, res, next) => {
+    const { name, branchId } = req.body;
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!name || !branchId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!businessNameRegex.test(name)) {
+            throw createHttpError(400, 'Invalid  Name!');
+        }
+        if (!mongoose.isValidObjectId(branchId)) {
+            throw createHttpError(404, 'Invalid branch id!')
+        }
+        const branch = await BranchModel.findById(branchId)
+            .populate({ path: 'businessId', select: "status" })
+            .exec() as IbranchPopulate | null;
+
+        if (!branch) {
+            throw createHttpError(404, 'Business not found!')
+        }
+        if (!branch.businessId._id.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!branch.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+        const newTable = await TableModel.create({ name, branchId });
+
+        res.status(201).json(newTable)
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface IEditTable extends INameBody {
+    tableId?: Types.ObjectId
+}
+interface ITablePopulate {
+    save(): unknown;
+    deleteOne(): unknown;
+    _id: Types.ObjectId;
+    branchId: {
+        _id: Types.ObjectId;
+        businessId: {
+            _id: Types.ObjectId;
+            status: boolean;
+        };
+    };
+    name: string;
+}
+
+export const editTable: RequestHandler<unknown, unknown, IEditTable, unknown> = async (req, res, next) => {
+    const { name, tableId } = req.body;
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!name || !tableId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!businessNameRegex.test(name)) {
+            throw createHttpError(400, 'Invalid  Name!');
+        }
+        if (!mongoose.isValidObjectId(tableId)) {
+            throw createHttpError(404, 'Invalid table id!')
+        }
+        const table = await TableModel.findById(tableId)
+            .populate({
+                path: 'branchId',
+                select: "businessId",
+                populate: {
+                    path: "businessId",
+                    select: "status"
+                }
+            })
+            .exec() as ITablePopulate | null;
+
+        if (!table) {
+            throw createHttpError(404, 'Table not found!')
+        }
+        if (!table.branchId.businessId._id.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!table.branchId.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+        table.name = name;
+        await table.save();
+        res.status(201).json(table)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface IDeleteTable {
+    tableId?: Types.ObjectId
+}
+
+export const deleteTable: RequestHandler<unknown, unknown, IDeleteTable, unknown> = async (req, res, next) => {
+    const { tableId } = req.body;
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!tableId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(tableId)) {
+            throw createHttpError(404, 'Invalid item id!')
+        }
+
+        const table = await TableModel.findById(tableId)
+            .populate({
+                path: 'branchId',
+                select: "businessId",
+                populate: {
+                    path: "businessId",
+                    select: "status"
+                }
+            })
+            .exec() as ITablePopulate | null;
+
+        if (!table) {
+            throw createHttpError(404, 'Table not found!')
+        }
+        if (!table.branchId.businessId._id.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        if (!table.branchId.businessId.status) {
+            throw createHttpError(401, 'Your business is locked!')
+        }
+
+        await table.deleteOne();
+        res.sendStatus(204);
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+
+
+export const getTables: RequestHandler<IBranchId, unknown, unknown, unknown> = async (req, res, next) => {
+    const { branchId } = req.params
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        if (!branchId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(branchId)) {
+            throw createHttpError(404, 'Invalid business id!')
+        }
+        const branch = await BranchModel.findById(branchId).exec();
+        if (!branch) {
+            throw createHttpError(404, 'Branch not found!')
+        }
+        if (!branch.businessId.equals(adminBusinessId)) {
+            throw createHttpError(401, 'You cannot access this business!')
+        }
+        const tables = await TableModel.find({ branchId }).exec()
+        if (!tables) {
+            throw createHttpError(404, 'Tables not found!')
+        }
+        res.status(201).json(tables)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const getBranches: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+
+        const branchModels = await BranchModel.find({ businessId: adminBusinessId })
+        if (!branchModels) {
+            throw createHttpError(404, 'Branches not found!')
+        }
+
+        res.status(201).json(branchModels)
+    } catch (error) {
+        next(error)
+    }
 
 }

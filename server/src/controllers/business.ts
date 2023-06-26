@@ -364,11 +364,11 @@ export const createAdmin: RequestHandler<unknown, unknown, AdminBody, unknown> =
 
 
 
-interface IBranchId {
+export interface IBranchId {
     branchId?: Schema.Types.ObjectId,
 }
 
-interface IbranchPopulate extends Document {
+export interface IbranchPopulate extends Document {
     name: string,
     businessId: {
         _id: Types.ObjectId;

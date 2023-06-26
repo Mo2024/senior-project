@@ -24,4 +24,14 @@ router.route('/item')
     .post(AdminContoller.createItem)
     .delete(AdminContoller.deleteItem)
     .patch(AdminContoller.editItem);
+
+//tables
+router.route('/table')
+    .post(AdminContoller.createTable)
+    .delete(AdminContoller.deleteTable)
+    .patch(AdminContoller.editTable);
+
+router.get('/table/:branchId', AdminContoller.getTables);
+router.get('/branches', AdminContoller.getBranches);
+
 export default router;
