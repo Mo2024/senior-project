@@ -1,11 +1,17 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
+import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-function SignUpSignInScreen() {
+interface SignUpSignInScreenProps {
+    navigation: NativeStackNavigationProp<any>
+    route: RouteProp<any>
+}
+function SignUpSignInScreen({ navigation }: SignUpSignInScreenProps) {
     return (
         <View style={styles.container}>
-            <PrimaryButton buttonName={"Sign In"} handlePress={() => { }} />
+            <PrimaryButton buttonName={"Sign In"} handlePress={() => navigation.navigate('LogInScreen')} />
             <PrimaryButton buttonName={"Sign Up"} handlePress={() => { }} />
             <StatusBar style="auto" />
         </View>
