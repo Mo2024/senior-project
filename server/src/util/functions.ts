@@ -3,6 +3,7 @@ import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex,
 import createHttpError from "http-errors";
 import nodemailer from 'nodemailer';
 import env from '../util/validateEnv';
+import { UserModel } from "../models/user";
 
 export function generatePassword(length = 10) {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-';
@@ -43,6 +44,20 @@ export function validateUserRegex(username: string, email: string, password: str
     }
     if (!passwordRegex.test(password) || !passwordRegex.test(confirmPassword)) {
         throw createHttpError(400, 'Make sure passwords have at least one lowercase letter, one uppercase letter, one digit, and one special character!');
+    }
+    if (!fullNameRegex.test(fullName)) {
+        throw createHttpError(400, 'Invalid area format');
+    }
+    if (!telephoneRegex.test(telephone)) {
+        throw createHttpError(400, 'Telephone input must be only 8 digits');
+    }
+}
+export function validateUpdateUserRegex(username: string, email: string, fullName: string, telephone: string) {
+    if (!usernameRegex.test(username)) {
+        throw createHttpError(400, 'Invalid username format');
+    }
+    if (!emailRegex.test(email)) {
+        throw createHttpError(400, 'Invalid email format');
     }
     if (!fullNameRegex.test(fullName)) {
         throw createHttpError(400, 'Invalid area format');
@@ -180,3 +195,45 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
         return false
     }
 };
+
+export async function checkIfCredentialsIsTaken(username: string, email: string) {
+    const existingUsername = await UserModel.findOne({ username }).exec();
+    if (existingUsername) {
+        throw createHttpError(409, "Username already taken. Please choose a different one.");
+    }
+
+    const existingEmail = await UserModel.findOne({ email }).exec();
+    if (existingEmail) {
+        throw createHttpError(409, "Email already taken. Please choose a different one.");
+    }
+}
+export async function checkIfCredentialsIsTakenUpdate(newUsername: string, newEmail: string, userId: Types.ObjectId) {
+    const existingUsername = await UserModel.findOne({ username: newUsername }).exec();
+    if (existingUsername && !existingUsername._id.equals(userId)) {
+        throw createHttpError(409, "Username already taken. Please choose a different one.");
+    }
+
+    const existingEmail = await UserModel.findOne({ email: newEmail }).exec();
+    if (existingEmail && !existingEmail._id.equals(userId)) {
+        throw createHttpError(409, "Email already taken. Please choose a different one.");
+    }
+}
+
+
+export function validateAddressRegex(name: string, area: string, building: string, block: string, road: string) {
+    if (!businessNameRegex.test(name)) {
+        throw createHttpError(400, 'Invalid Business');
+    }
+    if (!businessNameRegex.test(area)) {
+        throw createHttpError(400, 'Invalid area');
+    }
+    if (!businessNameRegex.test(building)) {
+        throw createHttpError(400, 'Invalid building');
+    }
+    if (!businessNameRegex.test(block)) {
+        throw createHttpError(400, 'Invalid block');
+    }
+    if (!businessNameRegex.test(road)) {
+        throw createHttpError(400, 'Invalid road');
+    }
+}

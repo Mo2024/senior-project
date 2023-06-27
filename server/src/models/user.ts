@@ -37,32 +37,26 @@ const ownerSchema = new Schema({
     verified: {
         type: Boolean,
         default: false,
-        select: false,
     },
     area: {
         type: String,
         required: true,
-        select: false,
     },
     road: {
         type: String,
         required: true,
-        select: false,
     },
     block: {
         type: String,
         required: true,
-        select: false,
     },
     building: {
         type: String,
         required: true,
-        select: false,
     },
     ownerCpr: {
         type: Number,
         required: true,
-        select: false,
     },
 });
 
@@ -78,7 +72,6 @@ const employeeSchema = new Schema({
     employeeCpr: {
         type: Number,
         required: true,
-        select: false,
     },
     branchId: {
         type: Schema.Types.ObjectId,
@@ -98,7 +91,6 @@ const adminSchema = new Schema({
     adminCpr: {
         type: Number,
         required: true,
-        select: false,
     },
     businessId: {
         type: Schema.Types.ObjectId,
@@ -114,38 +106,37 @@ type AdminType = InferSchemaType<typeof Admin.schema>;
 
 const AdminModel = model<AdminType>("Admin", Admin.schema);
 
+const addressSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    area: {
+        type: String,
+        required: true,
+    },
+    building: {
+        type: String,
+        required: true,
+    },
+    block: {
+        type: String,
+        required: true,
+    },
+    road: {
+        type: String,
+        required: true,
+    },
+});
 const customerSchema = new Schema({
     verified: {
         type: Boolean,
         default: false,
-        select: false,
     },
     addresses: {
-        type: [
-            {
-                addressName: {
-                    type: String,
-                    required: true,
-                },
-                area: {
-                    type: String,
-                    required: true,
-                },
-                building: {
-                    type: String,
-                    required: true,
-                },
-                block: {
-                    type: String,
-                    required: true,
-                },
-                road: {
-                    type: String,
-                    required: true,
-                },
-            },
-        ],
-        select: false,
+        type: Map,
+        of: addressSchema,
+        default: {},
     },
 });
 
