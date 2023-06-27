@@ -214,6 +214,7 @@ export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, un
     const { username, email, fullName, telephone, } = req.body;
     const role = req.session.role;
     const userId = req.session.userId;
+    console.log(role)
 
     try {
         assertIsDefined(userId)
@@ -266,11 +267,20 @@ export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, un
                 break;
             }
             case 'Customer': {
-                // Code for handling the 'Customer' role
+                validateUpdateUserRegex(username, email, fullName, telephone)
+                await checkIfCredentialsIsTakenUpdate(username, email, userId)
+                const user = await CustomerModel.findById(userId).exec()
+                if (!user) {
+                    throw createHttpError(401, "Invalid credentials")
+                }
+                const updatedFields = { username, email, fullName, telephone };
+                Object.assign(user, updatedFields);
+                await user.save();
+                res.status(200).json(user)
                 break;
             }
             default: {
-                // Code for handling unknown or unsupported roles
+                throw createHttpError(500, "Unknown error occured, trying logging out and in again");
                 break;
             }
         }
@@ -332,7 +342,6 @@ export const updateAddress: RequestHandler<unknown, unknown, IUpdateAddressBody,
         if (!user) {
             throw createHttpError(401, "Invalid credentials")
         }
-
 
         if (!user.addresses.get(addressId)) {
             throw createHttpError(404, "Address not found!")

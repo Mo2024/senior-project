@@ -13,6 +13,7 @@ router.post('/login', UserContoller.login);
 router.post('/logout', UserContoller.logout);
 router.patch('/update', requiresAuth, UserContoller.updateUserInfo);
 
+//will have its own section in react native
 router.route('/address')
     .post(requiresAuth, isCustomer, UserContoller.createAddress)
     .patch(requiresAuth, isCustomer, UserContoller.updateAddress)
