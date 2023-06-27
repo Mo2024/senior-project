@@ -1,17 +1,63 @@
-import { StyleSheet, View, Text, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
+import Field from '../components/Field';
+import { useState } from 'react';
+import SubmitButton from '../components/SubmitButton';
+import * as UserApi from "../network/user_api";
+import { User } from '../models/user';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
-function LogInScreen() {
+interface LogInScreenProps {
+    onLoginSuccessful: (user: User) => void,
+    // route: RouteProp<any, any>
+
+}
+
+function LogInScreen({ onLoginSuccessful }: LogInScreenProps) {
+    const [credentialsObject, setCredentialsObject] = useState({ username: 'mohd1', password: 'Naba1996%' })
+    async function onSubmit(credentials: UserApi.LoginCredentials) {
+        try {
+            const user = await UserApi.login(credentials);
+            onLoginSuccessful(user)
+        } catch (error) {
+            alert(error)
+            console.error(error)
+
+        }
+    }
     return (
-        <View style={styles.container}>
-            <Text style={styles.loginTitle}>Log In</Text>
-            <View style={styles.formBox}>
-                <Text style={styles.formBoxTitle}>Welcome Back</Text>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 
-                <TextInput placeholder='Username' style={styles.FormTextInput} placeholderTextColor={"#72063c"} />
+            <View style={styles.container}>
+                <Text style={styles.loginTitle}>Log In</Text>
+                <View style={styles.formBox}>
+                    <Text style={styles.formBoxTitle}>Welcome Back</Text>
+                    <Field
+                        handleChange={(username) => {
+                            const currentState = { ...credentialsObject };
+                            currentState.username = username
+                            setCredentialsObject(currentState)
+                        }}
+                        placeholder='Username'
+                        value={credentialsObject.username}
+                    />
+                    <Field
+                        handleChange={(password) => {
+                            const currentState = { ...credentialsObject };
+                            currentState.password = password
+                            setCredentialsObject(currentState)
+                            console.log(credentialsObject)
+                        }}
+                        placeholder='Password'
+                        value={credentialsObject.password}
+                        secureTextEntry
+                    />
+                    <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
 
+                </View>
             </View>
-        </View>
+        </TouchableWithoutFeedback >
+
     );
 }
 
@@ -26,7 +72,6 @@ const styles = StyleSheet.create({
         color: "#72063c",
         fontSize: 40,
         fontWeight: 'bold',
-        // marginVertical: 10,
         marginTop: 50,
         padding: 0,
         flex: 1,
@@ -45,15 +90,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center'
     },
-    FormTextInput: {
-        borderRadius: 100,
-        color: "#72063c",
-        paddingHorizontal: 10,
-        width: '80%',
-        height: 45,
-        borderBottomColor: 'white',
-        backgroundColor: 'rgb(220,220,220)'
+    submitBtn: {
+        marginTop: 100
     }
+
 });
 
 export default LogInScreen;

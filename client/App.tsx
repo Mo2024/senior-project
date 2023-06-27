@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SignUpSignInScreen from './screens/SignUpSignInScreen';
 import LoggedInScreen from './screens/LoggedInScreen';
 import LogInScreen from './screens/LogInScreen';
+import { View, Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,14 +26,46 @@ export default function App() {
   }, []);
 
   return (
+    // {
+    //   loggedInUser?<View> : <View>
+    // }
     <>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName={loggedInUser == null ? 'SignUpSignInScreen' : 'LoggedInScreen'} screenOptions={{ headerShown: false }} >
-          <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
-          <Stack.Screen name="LoggedInScreen" component={LoggedInScreen} />
-          <Stack.Screen name="LogInScreen" component={LogInScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      {!loggedInUser ?
+        (
+          <LogInScreen onLoginSuccessful={(user: User) => { setLoggedInUser(user) }} />
+        )
+        :
+        (
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName={loggedInUser == null ? 'SignUpSignInScreen' : 'LoggedInScreen'} screenOptions={{ headerShown: false }} >
+              <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
+              <Stack.Screen name="LoggedInScreen" component={LoggedInScreen} />
+              {/* <Stack.Screen
+                name="LogInScreen"
+                component={LogInScreen}
+                initialParams={{ onLoginSuccessful: (user: User) => { setLoggedInUser(user) } }}
+
+              /> */}
+            </Stack.Navigator>
+          </NavigationContainer>
+        )}
+      {/* Render your login screen and pass the onLoginSuccessful function */}
+      {/* <LoginScreen onLoginSuccessful={onLoginSuccessful} /> */}
     </>
+    // <>
+
+    // <NavigationContainer>
+    //   <Stack.Navigator initialRouteName={loggedInUser == null ? 'SignUpSignInScreen' : 'LoggedInScreen'} screenOptions={{ headerShown: false }} >
+    //     <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
+    //     <Stack.Screen name="LoggedInScreen" component={LoggedInScreen} />
+    //     <Stack.Screen
+    //       name="LogInScreen"
+    //       component={LogInScreen}
+    //       initialParams={{ onLoginSuccessful: (user: User) => { setLoggedInUser(user) } }}
+
+    //     />
+    //   </Stack.Navigator>
+    // </NavigationContainer>
+    // </>
   );
 }
