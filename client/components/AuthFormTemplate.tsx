@@ -11,31 +11,7 @@ import EvilIcons from '@expo/vector-icons/EvilIcons'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import TopBar from '../components/TopBar';
 
-interface LogInScreenProps {
-    navigation: NativeStackNavigationProp<any>
-    route: RouteProp<any>
-}
-
-function LogInScreen({ navigation }: LogInScreenProps) {
-    const [credentialsObject, setCredentialsObject] = useState({ username: '', password: '' })
-    async function onSubmit(credentials: UserApi.LoginCredentials) {
-        try {
-            console.log(credentials)
-            const user = await UserApi.login(credentials);
-            await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
-            navigation.dispatch(
-                CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'LoggedInScreen' }],
-                })
-            );
-        } catch (error) {
-            alert(error)
-            console.error(error)
-
-        }
-    }
-
+const AuthFormTemplate = () => {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 
@@ -68,7 +44,6 @@ function LogInScreen({ navigation }: LogInScreenProps) {
                 </View>
             </View>
         </TouchableWithoutFeedback >
-
     );
 }
 
@@ -100,4 +75,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default LogInScreen;
+export default AuthFormTemplate;
