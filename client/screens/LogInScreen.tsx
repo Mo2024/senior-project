@@ -1,24 +1,24 @@
-import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import Field from '../components/Field';
 import { useState } from 'react';
 import SubmitButton from '../components/SubmitButton';
 import * as UserApi from "../network/user_api";
-import { User } from '../models/user';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
+
 
 interface LogInScreenProps {
-    onLoginSuccessful: (user: User) => void,
     // route: RouteProp<any, any>
 
 }
 
-function LogInScreen({ onLoginSuccessful }: LogInScreenProps) {
-    const [credentialsObject, setCredentialsObject] = useState({ username: 'mohd1', password: 'Naba1996%' })
+function LogInScreen({ }: LogInScreenProps) {
+    const [credentialsObject, setCredentialsObject] = useState({ username: '', password: '' })
     async function onSubmit(credentials: UserApi.LoginCredentials) {
         try {
+            console.log(credentials)
             const user = await UserApi.login(credentials);
-            onLoginSuccessful(user)
+            await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
         } catch (error) {
             alert(error)
             console.error(error)
