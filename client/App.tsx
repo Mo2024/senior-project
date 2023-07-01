@@ -26,10 +26,10 @@ export default function App() {
         setIsLoading(false);
 
       } catch (error) {
+        setIsLoggedIn(false);
         setIsLoading(false);
         console.log(error)
         if (await SecureStore.getItemAsync('userInfo')) await SecureStore.deleteItemAsync('userInfo');
-        setIsLoggedIn(false);
 
       }
     }

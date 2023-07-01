@@ -1,7 +1,9 @@
 import fetchData from "../utils/functions";
 import { User as UserModel } from "../models/user";
+import { API_URL } from '@env';
+
 export async function getLoggedInUser(): Promise<UserModel> {
-    const response = await fetchData(`http://192.168.100.4:5000/api/users`, { method: 'GET' }) as UserModel | any;
+    const response = await fetchData(`${API_URL}/api/users`, { method: 'GET' }) as UserModel | any;
     return await response.json()
 }
 
@@ -11,7 +13,7 @@ export interface LoginCredentials {
 }
 
 export async function login(credentials: LoginCredentials): Promise<UserModel> {
-    const respone = await fetchData('http://192.168.100.4:5000/api/users/login', {
+    const respone = await fetchData(`${API_URL}/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials)
