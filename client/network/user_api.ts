@@ -22,7 +22,5 @@ export async function login(credentials: LoginCredentials): Promise<UserModel> {
 }
 
 export async function logout() {
-    console.log('a')
     await fetchData(`${API_URL}/api/users/logout`, { method: "POST" });
-    console.log('b')
 }
