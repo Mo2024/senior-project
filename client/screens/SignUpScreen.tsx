@@ -9,9 +9,43 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommonActions, RouteProp } from '@react-navigation/native';
 import EvilIcons from '@expo/vector-icons/EvilIcons'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
 import TopBar from '../components/TopBar';
+import SelectDropdownComponent from '../components/SelectDropdownComponent';
 
-const AuthFormTemplate = () => {
+interface SignUpScreenProps {
+    navigation: NativeStackNavigationProp<any>
+    route: RouteProp<any>
+}
+
+function SignUpScreen({ navigation }: SignUpScreenProps) {
+    const [credentialsObject, setCredentialsObject] = useState({
+        email: "",
+        username: "",
+        fullName: "",
+        telephone: "",
+        password: "",
+        confirmPassword: ""
+    })
+    const [selectedOption, setSelectedOption] = useState("Choose user type");
+
+    async function onSubmit(credentials: UserApi.LoginCredentials) {
+        try {
+            console.log(credentials)
+            const user = await UserApi.login(credentials);
+            await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'LoggedInScreen' }],
+                })
+            );
+        } catch (error) {
+            alert(error)
+            console.error(error)
+
+        }
+    }
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 
@@ -19,7 +53,21 @@ const AuthFormTemplate = () => {
 
                 <TopBar title='Log In' bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
                 <View style={styles.formBox}>
-                    <Text style={styles.formBoxTitle}>Welcome Back</Text>
+                    <Text style={styles.formBoxTitle}>Welcome!</Text>
+                    <SelectDropdownComponent
+                        options={['Business Owner', 'Customer']}
+                        selectedOption={selectedOption}
+                        handleOptionChange={(selectedItem) => setSelectedOption(selectedItem)}
+                    />
+
+                    <Field
+                        handleChange={(email) => {
+                            const currentState = { ...credentialsObject };
+                            currentState.email = email
+                            setCredentialsObject(currentState)
+                        }}
+                        placeholder='Email'
+                    />
                     <Field
                         handleChange={(username) => {
                             const currentState = { ...credentialsObject };
@@ -27,7 +75,14 @@ const AuthFormTemplate = () => {
                             setCredentialsObject(currentState)
                         }}
                         placeholder='Username'
-                        value={credentialsObject.username}
+                    />
+                    <Field
+                        handleChange={(fullName) => {
+                            const currentState = { ...credentialsObject };
+                            currentState.fullName = fullName
+                            setCredentialsObject(currentState)
+                        }}
+                        placeholder='fullName'
                     />
                     <Field
                         handleChange={(password) => {
@@ -37,13 +92,13 @@ const AuthFormTemplate = () => {
                             console.log(credentialsObject)
                         }}
                         placeholder='Password'
-                        value={credentialsObject.password}
                         secureTextEntry
                     />
                     <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
                 </View>
             </View>
         </TouchableWithoutFeedback >
+
     );
 }
 
@@ -58,7 +113,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#72063c",
         flex: 9,
         width: "100%",
-        borderTopLeftRadius: 150,
+        borderTopRightRadius: 150,
         alignItems: 'center',
     },
     formBoxTitle: {
@@ -75,4 +130,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default AuthFormTemplate;
+export default SignUpScreen;

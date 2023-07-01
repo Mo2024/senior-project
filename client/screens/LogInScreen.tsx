@@ -51,7 +51,6 @@ function LogInScreen({ navigation }: LogInScreenProps) {
                             setCredentialsObject(currentState)
                         }}
                         placeholder='Username'
-                        value={credentialsObject.username}
                     />
                     <Field
                         handleChange={(password) => {
@@ -61,7 +60,6 @@ function LogInScreen({ navigation }: LogInScreenProps) {
                             console.log(credentialsObject)
                         }}
                         placeholder='Password'
-                        value={credentialsObject.password}
                         secureTextEntry
                     />
                     <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />

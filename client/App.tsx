@@ -9,6 +9,7 @@ import LogInScreen from './screens/LogInScreen';
 import { View, Text } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import AppLoader from './components/AppLoader';
+import SignUpScreen from './screens/SignUpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +54,7 @@ export default function App() {
           <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
           <Stack.Screen name="LoggedInScreen" component={LoggedInScreen} />
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
+          <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

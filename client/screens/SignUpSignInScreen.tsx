@@ -12,7 +12,7 @@ function SignUpSignInScreen({ navigation }: SignUpSignInScreenProps) {
     return (
         <View style={styles.container}>
             <PrimaryButton buttonName={"Sign In"} handlePress={() => navigation.navigate('LogInScreen')} />
-            <PrimaryButton buttonName={"Sign Up"} handlePress={() => { }} />
+            <PrimaryButton buttonName={"Sign Up"} handlePress={() => navigation.navigate('SignUpScreen')} />
             <StatusBar style="auto" />
         </View>
     );
