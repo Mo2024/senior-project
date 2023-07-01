@@ -20,3 +20,9 @@ export async function login(credentials: LoginCredentials): Promise<UserModel> {
     });
     return respone.json();
 }
+
+export async function logout() {
+    console.log('a')
+    await fetchData(`${API_URL}/api/users/logout`, { method: "POST" });
+    console.log('b')
+}

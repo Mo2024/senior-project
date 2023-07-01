@@ -2,12 +2,13 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Text } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import SubmitButton from '../components/SubmitButton';
+import { logout } from '../network/user_api';
 
 function LoggedInScreen() {
     return (
         <View style={styles.container}>
             <Text>Is logged in!</Text>
-            <SubmitButton buttonName="Submit" handlePress={() => { }} />
+            <SubmitButton buttonName="Submit" handlePress={() => { logout() }} />
 
         </View>
     );
