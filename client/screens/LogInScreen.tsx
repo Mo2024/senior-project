@@ -44,7 +44,7 @@ function LogInScreen({ navigation }: LogInScreenProps) {
                 <TopBar title='Log In' bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
                 <View style={styles.formBox}>
                     <Text style={styles.formBoxTitle}>Welcome Back</Text>
-                    <Field
+                    {/* <Field
                         handleChange={(username) => {
                             const currentState = { ...credentialsObject };
                             currentState.username = username
@@ -61,7 +61,7 @@ function LogInScreen({ navigation }: LogInScreenProps) {
                         }}
                         placeholder='Password'
                         secureTextEntry
-                    />
+                    /> */}
                     <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
                 </View>
             </View>

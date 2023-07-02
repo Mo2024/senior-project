@@ -15,6 +15,7 @@ const SelectDropdownComponent = ({ options, selectedOption, handleOptionChange }
         height: 45,
         borderBottomColor: 'white',
         backgroundColor: 'rgb(220,220,220)',
+        marginTop: 25,
     };
 
 

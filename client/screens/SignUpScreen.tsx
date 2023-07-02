@@ -12,6 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import TopBar from '../components/TopBar';
 import SelectDropdownComponent from '../components/SelectDropdownComponent';
+import AuthFormBox from '../components/AuthFormBox';
 
 interface SignUpScreenProps {
     navigation: NativeStackNavigationProp<any>
@@ -19,20 +20,12 @@ interface SignUpScreenProps {
 }
 
 function SignUpScreen({ navigation }: SignUpScreenProps) {
-    const [credentialsObject, setCredentialsObject] = useState({
-        email: "",
-        username: "",
-        fullName: "",
-        telephone: "",
-        password: "",
-        confirmPassword: ""
-    })
     const [selectedOption, setSelectedOption] = useState("Choose user type");
 
-    async function onSubmit(credentials: UserApi.LoginCredentials) {
+    async function onSubmit(credentials: object) {
         try {
             console.log(credentials)
-            const user = await UserApi.login(credentials);
+            const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(
                 CommonActions.reset({
@@ -46,88 +39,34 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
 
         }
     }
+
+    const placeholderData = {
+        email: "Email",
+        username: "Username",
+        fullName: "Full Name",
+        telephone: "Telephone",
+        password: "Password",
+        confirmPassword: "Confirm Password"
+    }
+    const credentialsObject = {
+        email: "",
+        username: "",
+        fullName: "",
+        telephone: "",
+        password: "",
+        confirmPassword: ""
+    }
     return (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-
-            <View style={styles.container}>
-
-                <TopBar title='Log In' bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
-                <View style={styles.formBox}>
-                    <Text style={styles.formBoxTitle}>Welcome!</Text>
-                    <SelectDropdownComponent
-                        options={['Business Owner', 'Customer']}
-                        selectedOption={selectedOption}
-                        handleOptionChange={(selectedItem) => setSelectedOption(selectedItem)}
-                    />
-
-                    <Field
-                        handleChange={(email) => {
-                            const currentState = { ...credentialsObject };
-                            currentState.email = email
-                            setCredentialsObject(currentState)
-                        }}
-                        placeholder='Email'
-                    />
-                    <Field
-                        handleChange={(username) => {
-                            const currentState = { ...credentialsObject };
-                            currentState.username = username
-                            setCredentialsObject(currentState)
-                        }}
-                        placeholder='Username'
-                    />
-                    <Field
-                        handleChange={(fullName) => {
-                            const currentState = { ...credentialsObject };
-                            currentState.fullName = fullName
-                            setCredentialsObject(currentState)
-                        }}
-                        placeholder='fullName'
-                    />
-                    <Field
-                        handleChange={(password) => {
-                            const currentState = { ...credentialsObject };
-                            currentState.password = password
-                            setCredentialsObject(currentState)
-                            console.log(credentialsObject)
-                        }}
-                        placeholder='Password'
-                        secureTextEntry
-                    />
-                    <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
-                </View>
-            </View>
-        </TouchableWithoutFeedback >
+        <AuthFormBox
+            credentialsObjectProps={credentialsObject}
+            placeholderData={placeholderData}
+            navigation={navigation}
+            onSubmit={onSubmit}
+        />
 
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    formBox: {
-        backgroundColor: "#72063c",
-        flex: 9,
-        width: "100%",
-        borderTopRightRadius: 150,
-        alignItems: 'center',
-    },
-    formBoxTitle: {
-        marginTop: 50,
-        fontSize: 35,
-        color: "white",
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    submitBtn: {
-        marginTop: 100
-    },
 
-
-});
 
 export default SignUpScreen;
