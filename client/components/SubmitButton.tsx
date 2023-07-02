@@ -1,19 +1,25 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 
-interface PrimaryButton {
+interface SubmitButtonProps {
     buttonName: string,
     handlePress: () => void
+    disabled?: boolean;
 }
 
-function SubmitButton({ buttonName, handlePress }: PrimaryButton) {
+function SubmitButton({ buttonName, handlePress, disabled = false }: SubmitButtonProps) {
     return (
         <View style={styles.buttontOuterContainer}>
             <Pressable
-                style={({ pressed }) => pressed ? [styles.buttonInnerContainer, styles.pressed] : styles.buttonInnerContainer}
-                onPress={handlePress}
+                style={({ pressed }) =>
+                    pressed ? [styles.buttonInnerContainer, styles.pressed] : styles.buttonInnerContainer
+                }
+                onPress={disabled ? undefined : handlePress}
                 android_ripple={{ color: "#640233" }}
+                disabled={disabled}
             >
-                <Text style={styles.buttonText}>{buttonName}</Text>
+                <Text style={[styles.buttonText, disabled && styles.disabledButtonText]}>
+                    {buttonName}
+                </Text>
             </Pressable>
         </View>
     );
@@ -39,7 +45,10 @@ const styles = StyleSheet.create({
     },
     pressed: {
         opacity: 0.75
-    }
+    },
+    disabledButtonText: {
+        color: "gray", // Customize the color for disabled text
+    },
 });
 
 export default SubmitButton;

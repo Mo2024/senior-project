@@ -18,18 +18,34 @@ interface AuthFormBoxProps {
     placeholderData: { [key: string]: string }
     navigation: NativeStackNavigationProp<any>
     onSubmit: (credentials: object) => void
+    options?: string[]
+    title: string
+    formBoxTitle: string
 }
-const AuthFormBox = ({ credentialsObjectProps, placeholderData, navigation, onSubmit }: AuthFormBoxProps) => {
+const AuthFormBox = ({ credentialsObjectProps, placeholderData, navigation, onSubmit, options, title, formBoxTitle }: AuthFormBoxProps) => {
     const [credentialsObject, setCredentialsObject] = useState<object>(credentialsObjectProps)
+    const [selectedOption, setSelectedOption] = useState("Choose user type");
+    const [isDisabled, setIsDisabled] = useState(options ? true : false)
+
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 
             <View style={styles.container}>
 
-                <TopBar title='Log In' bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
+                <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
                 <View style={styles.formBox}>
-                    <Text style={styles.formBoxTitle}>Welcome!</Text>
+                    <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
+                    {options &&
+                        <SelectDropdownComponent
+                            options={['Business Owner', 'Customer']}
+                            selectedOption={selectedOption}
+                            handleOptionChange={(selectedItem) => {
+                                setSelectedOption(selectedItem);
+                                setIsDisabled(options ? !options.includes(selectedItem) : true);
 
+                            }}
+                        />
+                    }
 
                     {Object.keys(credentialsObject).map(key =>
                         <Field
@@ -41,7 +57,7 @@ const AuthFormBox = ({ credentialsObjectProps, placeholderData, navigation, onSu
                         />
                     )}
 
-                    <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+                    <SubmitButton disabled={isDisabled} buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
                 </View>
             </View>
         </TouchableWithoutFeedback >

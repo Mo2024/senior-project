@@ -20,19 +20,18 @@ interface SignUpScreenProps {
 }
 
 function SignUpScreen({ navigation }: SignUpScreenProps) {
-    const [selectedOption, setSelectedOption] = useState("Choose user type");
 
     async function onSubmit(credentials: object) {
         try {
             console.log(credentials)
-            const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
-            await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
-            navigation.dispatch(
-                CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'LoggedInScreen' }],
-                })
-            );
+            // const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
+            // await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
+            // navigation.dispatch(
+            //     CommonActions.reset({
+            //         index: 0,
+            //         routes: [{ name: 'LoggedInScreen' }],
+            //     })
+            // );
         } catch (error) {
             alert(error)
             console.error(error)
@@ -44,16 +43,16 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         email: "Email",
         username: "Username",
         fullName: "Full Name",
-        telephone: "Telephone",
-        password: "Password",
+        // telephone: "Telephone",
+        // password: "Password",
         confirmPassword: "Confirm Password"
     }
     const credentialsObject = {
         email: "",
         username: "",
         fullName: "",
-        telephone: "",
-        password: "",
+        // telephone: "",
+        // password: "",
         confirmPassword: ""
     }
     return (
@@ -62,6 +61,9 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
             placeholderData={placeholderData}
             navigation={navigation}
             onSubmit={onSubmit}
+            options={['Business Owner', 'Customer']}
+            title="Sign Up"
+            formBoxTitle="Welcome!"
         />
 
     );
