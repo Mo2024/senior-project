@@ -12,7 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import TopBar from '../components/TopBar';
 import SelectDropdownComponent from '../components/SelectDropdownComponent';
-import AuthFormBox from '../components/AuthFormBox';
+import AuthFormComponent from '../components/AuthFormBox';
 
 interface SignUpScreenProps {
     navigation: NativeStackNavigationProp<any>
@@ -21,17 +21,26 @@ interface SignUpScreenProps {
 
 function SignUpScreen({ navigation }: SignUpScreenProps) {
 
-    async function onSubmit(credentials: object) {
+    const [credentialsObject, setCredentialsObject] = useState<{ [key: string]: string }>({
+        email: "",
+        username: "",
+        fullName: "",
+        telephone: "",
+        password: "",
+        confirmPassword: ""
+    })
+
+    async function onSubmit(credentials: object, selectedOption: string) {
         try {
-            console.log(credentials)
-            // const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
-            // await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
-            // navigation.dispatch(
-            //     CommonActions.reset({
-            //         index: 0,
-            //         routes: [{ name: 'LoggedInScreen' }],
-            //     })
-            // );
+            console.log(selectedOption)
+            const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
+            await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'LoggedInScreen' }],
+                })
+            );
         } catch (error) {
             alert(error)
             console.error(error)
@@ -39,31 +48,51 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         }
     }
 
-    const placeholderData = {
+    const options = ['Business Owner', 'Customer']
+    let placeholderData = {
         email: "Email",
         username: "Username",
         fullName: "Full Name",
-        // telephone: "Telephone",
-        // password: "Password",
-        confirmPassword: "Confirm Password"
-    }
-    const credentialsObject = {
-        email: "",
-        username: "",
-        fullName: "",
-        // telephone: "",
-        // password: "",
-        confirmPassword: ""
+        telephone: "Telephone",
+        password: "Password",
+        confirmPassword: "Confirm Password",
+        area: "Area",
+        road: "Road",
+        block: "Block",
+        building: "Building",
+        ownerCpr: "CPR",
+    } as { [key: string]: string }
+
+    function credentialsObjectChanger(selectedItem: string) {
+
+        if (selectedItem == "Business Owner") {
+            setCredentialsObject({
+                ...credentialsObject,
+                area: "",
+                road: "",
+                block: "",
+                building: "",
+                ownerCpr: "",
+            })
+        } else if (selectedItem == "Customer") {
+            let { email, username, fullName, telephone, password, confirmPassword, } = credentialsObject
+            setCredentialsObject({
+                email, username, fullName, telephone, password, confirmPassword
+            })
+        }
+
     }
     return (
-        <AuthFormBox
-            credentialsObjectProps={credentialsObject}
+        <AuthFormComponent
+            credentialsObject={credentialsObject}
+            credentialsObjectUpdate={(updatedCredentialsObject) => { setCredentialsObject(updatedCredentialsObject); console.log(credentialsObject) }}
             placeholderData={placeholderData}
             navigation={navigation}
             onSubmit={onSubmit}
-            options={['Business Owner', 'Customer']}
+            options={options}
             title="Sign Up"
             formBoxTitle="Welcome!"
+            credentialsObjectChanger={credentialsObjectChanger}
         />
 
     );

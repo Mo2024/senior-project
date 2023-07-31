@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import Field from '../components/Field';
 import { useState } from 'react';
@@ -14,16 +14,17 @@ import TopBar from '../components/TopBar';
 import SelectDropdownComponent from '../components/SelectDropdownComponent';
 
 interface AuthFormBoxProps {
-    credentialsObjectProps: object
-    placeholderData: { [key: string]: string }
-    navigation: NativeStackNavigationProp<any>
-    onSubmit: (credentials: object) => void
-    options?: string[]
     title: string
     formBoxTitle: string
+    placeholderData: { [key: string]: string }
+    navigation: NativeStackNavigationProp<any>
+    credentialsObject: object
+    options?: string[]
+    onSubmit: (credentials: object, selectedOption: string) => void
+    credentialsObjectChanger?: (selectedItem: string) => void
+    credentialsObjectUpdate: (credentialsObject: { [key: string]: string }) => void
 }
-const AuthFormBox = ({ credentialsObjectProps, placeholderData, navigation, onSubmit, options, title, formBoxTitle }: AuthFormBoxProps) => {
-    const [credentialsObject, setCredentialsObject] = useState<object>(credentialsObjectProps)
+const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onSubmit, options, title, formBoxTitle, credentialsObjectChanger, credentialsObjectUpdate }: AuthFormBoxProps) => {
     const [selectedOption, setSelectedOption] = useState("Choose user type");
     const [isDisabled, setIsDisabled] = useState(options ? true : false)
 
@@ -35,12 +36,13 @@ const AuthFormBox = ({ credentialsObjectProps, placeholderData, navigation, onSu
                 <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
                 <View style={styles.formBox}>
                     <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
-                    {options &&
+                    {/* {options &&
                         <SelectDropdownComponent
-                            options={['Business Owner', 'Customer']}
+                            options={options}
                             selectedOption={selectedOption}
                             handleOptionChange={(selectedItem) => {
                                 setSelectedOption(selectedItem);
+                                credentialsObjectChanger && credentialsObjectChanger(selectedItem)
                                 setIsDisabled(options ? !options.includes(selectedItem) : true);
 
                             }}
@@ -50,14 +52,37 @@ const AuthFormBox = ({ credentialsObjectProps, placeholderData, navigation, onSu
                     {Object.keys(credentialsObject).map(key =>
                         <Field
                             handleChange={(updatedCredential) => {
-                                setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
+                                credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
                             }}
                             placeholder={placeholderData[key]}
                             key={key}
                         />
-                    )}
+                    )} */}
+                    <ScrollView contentContainerStyle={styles.scrollContainer}>
+                        {options &&
+                            <SelectDropdownComponent
+                                options={options}
+                                selectedOption={selectedOption}
+                                handleOptionChange={(selectedItem) => {
+                                    setSelectedOption(selectedItem);
+                                    credentialsObjectChanger && credentialsObjectChanger(selectedItem);
+                                    setIsDisabled(options ? !options.includes(selectedItem) : true);
+                                }}
+                            />
+                        }
 
-                    <SubmitButton disabled={isDisabled} buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+                        {Object.keys(credentialsObject).map(key =>
+                            <Field
+                                handleChange={(updatedCredential) => {
+                                    credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
+                                }}
+                                placeholder={placeholderData[key]}
+                                key={key}
+                            />
+                        )}
+                        <SubmitButton disabled={isDisabled} buttonName="Submit" handlePress={() => onSubmit(credentialsObject, selectedOption)} />
+                    </ScrollView>
+
                 </View>
             </View>
         </TouchableWithoutFeedback >
@@ -88,8 +113,14 @@ const styles = StyleSheet.create({
     submitBtn: {
         marginTop: 100
     },
+    scrollContainer: {
+        flexGrow: 1,
+        width: '80%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 
 
 });
 
-export default AuthFormBox;
+export default AuthFormComponent;
