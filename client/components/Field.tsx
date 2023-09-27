@@ -5,10 +5,12 @@ interface FieldProps {
     handleChange: (text: string) => void
 }
 
-function Field({ handleChange, ...props }: FieldProps) {
+function Field({ handleChange, placeholder, ...props }: FieldProps) {
     return (
         <TextInput
+            secureTextEntry={placeholder.includes("Password")}
             {...props}
+            placeholder={placeholder}
             style={styles.FormTextInput}
             placeholderTextColor={"#72063c"}
             onChangeText={(newValue) => handleChange(newValue)}

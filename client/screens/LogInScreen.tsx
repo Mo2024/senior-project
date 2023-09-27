@@ -10,6 +10,7 @@ import { CommonActions, RouteProp } from '@react-navigation/native';
 import EvilIcons from '@expo/vector-icons/EvilIcons'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import TopBar from '../components/TopBar';
+import AuthFormComponent from '../components/AuthFormBox';
 
 interface LogInScreenProps {
     navigation: NativeStackNavigationProp<any>
@@ -17,11 +18,11 @@ interface LogInScreenProps {
 }
 
 function LogInScreen({ navigation }: LogInScreenProps) {
-    const [credentialsObject, setCredentialsObject] = useState({ username: '', password: '' })
-    async function onSubmit(credentials: UserApi.LoginCredentials) {
+    const [credentialsObject, setCredentialsObject] = useState<{ [key: string]: string }>({ username: '', password: '' })
+    async function onSubmit(credentials: object) {
         try {
             console.log(credentials)
-            const user = await UserApi.login(credentials);
+            const user = await UserApi.login(credentials as UserApi.LoginCredentials);
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(
                 CommonActions.reset({
@@ -36,36 +37,24 @@ function LogInScreen({ navigation }: LogInScreenProps) {
         }
     }
 
+    let placeholderData = {
+        username: "Username",
+        password: "Password",
+
+    } as { [key: string]: string }
+
+
+
     return (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-
-            <View style={styles.container}>
-
-                <TopBar title='Log In' bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
-                <View style={styles.formBox}>
-                    <Text style={styles.formBoxTitle}>Welcome Back</Text>
-                    {/* <Field
-                        handleChange={(username) => {
-                            const currentState = { ...credentialsObject };
-                            currentState.username = username
-                            setCredentialsObject(currentState)
-                        }}
-                        placeholder='Username'
-                    />
-                    <Field
-                        handleChange={(password) => {
-                            const currentState = { ...credentialsObject };
-                            currentState.password = password
-                            setCredentialsObject(currentState)
-                            console.log(credentialsObject)
-                        }}
-                        placeholder='Password'
-                        secureTextEntry
-                    /> */}
-                    <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
-                </View>
-            </View>
-        </TouchableWithoutFeedback >
+        <AuthFormComponent
+            credentialsObject={credentialsObject}
+            credentialsObjectUpdate={(updatedCredentialsObject) => { setCredentialsObject(updatedCredentialsObject); console.log(credentialsObject) }}
+            placeholderData={placeholderData}
+            navigation={navigation}
+            onSubmit={onSubmit}
+            title="Sign In"
+            formBoxTitle="Welcome!"
+        />
 
     );
 }

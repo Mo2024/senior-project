@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from 'react-native';
+import { Dimensions, StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, SafeAreaView } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import Field from '../components/Field';
 import { useState } from 'react';
@@ -19,14 +19,13 @@ interface AuthFormBoxProps {
     placeholderData: { [key: string]: string }
     navigation: NativeStackNavigationProp<any>
     credentialsObject: object
-    onSubmit: (credentials: object, selectedOption: string) => void
+    onSubmit: (credentials: object) => void
     credentialsObjectUpdate: (credentialsObject: { [key: string]: string }) => void
 }
 const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onSubmit, title, formBoxTitle, credentialsObjectUpdate }: AuthFormBoxProps) => {
-    const [selectedOption, setSelectedOption] = useState("Choose user type");
-
     return (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        // <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <SafeAreaView style={styles.SafeAreaView}>
             <ScrollView>
 
                 <View style={styles.container}>
@@ -43,12 +42,14 @@ const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onS
                                 key={key}
                             />
                         )}
-                        <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject, selectedOption)} />
+                        <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
 
                     </View>
                 </View>
             </ScrollView>
-        </TouchableWithoutFeedback >
+        </SafeAreaView>
+
+        // </TouchableWithoutFeedback >
     );
 }
 
@@ -58,7 +59,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-
+    },
+    SafeAreaView: {
+        flex: 1,
     },
     formBox: {
         backgroundColor: "#72063c",
@@ -66,6 +69,10 @@ const styles = StyleSheet.create({
         width: "100%",
         borderTopRightRadius: 150,
         alignItems: 'center',
+        // height: 2000,
+        height: '100%',
+        // paddingBottom: '100%'
+
     },
     formBoxTitle: {
         marginTop: 50,

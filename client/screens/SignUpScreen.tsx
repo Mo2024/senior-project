@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import Field from '../components/Field';
 import { useState } from 'react';
@@ -75,10 +75,59 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
             title="Sign Up"
             formBoxTitle="Welcome!"
         />
+        // <ScrollView>
+
+        //     <View style={styles.container}>
+
+        //         <TopBar title={'Sign Up'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
+        //         <View style={styles.formBox}>
+        //             <Text style={styles.formBoxTitle}>{'Welcome!'}</Text>
+        //             {Object.keys(credentialsObject).map(key =>
+        //                 <Field
+        //                     handleChange={(updatedCredential) => {
+        //                         setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
+        //                     }}
+        //                     placeholder={placeholderData[key]}
+        //                     key={key}
+        //                 />
+        //             )}
+        //             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+
+        //         </View>
+        //     </View>
+        // </ScrollView>
 
     );
 }
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    formBox: {
+        // backgroundColor: "#72063c",
+        flex: 9,
+        width: "100%",
+        borderTopRightRadius: 150,
+        alignItems: 'center',
+        // height: 2000,
+        paddingBottom: '100%'
+    },
+    formBoxTitle: {
+        marginTop: 50,
+        fontSize: 35,
+        color: "white",
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    submitBtn: {
+        marginTop: 100
+    }
+
+});
 
 
 export default SignUpScreen;
