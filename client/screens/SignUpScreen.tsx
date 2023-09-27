@@ -27,12 +27,16 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         fullName: "",
         telephone: "",
         password: "",
-        confirmPassword: ""
+        confirmPassword: "",
+        area: "",
+        road: "",
+        block: "",
+        building: "",
+        ownerCpr: "",
     })
 
-    async function onSubmit(credentials: object, selectedOption: string) {
+    async function onSubmit(credentials: object) {
         try {
-            console.log(selectedOption)
             const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(
@@ -48,7 +52,6 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         }
     }
 
-    const options = ['Business Owner', 'Customer']
     let placeholderData = {
         email: "Email",
         username: "Username",
@@ -62,26 +65,6 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         building: "Building",
         ownerCpr: "CPR",
     } as { [key: string]: string }
-
-    function credentialsObjectChanger(selectedItem: string) {
-
-        if (selectedItem == "Business Owner") {
-            setCredentialsObject({
-                ...credentialsObject,
-                area: "",
-                road: "",
-                block: "",
-                building: "",
-                ownerCpr: "",
-            })
-        } else if (selectedItem == "Customer") {
-            let { email, username, fullName, telephone, password, confirmPassword, } = credentialsObject
-            setCredentialsObject({
-                email, username, fullName, telephone, password, confirmPassword
-            })
-        }
-
-    }
     return (
         <AuthFormComponent
             credentialsObject={credentialsObject}
@@ -89,10 +72,8 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
             placeholderData={placeholderData}
             navigation={navigation}
             onSubmit={onSubmit}
-            options={options}
             title="Sign Up"
             formBoxTitle="Welcome!"
-            credentialsObjectChanger={credentialsObjectChanger}
         />
 
     );

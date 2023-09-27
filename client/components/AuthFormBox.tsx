@@ -19,36 +19,35 @@ interface AuthFormBoxProps {
     placeholderData: { [key: string]: string }
     navigation: NativeStackNavigationProp<any>
     credentialsObject: object
-    options?: string[]
     onSubmit: (credentials: object, selectedOption: string) => void
-    credentialsObjectChanger?: (selectedItem: string) => void
     credentialsObjectUpdate: (credentialsObject: { [key: string]: string }) => void
 }
-const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onSubmit, options, title, formBoxTitle, credentialsObjectChanger, credentialsObjectUpdate }: AuthFormBoxProps) => {
+const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onSubmit, title, formBoxTitle, credentialsObjectUpdate }: AuthFormBoxProps) => {
     const [selectedOption, setSelectedOption] = useState("Choose user type");
-    const [isDisabled, setIsDisabled] = useState(options ? true : false)
 
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <ScrollView>
 
-            <View style={styles.container}>
+                <View style={styles.container}>
 
-                <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
-                <View style={styles.formBox}>
-                    <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
-                    {Object.keys(credentialsObject).map(key =>
-                        <Field
-                            handleChange={(updatedCredential) => {
-                                credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
-                            }}
-                            placeholder={placeholderData[key]}
-                            key={key}
-                        />
-                    )}
-                    <SubmitButton disabled={isDisabled} buttonName="Submit" handlePress={() => onSubmit(credentialsObject, selectedOption)} />
+                    <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
+                    <View style={styles.formBox}>
+                        <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
+                        {Object.keys(credentialsObject).map(key =>
+                            <Field
+                                handleChange={(updatedCredential) => {
+                                    credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
+                                }}
+                                placeholder={placeholderData[key]}
+                                key={key}
+                            />
+                        )}
+                        <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject, selectedOption)} />
 
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         </TouchableWithoutFeedback >
     );
 }
@@ -59,6 +58,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
+
     },
     formBox: {
         backgroundColor: "#72063c",
@@ -77,12 +77,7 @@ const styles = StyleSheet.create({
     submitBtn: {
         marginTop: 100
     },
-    scrollContainer: {
-        flexGrow: 1,
-        width: '80%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+
 
 
 });

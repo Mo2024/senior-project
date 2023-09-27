@@ -40,7 +40,7 @@ export interface SignupCredentials {
 }
 
 export async function signup(credentials: SignupCredentials): Promise<UserModel> {
-    const respone = await fetchData(`${API_URL}/api/users/login`, {
+    const respone = await fetchData(`${API_URL}/api/users/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials)
