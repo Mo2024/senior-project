@@ -106,46 +106,4 @@ type AdminType = InferSchemaType<typeof Admin.schema>;
 
 const AdminModel = model<AdminType>("Admin", Admin.schema);
 
-const addressSchema = new Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    area: {
-        type: String,
-        required: true,
-    },
-    building: {
-        type: String,
-        required: true,
-    },
-    block: {
-        type: String,
-        required: true,
-    },
-    road: {
-        type: String,
-        required: true,
-    },
-});
-const customerSchema = new Schema({
-    verified: {
-        type: Boolean,
-        default: false,
-    },
-    addresses: {
-        type: Map,
-        of: addressSchema,
-        default: {},
-    },
-});
-
-
-customerSchema.add(userSchema);
-
-const Customer = User.discriminator("Customer", customerSchema);
-type CustomerType = InferSchemaType<typeof Customer.schema>;
-
-const CustomerModel = model<CustomerType>("Customer", Customer.schema);
-
-export { UserModel, OwnerModel, EmployeeModel, CustomerModel, AdminModel }
+export { UserModel, OwnerModel, EmployeeModel, AdminModel }

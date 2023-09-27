@@ -220,20 +220,20 @@ export async function checkIfCredentialsIsTakenUpdate(newUsername: string, newEm
 }
 
 
-export function validateAddressRegex(name: string, area: string, building: string, block: string, road: string) {
-    if (!businessNameRegex.test(name)) {
-        throw createHttpError(400, 'Invalid Business');
-    }
-    if (!businessNameRegex.test(area)) {
-        throw createHttpError(400, 'Invalid area');
-    }
-    if (!businessNameRegex.test(building)) {
-        throw createHttpError(400, 'Invalid building');
-    }
-    if (!businessNameRegex.test(block)) {
-        throw createHttpError(400, 'Invalid block');
-    }
-    if (!businessNameRegex.test(road)) {
-        throw createHttpError(400, 'Invalid road');
-    }
-}
+// export function validateAddressRegex(name: string, area: string, building: string, block: string, road: string) {
+//     if (!businessNameRegex.test(name)) {
+//         throw createHttpError(400, 'Invalid Business');
+//     }
+//     if (!businessNameRegex.test(area)) {
+//         throw createHttpError(400, 'Invalid area');
+//     }
+//     if (!businessNameRegex.test(building)) {
+//         throw createHttpError(400, 'Invalid building');
+//     }
+//     if (!businessNameRegex.test(block)) {
+//         throw createHttpError(400, 'Invalid block');
+//     }
+//     if (!businessNameRegex.test(road)) {
+//         throw createHttpError(400, 'Invalid road');
+//     }
+// }

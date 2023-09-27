@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
-import { AdminModel, CustomerModel, EmployeeModel, OwnerModel } from "../models/user";
+import { AdminModel, EmployeeModel, OwnerModel } from "../models/user";
 
 export const requiresAuth: RequestHandler = (req, res, next) => {
     if (req.session.userId) {
@@ -39,13 +39,3 @@ export const isAdmin: RequestHandler = async (req, res, next) => {
     }
     next()
 }
-export const isCustomer: RequestHandler = async (req, res, next) => {
-    const authenticatedUserId = req.session.userId;
-    const customer = await CustomerModel.findById(authenticatedUserId).exec();
-
-    if (!customer) {
-        next(createHttpError(401, 'User not Authorized'))
-    }
-    next()
-}
-
