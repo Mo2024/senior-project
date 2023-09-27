@@ -36,19 +36,6 @@ const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onS
                 <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
                 <View style={styles.formBox}>
                     <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
-                    {/* {options &&
-                        <SelectDropdownComponent
-                            options={options}
-                            selectedOption={selectedOption}
-                            handleOptionChange={(selectedItem) => {
-                                setSelectedOption(selectedItem);
-                                credentialsObjectChanger && credentialsObjectChanger(selectedItem)
-                                setIsDisabled(options ? !options.includes(selectedItem) : true);
-
-                            }}
-                        />
-                    }
-
                     {Object.keys(credentialsObject).map(key =>
                         <Field
                             handleChange={(updatedCredential) => {
@@ -57,31 +44,8 @@ const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onS
                             placeholder={placeholderData[key]}
                             key={key}
                         />
-                    )} */}
-                    <ScrollView contentContainerStyle={styles.scrollContainer}>
-                        {options &&
-                            <SelectDropdownComponent
-                                options={options}
-                                selectedOption={selectedOption}
-                                handleOptionChange={(selectedItem) => {
-                                    setSelectedOption(selectedItem);
-                                    credentialsObjectChanger && credentialsObjectChanger(selectedItem);
-                                    setIsDisabled(options ? !options.includes(selectedItem) : true);
-                                }}
-                            />
-                        }
-
-                        {Object.keys(credentialsObject).map(key =>
-                            <Field
-                                handleChange={(updatedCredential) => {
-                                    credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
-                                }}
-                                placeholder={placeholderData[key]}
-                                key={key}
-                            />
-                        )}
-                        <SubmitButton disabled={isDisabled} buttonName="Submit" handlePress={() => onSubmit(credentialsObject, selectedOption)} />
-                    </ScrollView>
+                    )}
+                    <SubmitButton disabled={isDisabled} buttonName="Submit" handlePress={() => onSubmit(credentialsObject, selectedOption)} />
 
                 </View>
             </View>
