@@ -74,8 +74,10 @@ export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unkn
         });
 
         req.session.userId = newOwner._id as mongoose.Types.ObjectId;
+        req.session.role = newOwner.__t;
 
-        res.status(201).json(newOwner);
+        const userObj = { _id: newOwner._id, __t: newOwner.__t }
+        res.status(201).json(userObj);
     } catch (error) {
         next(error);
     }
@@ -139,10 +141,11 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
         if (user.__t === "Admin") {
             req.session.businessId = user.businessId;
         }
-
         req.session.userId = user._id;
         req.session.role = user.__t;
-        res.status(201).json(user)
+
+        const userObj = { _id: user._id, __t: user.__t }
+        res.status(201).json(userObj)
     } catch (error) {
         next(error)
     }
