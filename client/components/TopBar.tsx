@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         flex: 1,
         textAlign: 'center',
+        right: 25
     },
     topContainer: {
         marginTop: 30,
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     },
     topLeftContainer: {
         position: 'relative',
-        left: 16,
+        left: 0,
     }
 
 });
