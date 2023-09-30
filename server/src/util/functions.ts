@@ -16,8 +16,7 @@ export function generatePassword(length = 10) {
 
     return password;
 }
-
-export function validateOwnerRegex(area: string, road: string, block: string, building: string, ownerCpr: number) {
+export function validateUpdateOwnerRegex(area: string, road: string, block: string, building: string, ownerCpr: number) {
     if (!fullNameRegex.test(area)) {
         throw createHttpError(400, 'Invalid area format');
     }
@@ -35,21 +34,37 @@ export function validateOwnerRegex(area: string, road: string, block: string, bu
     }
 }
 
-export function validateUserRegex(username: string, email: string, password: string, confirmPassword: string, fullName: string, telephone: string) {
-    if (!usernameRegex.test(username)) {
-        throw createHttpError(400, 'Invalid username format');
-    }
+export function validateOwnerRegex(username: string, email: string, password: string, confirmPassword: string, fullName: string, telephone: string, area: string, road: string, block: string, building: string, ownerCpr: number) {
     if (!emailRegex.test(email)) {
         throw createHttpError(400, 'Invalid email format');
     }
-    if (!passwordRegex.test(password) || !passwordRegex.test(confirmPassword)) {
-        throw createHttpError(400, 'Make sure passwords have at least one lowercase letter, one uppercase letter, one digit, and one special character!');
+    if (!usernameRegex.test(username)) {
+        throw createHttpError(400, 'Username must be 3-20 characters, using only letters, numbers, and underscores.');
     }
     if (!fullNameRegex.test(fullName)) {
         throw createHttpError(400, 'Invalid area format');
     }
     if (!telephoneRegex.test(telephone)) {
         throw createHttpError(400, 'Telephone input must be only 8 digits');
+    }
+    if (!passwordRegex.test(password) || !passwordRegex.test(confirmPassword)) {
+        throw createHttpError(400, 'Make sure passwords have at least one lowercase letter, one uppercase letter, one digit, and one special character!');
+    }
+
+    if (!fullNameRegex.test(area)) {
+        throw createHttpError(400, 'Invalid area format');
+    }
+    if (!fullNameRegex.test(road)) {
+        throw createHttpError(400, 'Invalid road format');
+    }
+    if (!fullNameRegex.test(block)) {
+        throw createHttpError(400, 'Invalid block format');
+    }
+    if (!fullNameRegex.test(building)) {
+        throw createHttpError(400, 'Invalid building format');
+    }
+    if (ownerCpr && !ownerCprRegex.test(ownerCpr.toString())) {
+        throw createHttpError(400, 'Invalid owner CPR format');
     }
 }
 export function validateUpdateUserRegex(username: string, email: string, fullName: string, telephone: string) {

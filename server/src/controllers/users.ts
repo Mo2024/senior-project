@@ -3,7 +3,7 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import { AdminModel, EmployeeModel, OwnerModel, UserModel } from '../models/user';
-import { checkIfCredentialsIsTaken, checkIfCredentialsIsTakenUpdate, validateOwnerRegex, validateUpdateUserRegex, validateUserRegex } from '../util/functions';
+import { checkIfCredentialsIsTaken, checkIfCredentialsIsTakenUpdate, validateOwnerRegex, validateUpdateOwnerRegex, validateUpdateUserRegex } from '../util/functions';
 import { BusinessModel } from '../models/business';
 import { BranchModel } from '../models/branch';
 import { assertIsDefined } from '../util/assertIsDefined';
@@ -53,11 +53,10 @@ export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unkn
         }
 
         if (password !== confirmPassword) {
-            throw createHttpError(400, "Passwords Do not match!");
+            throw createHttpError(400, "Passwords do not match!");
         }
 
-        validateUserRegex(username, email, password, confirmPassword, fullName, telephone)
-        validateOwnerRegex(area, road, block, building, ownerCpr)
+        validateOwnerRegex(username, email, password, confirmPassword, fullName, telephone, area, road, block, building, ownerCpr)
         await checkIfCredentialsIsTaken(username, email)
 
         const passwordHashed = await bcrypt.hash(password, 10);
@@ -222,7 +221,8 @@ export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, un
                     throw createHttpError(400, "Parameter Missing");
                 }
                 validateUpdateUserRegex(username, email, fullName, telephone)
-                validateOwnerRegex(area, road, block, building, cpr)
+                validateUpdateOwnerRegex(area, road, block, building, cpr)
+
                 await checkIfCredentialsIsTakenUpdate(username, email, userId)
                 const user = await OwnerModel.findById(userId).exec()
                 if (!user) {
