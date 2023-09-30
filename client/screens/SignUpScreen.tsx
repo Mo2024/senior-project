@@ -34,6 +34,9 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         building: "",
         ownerCpr: "",
     })
+    const [isError, setIsError] = useState(false);
+    const [isMessageVisible, setIsMessageVisible] = useState(false);
+    const [message, setMessage] = useState('');
 
     async function onSubmit(credentials: object) {
         try {
@@ -46,8 +49,13 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
                 })
             );
         } catch (error) {
-            alert(error)
-            console.error(error)
+            setIsError(true)
+            let errorMessage = ''
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setMessage(errorMessage)
+            setIsMessageVisible(true)
 
         }
     }
@@ -74,6 +82,12 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
             onSubmit={onSubmit}
             title="Sign Up"
             formBoxTitle="Welcome!"
+            isMessageVisible={isMessageVisible}
+            isError={isError}
+            message={message}
+            onClose={() => {
+                setIsMessageVisible(false)
+            }}
         />
         // <ScrollView>
 

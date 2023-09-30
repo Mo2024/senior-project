@@ -12,6 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import TopBar from '../components/TopBar';
 import SelectDropdownComponent from '../components/SelectDropdownComponent';
+import MessageBox from './MessageBox';
 
 interface AuthFormBoxProps {
     title: string
@@ -20,34 +21,52 @@ interface AuthFormBoxProps {
     navigation: NativeStackNavigationProp<any>
     credentialsObject: object
     onSubmit: (credentials: object) => void
+    isMessageVisible: boolean
+    isError: boolean
+    message: string
+    onClose: () => void
     credentialsObjectUpdate: (credentialsObject: { [key: string]: string }) => void
 }
-const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onSubmit, title, formBoxTitle, credentialsObjectUpdate }: AuthFormBoxProps) => {
+const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, credentialsObject, placeholderData, navigation, onSubmit, title, formBoxTitle, credentialsObjectUpdate }: AuthFormBoxProps) => {
     return (
         // <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <SafeAreaView style={styles.SafeAreaView}>
-            <ScrollView>
+        <>
+            {
+                isMessageVisible &&
 
-                <View style={styles.container}>
+                <MessageBox
+                    type={isError}
+                    message={message}
+                    onClose={() => {
+                        onClose()
+                    }}
 
-                    <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
-                    <View style={styles.formBox}>
-                        <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
-                        {Object.keys(credentialsObject).map(key =>
-                            <Field
-                                handleChange={(updatedCredential) => {
-                                    credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
-                                }}
-                                placeholder={placeholderData[key]}
-                                key={key}
-                            />
-                        )}
-                        <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+                />
+            }
+            <SafeAreaView style={styles.SafeAreaView}>
+                <ScrollView>
 
+                    <View style={styles.container}>
+
+                        <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
+                        <View style={styles.formBox}>
+                            <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
+                            {Object.keys(credentialsObject).map(key =>
+                                <Field
+                                    handleChange={(updatedCredential) => {
+                                        credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
+                                    }}
+                                    placeholder={placeholderData[key]}
+                                    key={key}
+                                />
+                            )}
+                            <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+
+                        </View>
                     </View>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </SafeAreaView>
+        </>
 
         // </TouchableWithoutFeedback >
     );
