@@ -30,7 +30,9 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: '5%'
+        marginBottom: '5%',
+        borderWidth: 1,
+        borderColor: '#72063c'
 
     },
     buttonInnerContainer: {

@@ -56,7 +56,7 @@ const AuthFormComponent = ({ credentialsObject, placeholderData, navigation, onS
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        // backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     formBox: {
-        backgroundColor: "#72063c",
+        // backgroundColor: "#72063c",
         flex: 9,
         width: "100%",
         borderTopRightRadius: 150,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     formBoxTitle: {
         marginTop: 50,
         fontSize: 35,
-        color: "white",
+        color: "#72063c",
         fontWeight: 'bold',
         textAlign: 'center',
     },
