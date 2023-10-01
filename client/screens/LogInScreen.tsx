@@ -11,6 +11,7 @@ import EvilIcons from '@expo/vector-icons/EvilIcons'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import TopBar from '../components/TopBar';
 import AuthFormComponent from '../components/AuthFormBox';
+import { validateLogin } from '../utils/functions';
 
 interface LogInScreenProps {
     navigation: NativeStackNavigationProp<any>
@@ -24,7 +25,7 @@ function LogInScreen({ navigation }: LogInScreenProps) {
     const [message, setMessage] = useState('');
     async function onSubmit(credentials: object) {
         try {
-            console.log(credentials)
+            await validateLogin(credentials as UserApi.LoginCredentials)
             const user = await UserApi.login(credentials as UserApi.LoginCredentials);
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(

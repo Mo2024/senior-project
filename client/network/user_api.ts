@@ -3,6 +3,7 @@ import { User as UserModel } from "../models/user";
 import { API_URL } from '@env';
 
 export async function getLoggedInUser(): Promise<UserModel> {
+
     const response = await fetchData(`${API_URL}/api/users`, { method: 'GET' }) as UserModel | any;
     return await response.json()
 }
