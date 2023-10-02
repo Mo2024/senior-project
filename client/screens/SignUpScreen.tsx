@@ -91,28 +91,6 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
                 setIsMessageVisible(false)
             }}
         />
-        // <ScrollView>
-
-        //     <View style={styles.container}>
-
-        //         <TopBar title={'Sign Up'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
-        //         <View style={styles.formBox}>
-        //             <Text style={styles.formBoxTitle}>{'Welcome!'}</Text>
-        //             {Object.keys(credentialsObject).map(key =>
-        //                 <Field
-        //                     handleChange={(updatedCredential) => {
-        //                         setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
-        //                     }}
-        //                     placeholder={placeholderData[key]}
-        //                     key={key}
-        //                 />
-        //             )}
-        //             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
-
-        //         </View>
-        //     </View>
-        // </ScrollView>
-
     );
 }
 

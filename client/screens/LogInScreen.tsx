@@ -1,15 +1,9 @@
-import { StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
-import Field from '../components/Field';
+import { StyleSheet } from 'react-native';
 import { useState } from 'react';
-import SubmitButton from '../components/SubmitButton';
 import * as UserApi from "../network/user_api";
 import * as SecureStore from 'expo-secure-store';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommonActions, RouteProp } from '@react-navigation/native';
-import EvilIcons from '@expo/vector-icons/EvilIcons'
-import Ionicons from '@expo/vector-icons/Ionicons'
-import TopBar from '../components/TopBar';
 import AuthFormComponent from '../components/AuthFormBox';
 import { validateLogin } from '../utils/functions';
 
