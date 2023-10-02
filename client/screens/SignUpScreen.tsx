@@ -13,6 +13,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome'
 import TopBar from '../components/TopBar';
 import SelectDropdownComponent from '../components/SelectDropdownComponent';
 import AuthFormComponent from '../components/AuthFormBox';
+import { validateSignup } from '../utils/functions';
 
 interface SignUpScreenProps {
     navigation: NativeStackNavigationProp<any>
@@ -40,6 +41,7 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
 
     async function onSubmit(credentials: object) {
         try {
+            await validateSignup(credentials as UserApi.SignupCredentials)
             const user = await UserApi.signup(credentials as UserApi.SignupCredentials);
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(
