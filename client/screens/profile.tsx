@@ -25,7 +25,7 @@ function Profile({ navigation }: LoggedInScreenProps) {
     }
     return (
         <View style={styles.container}>
-            <Text>Is logged in!</Text>
+            <Text>Profile!</Text>
             <SubmitButton buttonName="Submit" handlePress={() => { logoutBtn() }} />
 
         </View>

@@ -47,7 +47,7 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
             navigation.dispatch(
                 CommonActions.reset({
                     index: 0,
-                    routes: [{ name: 'LoggedInScreen' }],
+                    routes: [{ name: 'Profile' }],
                 })
             );
         } catch (error) {

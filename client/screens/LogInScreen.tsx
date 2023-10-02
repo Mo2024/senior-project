@@ -31,7 +31,7 @@ function LogInScreen({ navigation }: LogInScreenProps) {
             navigation.dispatch(
                 CommonActions.reset({
                     index: 0,
-                    routes: [{ name: 'LoggedInScreen' }],
+                    routes: [{ name: 'OwnerNav' }],
                 })
             );
         } catch (error) {

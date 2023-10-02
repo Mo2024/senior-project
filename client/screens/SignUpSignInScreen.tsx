@@ -11,9 +11,11 @@ interface SignUpSignInScreenProps {
 function SignUpSignInScreen({ navigation }: SignUpSignInScreenProps) {
     return (
         <View style={styles.container}>
-            <PrimaryButton buttonName={"Sign In"} handlePress={() => navigation.navigate('LogInScreen')} />
-            <PrimaryButton buttonName={"Sign Up"} handlePress={() => navigation.navigate('SignUpScreen')} />
-            <StatusBar style="auto" />
+            <View style={styles.innerContainer}>
+                <PrimaryButton buttonName={"Sign In"} handlePress={() => navigation.navigate('LogInScreen')} />
+                <PrimaryButton buttonName={"Sign Up"} handlePress={() => navigation.navigate('SignUpScreen')} />
+            </View>
+            <StatusBar hidden={true} />
         </View>
     );
 }
@@ -25,6 +27,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    innerContainer: {
+
+    }
 });
 
 export default SignUpSignInScreen;

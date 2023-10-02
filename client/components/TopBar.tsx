@@ -41,11 +41,12 @@ const styles = StyleSheet.create({
         right: 25
     },
     topContainer: {
-        marginTop: 30,
+        // marginTop: '10%',
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        // backgroundColor: 'black'
     },
     topLeftContainer: {
         position: 'relative',
