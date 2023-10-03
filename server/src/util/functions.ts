@@ -233,6 +233,11 @@ export async function checkIfCredentialsIsTakenUpdate(newUsername: string, newEm
         throw createHttpError(409, "Email already taken. Please choose a different one.");
     }
 }
+export async function validatePassword(newPwd: string) {
+    if (!passwordRegex.test(newPwd)) {
+        throw createHttpError(400, 'Make sure passwords have at least one lowercase letter, one uppercase letter, one digit, and one special character!');
+    }
+}
 
 
 // export function validateAddressRegex(name: string, area: string, building: string, block: string, road: string) {
