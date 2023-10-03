@@ -5,7 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommonActions, RouteProp } from '@react-navigation/native';
 import AuthFormComponent from '../components/AuthFormBox';
-import { validateLogin } from '../utils/functions';
+import { userRouter, validateLogin } from '../utils/functions';
 
 interface LogInScreenProps {
     navigation: NativeStackNavigationProp<any>
@@ -21,11 +21,12 @@ function LogInScreen({ navigation }: LogInScreenProps) {
         try {
             await validateLogin(credentials as UserApi.LoginCredentials)
             const user = await UserApi.login(credentials as UserApi.LoginCredentials);
+            let navResult = await userRouter(user.__t) as string
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(
                 CommonActions.reset({
                     index: 0,
-                    routes: [{ name: 'OwnerNav' }],
+                    routes: [{ name: navResult }],
                 })
             );
         } catch (error) {

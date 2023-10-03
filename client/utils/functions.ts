@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import * as UserApi from "../network/user_api";
 import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex } from "./regex";
+import OwnerNav from "../components/OwnerNav";
 
 
 export default async function fetchData(input: RequestInfo, init?: RequestInit) {
@@ -71,4 +73,19 @@ export async function validateSignup(credentials: UserApi.SignupCredentials) {
         throw Error('Invalid owner CPR format');
     }
 
+}
+
+interface IUserInfo {
+    _id: mongoose.Types.ObjectId
+    __t: mongoose.Types.ObjectId
+
+}
+export async function userRouter(userType: string) {
+    if (userType == "Owner") {
+        return 'OwnerNav'
+    } else if (userType == 'Employee') {
+        return 'EmployeeNav'
+    } else if (userType == 'Admin') {
+        return 'AdminNav'
+    }
 }

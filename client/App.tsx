@@ -9,6 +9,7 @@ import AppLoader from './components/AppLoader';
 import SignUpScreen from './screens/SignUpScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import OwnerNav from './components/OwnerNav';
+import { userRouter } from "./utils/functions";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -16,12 +17,15 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [loggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userTypeNav, setUserTypeNav] = useState<string>('')
 
   useEffect(() => {
     async function fetchLoggedInUser() {
       try {
         const user = await UserApi.getLoggedInUser()
         if (!user) await SecureStore.deleteItemAsync('userInfo'); setIsLoggedIn(false);
+        // setUserType(user.__t)
+        setUserTypeNav(await userRouter(user.__t) as string)
         await SecureStore.setItemAsync('userInfo', JSON.stringify(user))
         setIsLoggedIn(true);
         setIsLoading(false);
@@ -51,7 +55,7 @@ export default function App() {
 
     <>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName={loggedIn ? 'OwnerNav' : 'SignUpSignInScreen'} screenOptions={{ headerShown: false }} >
+        <Stack.Navigator initialRouteName={loggedIn ? userTypeNav : 'SignUpSignInScreen'} screenOptions={{ headerShown: false }} >
           <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
