@@ -6,5 +6,7 @@ declare module 'express-session' {
         branchId: mongoose.Types.ObjectId
         businessId: mongoose.Types.ObjectId
         role: string
+        forgotPwdCode: string
+        email: string
     }
 }

@@ -12,6 +12,8 @@ router.post('/login', UserContoller.login);
 router.post('/logout', UserContoller.logout);
 router.patch('/update', requiresAuth, UserContoller.updateUserInfo);
 router.patch('/updatePassword', requiresAuth, UserContoller.updatePassword);
+router.post('/forgotPasswordEmail', UserContoller.forgotPasswordEmail);
+router.patch('/forgotPasswordCode', UserContoller.forgotPasswordCode);
 
 
 export default router;

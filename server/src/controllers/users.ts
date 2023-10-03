@@ -3,7 +3,7 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import { AdminModel, EmployeeModel, OwnerModel, UserModel } from '../models/user';
-import { checkIfCredentialsIsTaken, checkIfCredentialsIsTakenUpdate, validateOwnerRegex, validatePassword, validateUpdateOwnerRegex, validateUpdateUserRegex } from '../util/functions';
+import { checkIfCredentialsIsTaken, checkIfCredentialsIsTakenUpdate, sendEmail, validateOwnerRegex, validatePassword, validateUpdateOwnerRegex, validateUpdateUserRegex } from '../util/functions';
 import { BusinessModel } from '../models/business';
 import { BranchModel } from '../models/branch';
 import { assertIsDefined } from '../util/assertIsDefined';
@@ -264,17 +264,88 @@ export const updatePassword: RequestHandler<unknown, unknown, UpdatePasswordInfo
         if (!currentPwd || !newPwd || !confirmNewPwd) {
             throw createHttpError(400, "Parameter Missing");
         }
-        const user = await OwnerModel.findById(userId).select('password');
+        const user = await UserModel.findById(userId).select('password');
 
         if (!user) {
             throw createHttpError(401, "Invalid credentials")
         }
-        console.log(user)
 
         const passwordMatch = await bcrypt.compare(currentPwd, user.password)
 
         if (!passwordMatch) {
             throw createHttpError(401, "Invalid Current Password")
+        }
+        if (newPwd !== confirmNewPwd) {
+            throw createHttpError(400, "Passwords do not match!");
+        }
+        await validatePassword(newPwd)
+        const passwordHashed = await bcrypt.hash(newPwd, 10);
+
+        if (!user) {
+            throw createHttpError(401, "Invalid credentials")
+        }
+        const updatedFields = { password: passwordHashed };
+        Object.assign(user, updatedFields);
+        await user.save();
+        res.status(201).json({ message: 'Password Updated Successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+interface ForgotPasswordEmailBody {
+    email?: string,
+}
+
+export const forgotPasswordEmail: RequestHandler<unknown, unknown, ForgotPasswordEmailBody, unknown> = async (req, res, next) => {
+    const {
+        email,
+    } = req.body;
+
+    try {
+        if (!email) {
+            throw createHttpError(400, "Parameter Missing");
+        }
+        const user = await UserModel.findOne({ email: email });
+
+        if (!user) {
+            throw createHttpError(401, "User does not exist")
+        }
+        const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+        req.session.forgotPwdCode = randomCode;
+        req.session.email = email;
+        // needs to send email
+        await sendEmail(email, 'Forget Password code', `Your code is ${randomCode}`)
+        res.status(201);
+    } catch (error) {
+        next(error);
+    }
+};
+interface ForgotPasswordCodeBody {
+    code?: string,
+    newPwd?: string,
+    confirmNewPwd?: string,
+}
+
+export const forgotPasswordCode: RequestHandler<unknown, unknown, ForgotPasswordCodeBody, unknown> = async (req, res, next) => {
+    const {
+        code,
+        newPwd,
+        confirmNewPwd
+    } = req.body;
+
+    try {
+        if (!code || !newPwd || !confirmNewPwd) {
+            throw createHttpError(400, "Parameter Missing");
+        }
+        if (code !== req.session.forgotPwdCode) {
+            throw createHttpError(401, "Invalid Code")
+
+        }
+        const user = await UserModel.findOne({ email: req.session.email }).select('password');
+
+        if (!user) {
+            throw createHttpError(401, "Invalid credentials")
         }
         if (newPwd !== confirmNewPwd) {
             throw createHttpError(400, "Passwords do not match!");
