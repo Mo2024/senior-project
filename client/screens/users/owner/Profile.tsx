@@ -82,6 +82,7 @@ function Profile({ navigation }: LoggedInScreenProps) {
                         building,
                         cpr
                     })
+                    console.log(cpr)
 
                 }
 
