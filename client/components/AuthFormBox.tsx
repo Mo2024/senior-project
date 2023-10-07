@@ -48,7 +48,7 @@ const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, creden
 
                     <View style={styles.container}>
 
-                        <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
+                        <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
                             <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
                             {Object.keys(credentialsObject).map(key =>

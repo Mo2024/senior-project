@@ -6,26 +6,31 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 interface TopBarProps {
     navigation: NativeStackNavigationProp<any>,
     title: string,
+    navBtnVisible: boolean,
     bgColor: string
 
 }
-const TopBar = ({ navigation, title, bgColor }: TopBarProps) => {
+const TopBar = ({ navBtnVisible, navigation, title, bgColor }: TopBarProps) => {
 
     const goBack = () => {
         navigation.goBack();
     };
 
     return (
-        <View style={styles.topContainer}>
-            <FontAwesome.Button
-                name='arrow-left'
-                backgroundColor={bgColor}
-                color="rgb(0,0,0)"
-                onPress={goBack}
-                size={32}
-                style={styles.topLeftContainer}
-                underlayColor='transparent'
-            />
+        <View style={[styles.topContainer, navBtnVisible ? styles.visibleRight : null]}>
+            {
+                navBtnVisible &&
+
+                <FontAwesome.Button
+                    name='arrow-left'
+                    backgroundColor={bgColor}
+                    color="rgb(0,0,0)"
+                    onPress={goBack}
+                    size={32}
+                    style={styles.topLeftContainer}
+                    underlayColor='transparent'
+                />
+            }
             <Text style={styles.loginTitle}>{title}</Text>
         </View>
     );
@@ -38,7 +43,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         flex: 1,
         textAlign: 'center',
+    },
+    visibleRight: {
         right: 25
+
     },
     topContainer: {
         // marginTop: '10%',

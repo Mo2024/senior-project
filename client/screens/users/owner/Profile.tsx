@@ -88,29 +88,17 @@ function Profile({ navigation }: LoggedInScreenProps) {
 
                 setIsLoading(false);
 
-                // if (!user) await SecureStore.deleteItemAsync('userInfo'); setIsLoggedIn(false);
-                // // setUserType(user.__t)
-                // setUserTypeNav(await userRouter(user.__t) as string)
-                // await SecureStore.setItemAsync('userInfo', JSON.stringify(user))
-                // setIsLoggedIn(true);
-                // setIsLoading(false);
-
             } catch (error) {
-                // setIsLoggedIn(false);
-                // setIsLoading(false);
                 console.log(error)
-                // if (await SecureStore.getItemAsync('userInfo')) await SecureStore.deleteItemAsync('userInfo');
-
             }
         }
         fetchLoggedInUserInfo()
     }, []);
 
-    async function onSubmit(credentials: object) {
+    async function onSubmit(credentialsObject: object) {
         try {
             // await validateSignup(credentials as UserApi.userInfoUpdateCredentials)
-            const user = await UserApi.updateUserInfo(credentialsObject as any);
-            // await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
+            const user = await UserApi.updateUserInfo(credentialsObject as UserApi.userInfoUpdateCredentials);
             setIsError(false)
             setIsMessageVisible(true)
             setMessage('Information Updated successfully')
@@ -136,21 +124,6 @@ function Profile({ navigation }: LoggedInScreenProps) {
     }
 
     return (
-        // <AuthFormComponent
-        //     credentialsObject={credentialsObject}
-        //     credentialsObjectUpdate={(updatedCredentialsObject) => { setCredentialsObject(updatedCredentialsObject); console.log(credentialsObject) }}
-        //     placeholderData={placeholderData}
-        //     navigation={navigation}
-        //     onSubmit={onSubmit}
-        //     title="Profile"
-        //     formBoxTitle=""
-        //     isMessageVisible={isMessageVisible}
-        //     isError={isError}
-        //     message={message}
-        //     onClose={() => {
-        //         setIsMessageVisible(false)
-        //     }}
-        // />
         <>
             {
                 isMessageVisible &&
@@ -171,7 +144,7 @@ function Profile({ navigation }: LoggedInScreenProps) {
 
                     <View style={styles.container}>
 
-                        <TopBar title={'Profile'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} />
+                        <TopBar title={'Profile'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
                         <View style={styles.formBox}>
                             {Object.keys(credentialsObject).map(key =>
                                 <>
