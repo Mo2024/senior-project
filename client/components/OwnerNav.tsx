@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Profile from '../screens/Profile';
+import Profile from '../screens/users/owner/Profile';
 import { Ionicons } from '@expo/vector-icons';
 import ManageEmployee from '../screens/users/owner/ManageEmployee';
 import ManageBusinessess from '../screens/users/owner/ManageBusinessess';

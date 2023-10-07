@@ -33,7 +33,7 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         road: "",
         block: "",
         building: "",
-        ownerCpr: "",
+        cpr: "",
     })
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
@@ -74,7 +74,7 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
         road: "Road",
         block: "Block",
         building: "Building",
-        ownerCpr: "CPR",
+        cpr: "CPR",
     } as { [key: string]: string }
     return (
         <AuthFormComponent
