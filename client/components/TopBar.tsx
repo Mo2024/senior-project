@@ -17,7 +17,7 @@ const TopBar = ({ navBtnVisible, navigation, title, bgColor }: TopBarProps) => {
     };
 
     return (
-        <View style={[styles.topContainer, navBtnVisible ? styles.visibleRight : null]}>
+        <View style={styles.topContainer}>
             {
                 navBtnVisible &&
 
@@ -43,10 +43,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         flex: 1,
         textAlign: 'center',
-    },
-    visibleRight: {
-        right: 25
-
     },
     topContainer: {
         // marginTop: '10%',
