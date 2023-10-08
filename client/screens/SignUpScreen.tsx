@@ -120,7 +120,16 @@ const styles = StyleSheet.create({
     },
     submitBtn: {
         marginTop: 100
+    },
+    Label: {
+        color: '#72063c',
+        fontWeight: 'bold'
+
+    },
+    labelView: {
+        width: '70%'
     }
+
 
 });
 

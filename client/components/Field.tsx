@@ -14,7 +14,7 @@ function Field({ handleChange, placeholder, ...props }: FieldProps) {
                 {...props}
                 placeholder={placeholder}
                 style={styles.FormTextInput}
-                placeholderTextColor={"#72063c"}
+                placeholderTextColor={"black"}
                 onChangeText={(newValue) => handleChange(newValue)}
             />
         </>
@@ -24,9 +24,9 @@ function Field({ handleChange, placeholder, ...props }: FieldProps) {
 
 const styles = StyleSheet.create({
     FormTextInput: {
-        marginTop: 25,
+        marginBottom: 10,
         borderRadius: 100,
-        color: "#72063c",
+        color: "black",
         paddingHorizontal: 10,
         width: '80%',
         height: 45,

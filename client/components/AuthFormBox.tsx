@@ -52,13 +52,18 @@ const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, creden
                         <View style={styles.formBox}>
                             <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
                             {Object.keys(credentialsObject).map(key =>
-                                <Field
-                                    handleChange={(updatedCredential) => {
-                                        credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
-                                    }}
-                                    placeholder={placeholderData[key]}
-                                    key={key}
-                                />
+                                <>
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>{placeholderData[key]}</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
+                                        }}
+                                        placeholder={placeholderData[key]}
+                                        key={key}
+                                    />
+                                </>
                             )}
                             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
 
@@ -103,9 +108,14 @@ const styles = StyleSheet.create({
     submitBtn: {
         marginTop: 100
     },
+    Label: {
+        color: '#72063c',
+        fontWeight: 'bold'
 
-
-
+    },
+    labelView: {
+        width: '75%'
+    }
 });
 
 export default AuthFormComponent;

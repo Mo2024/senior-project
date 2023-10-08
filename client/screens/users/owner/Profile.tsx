@@ -149,9 +149,9 @@ function Profile({ navigation }: LoggedInScreenProps) {
                         <View style={styles.formBox}>
                             {Object.keys(credentialsObject).map(key =>
                                 <>
-                                    {/* <View style={styles.labelView}>
+                                    <View style={styles.labelView}>
                                         <Text style={styles.Label}>{placeholderData[key]}</Text>
-                                    </View> */}
+                                    </View>
                                     <Field
                                         handleChange={(updatedCredential) => {
                                             setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
@@ -204,13 +204,12 @@ const styles = StyleSheet.create({
         marginTop: 100
     },
     Label: {
-        borderWidth: 1,
-        // paddingLeft: 100
+        color: '#72063c',
+        fontWeight: 'bold'
+
     },
     labelView: {
-        borderWidth: 1,
-        // paddingHorizontal: '20%'
-        width: '70%'
+        width: '75%'
     }
 
 

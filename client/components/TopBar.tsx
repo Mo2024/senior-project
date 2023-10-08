@@ -31,7 +31,7 @@ const TopBar = ({ navBtnVisible, navigation, title, bgColor }: TopBarProps) => {
                     underlayColor='transparent'
                 />
             }
-            <Text style={styles.loginTitle}>{title}</Text>
+            <Text style={[styles.loginTitle, navBtnVisible ? styles.visibleRight : null]}>{title}</Text>
         </View>
     );
 }
@@ -43,6 +43,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         flex: 1,
         textAlign: 'center',
+    },
+    visibleRight: {
+        right: 25
+
     },
     topContainer: {
         // marginTop: '10%',
