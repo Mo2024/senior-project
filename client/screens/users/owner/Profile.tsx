@@ -5,7 +5,7 @@ import SubmitButton from '../../../components/SubmitButton';
 import { logout } from '../../../network/user_api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommonActions, RouteProp, useRoute } from '@react-navigation/native';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import * as UserApi from "../../../network/user_api";
 import AuthFormComponent from '../../../components/AuthFormBox';
@@ -148,7 +148,7 @@ function Profile({ navigation }: LoggedInScreenProps) {
                         <TopBar title={'Profile'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
                         <View style={styles.formBox}>
                             {Object.keys(credentialsObject).map(key =>
-                                <>
+                                <React.Fragment key={key}>
                                     <View style={styles.labelView}>
                                         <Text style={styles.Label}>{placeholderData[key]}</Text>
                                     </View>
@@ -157,11 +157,10 @@ function Profile({ navigation }: LoggedInScreenProps) {
                                             setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
                                         }}
                                         placeholder={placeholderData[key]}
-                                        key={key}
                                         defaultValue={`${credentialsObject[key]}`}
                                         label={placeholderData[key]}
                                     />
-                                </>
+                                </React.Fragment>
                             )}
                             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
                         </View>

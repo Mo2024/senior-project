@@ -1,7 +1,7 @@
 import { Dimensions, StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, SafeAreaView } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import Field from '../components/Field';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import SubmitButton from '../components/SubmitButton';
 import * as UserApi from "../network/user_api";
 import * as SecureStore from 'expo-secure-store';
@@ -52,7 +52,7 @@ const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, creden
                         <View style={styles.formBox}>
                             <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
                             {Object.keys(credentialsObject).map(key =>
-                                <>
+                                <React.Fragment key={key}>
                                     <View style={styles.labelView}>
                                         <Text style={styles.Label}>{placeholderData[key]}</Text>
                                     </View>
@@ -61,9 +61,8 @@ const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, creden
                                             credentialsObjectUpdate({ ...credentialsObject, [key]: updatedCredential });
                                         }}
                                         placeholder={placeholderData[key]}
-                                        key={key}
                                     />
-                                </>
+                                </React.Fragment>
                             )}
                             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
 
