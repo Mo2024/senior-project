@@ -4,7 +4,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import SubmitButton from '../../../components/SubmitButton';
 import { logout } from '../../../network/user_api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CommonActions, RouteProp, useRoute } from '@react-navigation/native';
+import { CommonActions, RouteProp, useFocusEffect, useRoute } from '@react-navigation/native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import * as UserApi from "../../../network/user_api";
@@ -52,49 +52,51 @@ function Profile({ navigation }: LoggedInScreenProps) {
 
     } as { [key: string]: string }
 
-    useEffect(() => {
-        async function fetchLoggedInUserInfo() {
-            try {
-                const storedUserInfo = await SecureStore.getItemAsync('userInfo');
+    useFocusEffect(
+        React.useCallback(() => {
+            async function fetchLoggedInUserInfo() {
+                try {
+                    setIsLoading(true);
+                    const storedUserInfo = await SecureStore.getItemAsync('userInfo');
 
-                if (storedUserInfo) {
-                    const user = await UserApi.getLoggedInUserInfo() as any
-                    const {
-                        email,
-                        username,
-                        fullName,
-                        telephone,
-                        cpr,
-                        area,
-                        road,
-                        block,
-                        building
-                    } = user
+                    if (storedUserInfo) {
+                        const user = await UserApi.getLoggedInUserInfo() as any
+                        const {
+                            email,
+                            username,
+                            fullName,
+                            telephone,
+                            cpr,
+                            area,
+                            road,
+                            block,
+                            building
+                        } = user
 
-                    setCredentialsObject({
-                        email,
-                        username,
-                        fullName,
-                        telephone,
-                        area,
-                        road,
-                        block,
-                        building,
-                        cpr
-                    })
-                    console.log(cpr)
+                        setCredentialsObject({
+                            email,
+                            username,
+                            fullName,
+                            telephone,
+                            area,
+                            road,
+                            block,
+                            building,
+                            cpr
+                        })
 
+                    }
+
+
+                    setIsLoading(false);
+
+                } catch (error) {
+                    console.log(error)
                 }
-
-
-                setIsLoading(false);
-
-            } catch (error) {
-                console.log(error)
             }
-        }
-        fetchLoggedInUserInfo()
-    }, []);
+            fetchLoggedInUserInfo()
+        }, [])
+    )
 
     async function onSubmit(credentialsObject: object) {
         try {
