@@ -21,7 +21,6 @@ interface LoggedInScreenProps {
 }
 
 function Profile({ navigation }: LoggedInScreenProps) {
-    const route = useRoute();
     const [isLoading, setIsLoading] = useState(true);
     const [credentialsObject, setCredentialsObject] = useState<{ [key: string]: string }>({
         email: "",
