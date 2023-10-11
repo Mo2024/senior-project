@@ -25,7 +25,6 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
     const [currentSubScreen, setCurrentSubScreen] = useState('viewBusiness');
     const [isLoading, setIsLoading] = useState(true);
     const [businessess, setBusinessess] = useState<Businesses>([])
-    const [activeArray, setActiveArray] = useState([true, false])
 
     useFocusEffect(
         React.useCallback(() => {
@@ -83,12 +82,7 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                 <ScrollView>
 
                     <View style={styles.container}>
-                        <TopBar title={'Businessess'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
-                        {/* <View style={{ flexDirection: 'row' }}>
-
-                            <TopBarBtn buttonName='View' isActive={activeArray[0]} handlePress={() => { setCurrentSubScreen('viewBusiness'); setActiveArray([true, false]) }} />
-                            <TopBarBtn buttonName='Create' isActive={activeArray[1]} handlePress={() => { setCurrentSubScreen('createBusiness'); setActiveArray([false, true]) }} />
-                        </View> */}
+                        <TopBar title={'My Business'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
                         <View style={styles.formBox}>
                             {currentSubScreen == 'viewBusiness' &&
 
