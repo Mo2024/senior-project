@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import * as UserApi from "../network/user_api";
 import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex } from "./regex";
-import OwnerNav from "../components/OwnerNav";
 
 
 export default async function fetchData(input: RequestInfo, init?: RequestInit) {

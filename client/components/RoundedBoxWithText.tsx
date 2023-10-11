@@ -1,7 +1,6 @@
-import { FontAwesome } from '@expo/vector-icons';
 import mongoose from 'mongoose';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import RoundedBoxBtn from './RoundedBoxBtn';
 import * as OwnerApi from "../network/owner_api";
 

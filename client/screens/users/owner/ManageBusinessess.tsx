@@ -1,13 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, SafeAreaView, ScrollView } from 'react-native';
-import PrimaryButton from '../../../components/PrimaryButton';
-import SubmitButton from '../../../components/SubmitButton';
-import { logout } from '../../../network/user_api';
+import { StyleSheet, View, SafeAreaView, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CommonActions, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import TopBar from '../../../components/TopBar';
 import MessageBox from '../../../components/MessageBox';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as OwnerApi from "../../../network/owner_api";
 import { Businesses } from '../../../models/user';
 import mongoose from 'mongoose';

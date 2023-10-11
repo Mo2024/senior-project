@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 
 interface roundedBoxBtnProps {

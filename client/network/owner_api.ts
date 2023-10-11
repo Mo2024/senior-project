@@ -1,6 +1,6 @@
 import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
-import { Business, Businesses } from "../models/user";
+import { Businesses } from "../models/user";
 import mongoose from "mongoose";
 
 
