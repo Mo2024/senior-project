@@ -11,6 +11,14 @@ export default async function fetchData(input: RequestInfo, init?: RequestInit) 
     throw new Error(errorBody.error)
 }
 
+export async function deleteData(input: RequestInfo, init?: RequestInit) {
+    const response = await fetch(input, init);
+    if (response.status === 204) return
+    if (response.ok) return response
+    const errorBody = await response.json();
+    throw new Error(errorBody.error);
+}
+
 export async function validateLogin(credentials: UserApi.LoginCredentials) {
     const { username, password } = credentials
     if (!username || !password) throw Error("Parameter Missing")

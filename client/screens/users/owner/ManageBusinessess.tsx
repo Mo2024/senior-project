@@ -47,28 +47,16 @@ function ManageBusinessess({ navigation }: ManageBusinessessProp) {
         }, [])
     )
 
-    async function deleteBusiness(businessId: mongoose.Types.ObjectId) {
-        try {
-            console.log('clicked')
-            await OwnerApi.deleteBusiness(businessId)
-            setBusinessess((prevBusinesses) => {
-                return prevBusinesses.filter((business) => business._id !== businessId);
-            });
-            setIsError(false)
-            setIsMessageVisible(true)
-            setMessage('Business Deleted successfully')
-        } catch (error) {
-            setIsError(true)
-            let errorMessage = ''
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            setMessage(errorMessage)
-            setIsMessageVisible(true)
-
-        }
+    function deleteBusiness(businessId: mongoose.Types.ObjectId) {
+        setBusinessess((prevBusinesses) => {
+            return prevBusinesses.filter((business) => business._id !== businessId);
+        });
     }
-
+    function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
+        setIsError(isErrorParam)
+        setIsMessageVisible(isVisibleParam)
+        setMessage(message)
+    }
     if (isLoading) {
         return (
             <>
@@ -118,13 +106,11 @@ function ManageBusinessess({ navigation }: ManageBusinessessProp) {
                                                 label={placeholderData[key]}
                                             /> */}
                                             <RoundedBoxWithText
-                                                deleteBusiness={() => {
-                                                    console.log('Deleting business...');
-
-                                                    deleteBusiness(business._id as mongoose.Types.ObjectId)
-                                                }}
                                                 title={business.name as string}
+                                                deleteBusinessProp={deleteBusiness}
+                                                businessId={business._id as mongoose.Types.ObjectId}
                                                 subtitle={`Number of branches ${business.branches?.length}`}
+                                                handleMessage={handleMessage}
                                             />
                                             {/* <Text>{business.name}</Text> */}
                                         </React.Fragment>
