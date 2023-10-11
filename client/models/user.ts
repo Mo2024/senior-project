@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 export interface User {
     __t: string;
@@ -29,3 +29,15 @@ interface Branch {
     __v?: number;
 }
 export type Businesses = Business[];
+
+
+export interface newBusinessModel {
+    name: string,
+    description: string,
+    status: true,
+    ownerId: mongoose.Types.ObjectId,
+    branches: Branch[],
+    filename: null | string,
+    _id: string,
+    __v: number
+}

@@ -16,7 +16,7 @@ import MessageBox from './MessageBox';
 
 interface AuthFormBoxProps {
     title: string
-    formBoxTitle: string
+    formBoxTitle: string | null
     placeholderData: { [key: string]: string }
     navigation: NativeStackNavigationProp<any>
     credentialsObject: object
@@ -50,7 +50,10 @@ const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, creden
 
                         <TopBar title={title} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
-                            <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
+                            {formBoxTitle !== null &&
+
+                                <Text style={styles.formBoxTitle}>{formBoxTitle}</Text>
+                            }
                             {Object.keys(credentialsObject).map(key =>
                                 <React.Fragment key={key}>
                                     <View style={styles.labelView}>

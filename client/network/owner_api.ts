@@ -1,6 +1,6 @@
 import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
-import { Businesses } from "../models/user";
+import { Businesses, newBusinessModel } from "../models/user";
 import mongoose from "mongoose";
 
 
@@ -16,4 +16,17 @@ export async function deleteBusiness(businessId: mongoose.Types.ObjectId): Promi
         body: JSON.stringify({ businessId: businessId })
     });
     return;
+}
+
+export interface newBusiness {
+    name: string
+    description: string
+}
+export async function createBusiness(newBusiness: newBusiness): Promise<newBusinessModel> {
+    const respone = await fetchData(`${API_URL}/api/business`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBusiness)
+    });
+    return respone.json();
 }

@@ -11,6 +11,7 @@ import mongoose from 'mongoose';
 import RoundedBoxWithText from '../../../components/RoundedBoxWithText';
 import AppLoader from '../../../components/AppLoader';
 import TopBarBtn from '../../../components/TopBarBtn';
+import SubmitButton from '../../../components/SubmitButton';
 
 interface ManageBusinessessProp {
     navigation: NativeStackNavigationProp<any>
@@ -24,7 +25,7 @@ function ManageBusinessess({ navigation }: ManageBusinessessProp) {
     const [currentSubScreen, setCurrentSubScreen] = useState('viewBusiness');
     const [isLoading, setIsLoading] = useState(true);
     const [businessess, setBusinessess] = useState<Businesses>([])
-    const [activeArray, setActiveArray] = useState([true])
+    const [activeArray, setActiveArray] = useState([true, false])
 
     useFocusEffect(
         React.useCallback(() => {
@@ -82,26 +83,18 @@ function ManageBusinessess({ navigation }: ManageBusinessessProp) {
                 <ScrollView>
 
                     <View style={styles.container}>
-
                         <TopBar title={'Businessess'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
-                        <TopBarBtn buttonName='bdsdsdstn' isActive={activeArray[0]} handlePress={() => { }} />
+                        {/* <View style={{ flexDirection: 'row' }}>
+
+                            <TopBarBtn buttonName='View' isActive={activeArray[0]} handlePress={() => { setCurrentSubScreen('viewBusiness'); setActiveArray([true, false]) }} />
+                            <TopBarBtn buttonName='Create' isActive={activeArray[1]} handlePress={() => { setCurrentSubScreen('createBusiness'); setActiveArray([false, true]) }} />
+                        </View> */}
                         <View style={styles.formBox}>
                             {currentSubScreen == 'viewBusiness' &&
 
                                 (
                                     businessess.map((business, i) =>
                                         <React.Fragment key={i}>
-                                            {/* <View style={styles.labelView}>
-                                                <Text style={styles.Label}>{placeholderData[key]}</Text>
-                                            </View>
-                                            <Field
-                                                handleChange={(updatedCredential) => {
-                                                    setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
-                                                }}
-                                                placeholder={placeholderData[key]}
-                                                defaultValue={`${credentialsObject[key]}`}
-                                                label={placeholderData[key]}
-                                            /> */}
                                             <RoundedBoxWithText
                                                 title={business.name as string}
                                                 deleteBusinessProp={deleteBusiness}
@@ -109,12 +102,20 @@ function ManageBusinessess({ navigation }: ManageBusinessessProp) {
                                                 subtitle={`Number of branches ${business.branches?.length}`}
                                                 handleMessage={handleMessage}
                                             />
-                                            {/* <Text>{business.name}</Text> */}
                                         </React.Fragment>
                                     )
                                 )
                             }
-                            {/* <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} /> */}
+                            <SubmitButton buttonName='Create Business' handlePress={() => { console.log('ss'); navigation.navigate('CreateBusiness') }} />
+
+                            {currentSubScreen == 'createBusiness' &&
+
+                                (
+                                    <>
+                                        <AppLoader />
+                                    </>
+                                )
+                            }
                         </View>
                     </View>
                 </ScrollView>

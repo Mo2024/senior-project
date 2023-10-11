@@ -10,6 +10,7 @@ import SignUpScreen from './screens/SignUpScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import OwnerNav from './components/OwnerNav';
 import { userRouter } from "./utils/functions";
+import CreateBusiness from "./screens/users/owner/CreateBusiness";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -59,6 +60,7 @@ export default function App() {
           <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+          <Stack.Screen name="CreateBusiness" component={CreateBusiness} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />
         </Stack.Navigator>
 
