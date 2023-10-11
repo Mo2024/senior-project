@@ -30,3 +30,17 @@ export async function createBusiness(newBusiness: newBusiness): Promise<newBusin
     });
     return respone.json();
 }
+
+export interface editBusiness {
+    name: string
+    description: string
+    businessId: mongoose.Types.ObjectId
+}
+export async function editBusiness(editBusiness: newBusiness): Promise<newBusinessModel> {
+    const respone = await fetchData(`${API_URL}/api/business`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editBusiness)
+    });
+    return respone.json();
+}

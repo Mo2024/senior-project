@@ -11,6 +11,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import OwnerNav from './components/OwnerNav';
 import { userRouter } from "./utils/functions";
 import CreateBusiness from "./screens/users/owner/CreateBusiness";
+import EditBusiness from "./screens/users/owner/EditBusiness";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,6 +62,7 @@ export default function App() {
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           <Stack.Screen name="CreateBusiness" component={CreateBusiness} />
+          <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />
         </Stack.Navigator>
 

@@ -18,7 +18,7 @@ interface ManageBusinessessProp {
     route: RouteProp<any>
 }
 
-function ManageBusinessess({ navigation }: ManageBusinessessProp) {
+function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
@@ -99,9 +99,8 @@ function ManageBusinessess({ navigation }: ManageBusinessessProp) {
                                                 title={business.name as string}
                                                 deleteBusinessProp={deleteBusiness}
                                                 businessId={business._id as mongoose.Types.ObjectId}
-                                                subtitle={`Number of branches ${business.branches?.length}`}
-                                                handleMessage={handleMessage}
-                                            />
+                                                subtitle={business.description as string}
+                                                handleMessage={handleMessage} navigation={navigation} route={route} />
                                         </React.Fragment>
                                     )
                                 )

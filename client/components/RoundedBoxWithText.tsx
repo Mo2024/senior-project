@@ -3,18 +3,22 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import RoundedBoxBtn from './RoundedBoxBtn';
 import * as OwnerApi from "../network/owner_api";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 
 interface RoundedBoxWithTextProps {
-    title: string
     subtitle: string
+    title: string
     deleteBusinessProp: (businessId: mongoose.Types.ObjectId) => void
     businessId: mongoose.Types.ObjectId
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
+    navigation: NativeStackNavigationProp<any>
+    route: RouteProp<any>
 }
 const windowWidth = Dimensions.get('window').width;
 
 
-const RoundedBoxWithText = ({ title, handleMessage, subtitle, businessId, deleteBusinessProp }: RoundedBoxWithTextProps) => {
+const RoundedBoxWithText = ({ title, handleMessage, subtitle, businessId, deleteBusinessProp, navigation }: RoundedBoxWithTextProps) => {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
@@ -45,14 +49,10 @@ const RoundedBoxWithText = ({ title, handleMessage, subtitle, businessId, delete
     return (
         <View style={styles.container}>
             <View style={styles.roundedBox}>
-                {/* <TouchableOpacity hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}
-                    onPress={deleteBusiness} style={styles.iconButton}>
-                    <FontAwesome name="trash" size={24} color="#fff" />
-                </TouchableOpacity> */}
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.subtitle}>{subtitle}</Text>
                 <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(businessId) }} />
-                {/* <RoundedBoxBtn buttonName='Edit' handlePress={() => { }} /> */}
+                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness', { businessId: businessId, name: title, description: subtitle }); }} />
             </View>
         </View>
     );
