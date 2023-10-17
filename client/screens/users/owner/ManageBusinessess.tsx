@@ -12,6 +12,7 @@ import RoundedBoxWithText from '../../../components/RoundedBoxWithText';
 import AppLoader from '../../../components/AppLoader';
 import TopBarBtn from '../../../components/TopBarBtn';
 import SubmitButton from '../../../components/SubmitButton';
+import * as SecureStore from 'expo-secure-store';
 
 interface ManageBusinessessProp {
     navigation: NativeStackNavigationProp<any>
@@ -36,6 +37,12 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                         const fetchedBusinessess = await OwnerApi.getMyBusinessess() as Businesses
                         setFetchedBusinessess(fetchedBusinessess)
                     }
+                    const editedInfoString = await SecureStore.getItemAsync('updatedBusiness');
+                    if (editedInfoString) {
+                        const editedInfo = JSON.parse(editedInfoString);
+                        updateBusinessState(editedInfo.name, editedInfo.description, editedInfo.businessId)
+                        await SecureStore.deleteItemAsync('updatedBusiness');
+                    }
 
                     setBusinessess(fetchedBusinessess)
 
@@ -49,6 +56,17 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
         }, [fetchedBusinessess])
     )
 
+    function updateBusinessState(newName: string, newDesc: string, businessId: mongoose.Types.ObjectId) {
+        setFetchedBusinessess((prevBusinesses) => {
+            return prevBusinesses.map((business) => {
+                if (business._id === businessId) {
+                    business.name = newName;
+                    business.description = newDesc;
+                }
+                return business;
+            });
+        });
+    }
     function deleteBusiness(businessId: mongoose.Types.ObjectId) {
         setBusinessess((prevBusinesses) => {
             return prevBusinesses.filter((business) => business._id !== businessId);
@@ -102,7 +120,10 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                                                 deleteBusinessProp={deleteBusiness}
                                                 businessId={business._id as mongoose.Types.ObjectId}
                                                 subtitle={business.description as string}
-                                                handleMessage={handleMessage} navigation={navigation} route={route} />
+                                                handleMessage={handleMessage}
+                                                navigation={navigation}
+                                                route={route}
+                                            />
                                         </React.Fragment>
                                     )
                                 )

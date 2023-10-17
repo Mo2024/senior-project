@@ -13,7 +13,7 @@ interface RoundedBoxWithTextProps {
     businessId: mongoose.Types.ObjectId
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
     navigation: NativeStackNavigationProp<any>
-    route: RouteProp<any>
+    route: RouteProp<any>,
 }
 const windowWidth = Dimensions.get('window').width;
 

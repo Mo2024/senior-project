@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import TopBar from '../../../components/TopBar';
 import SubmitButton from '../../../components/SubmitButton';
 import Field from '../../../components/Field';
+import * as SecureStore from 'expo-secure-store';
 
 interface EditBusinessProps {
     navigation: NativeStackNavigationProp<any>
@@ -24,7 +25,7 @@ function EditBusiness({ navigation, route }: EditBusinessProps) {
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { businessId, name, description } = route.params || {};
+    const { businessId, name, description, updateBusinessState } = route.params || {};
 
 
     useFocusEffect(
@@ -52,6 +53,7 @@ function EditBusiness({ navigation, route }: EditBusinessProps) {
             const finalCred = credentials as OwnerApi.newBusiness
             let finalObj = { name: finalCred.name, description: finalCred.description, businessId: businessId as mongoose.Types.ObjectId }
             await OwnerApi.editBusiness(finalObj);
+            await SecureStore.setItemAsync('updatedBusiness', JSON.stringify(finalObj))
             navigation.navigate('ManageBusinessess')
         } catch (error) {
             setIsError(true)
