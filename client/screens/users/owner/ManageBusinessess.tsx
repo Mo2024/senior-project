@@ -24,6 +24,7 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
     const [message, setMessage] = useState('');
     const [currentSubScreen, setCurrentSubScreen] = useState('viewBusiness');
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchedBusinessess, setFetchedBusinessess] = useState<Businesses>([])
     const [businessess, setBusinessess] = useState<Businesses>([])
 
     useFocusEffect(
@@ -31,8 +32,12 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
             async function fetchLoggedInUserInfo() {
                 try {
                     setIsLoading(true);
-                    const businessess = await OwnerApi.getMyBusinessess() as Businesses
-                    setBusinessess(businessess)
+                    if (fetchedBusinessess.length === 0) {
+                        const fetchedBusinessess = await OwnerApi.getMyBusinessess() as Businesses
+                        setFetchedBusinessess(fetchedBusinessess)
+                    }
+
+                    setBusinessess(fetchedBusinessess)
 
                     setIsLoading(false);
 
@@ -41,11 +46,14 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                 }
             }
             fetchLoggedInUserInfo()
-        }, [])
+        }, [fetchedBusinessess])
     )
 
     function deleteBusiness(businessId: mongoose.Types.ObjectId) {
         setBusinessess((prevBusinesses) => {
+            return prevBusinesses.filter((business) => business._id !== businessId);
+        });
+        setFetchedBusinessess((prevBusinesses) => {
             return prevBusinesses.filter((business) => business._id !== businessId);
         });
     }
@@ -99,7 +107,7 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                                     )
                                 )
                             }
-                            <SubmitButton buttonName='Create Business' handlePress={() => { console.log('ss'); navigation.navigate('CreateBusiness') }} />
+                            <SubmitButton buttonName='Create Business' handlePress={() => { setFetchedBusinessess([]); navigation.navigate('CreateBusiness') }} />
 
                             {currentSubScreen == 'createBusiness' &&
 
