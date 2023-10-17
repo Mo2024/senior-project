@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, SafeAreaView, ScrollView } from 'react-native';
 import SubmitButton from '../../../components/SubmitButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp, useFocusEffect } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import * as UserApi from "../../../network/user_api";
 import MessageBox from '../../../components/MessageBox';
@@ -19,6 +19,7 @@ interface LoggedInScreenProps {
 
 function Profile({ navigation }: LoggedInScreenProps) {
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchedCredentialsObject, setFetchedCredentialsObject] = useState<{ [key: string]: string }>({})
     const [credentialsObject, setCredentialsObject] = useState<{ [key: string]: string }>({
         email: "",
         username: "",
@@ -47,7 +48,6 @@ function Profile({ navigation }: LoggedInScreenProps) {
 
 
     } as { [key: string]: string }
-
     useFocusEffect(
         React.useCallback(() => {
             async function fetchLoggedInUserInfo() {
@@ -56,44 +56,42 @@ function Profile({ navigation }: LoggedInScreenProps) {
                     const storedUserInfo = await SecureStore.getItemAsync('userInfo');
 
                     if (storedUserInfo) {
-                        const user = await UserApi.getLoggedInUserInfo() as any
-                        const {
-                            email,
-                            username,
-                            fullName,
-                            telephone,
-                            cpr,
-                            area,
-                            road,
-                            block,
-                            building
-                        } = user
+                        if (Object.keys(fetchedCredentialsObject).length === 0) {
+                            const user = await UserApi.getLoggedInUserInfo() as any
+                            const {
+                                email,
+                                username,
+                                fullName,
+                                telephone,
+                                cpr,
+                                area,
+                                road,
+                                block,
+                                building
+                            } = user
+                            setFetchedCredentialsObject({
+                                email,
+                                username,
+                                fullName,
+                                telephone,
+                                area,
+                                road,
+                                block,
+                                building,
+                                cpr
+                            })
 
-                        setCredentialsObject({
-                            email,
-                            username,
-                            fullName,
-                            telephone,
-                            area,
-                            road,
-                            block,
-                            building,
-                            cpr
-                        })
-
+                        }
+                        setCredentialsObject(fetchedCredentialsObject);
                     }
-
-
                     setIsLoading(false);
-
                 } catch (error) {
                     console.log(error)
                 }
             }
             fetchLoggedInUserInfo()
-        }, [])
+        }, [fetchedCredentialsObject])
     )
-
     async function onSubmit(credentialsObject: object) {
         try {
             // await validateSignup(credentials as UserApi.userInfoUpdateCredentials)
@@ -101,6 +99,7 @@ function Profile({ navigation }: LoggedInScreenProps) {
             setIsError(false)
             setIsMessageVisible(true)
             setMessage('Information Updated successfully')
+            setFetchedCredentialsObject(credentialsObject as { [key: string]: string });
         } catch (error) {
             setIsError(true)
             let errorMessage = ''
