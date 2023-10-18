@@ -221,7 +221,7 @@ interface EmployeeBody {
     email?: string
     fullName?: string
     telephone?: string
-    employeeCpr?: number
+    cpr?: number
     branchId?: Schema.Types.ObjectId
 }
 
@@ -231,19 +231,20 @@ export const createEmployee: RequestHandler<unknown, unknown, EmployeeBody, unkn
         email,
         fullName,
         telephone,
-        employeeCpr,
+        cpr,
         branchId
 
     } = req.body;
+    console.log(req.body)
     const authenticatedUserId = req.session.userId;
 
     try {
         assertIsDefined(authenticatedUserId)
-        if (!username || !email || !fullName || !telephone || !employeeCpr || !branchId) {
+        if (!username || !email || !fullName || !telephone || !cpr || !branchId) {
 
             throw createHttpError(400, "Parameter Missing")
         }
-        validateEmployeeRegex(branchId, employeeCpr, username, email, fullName, telephone)
+        validateEmployeeRegex(branchId, cpr, username, email, fullName, telephone)
         const branch = await BranchModel.findById(branchId)
             .populate({ path: 'businessId', select: 'ownerId status' })
             .exec() as IbranchPopulate | null;
@@ -275,7 +276,7 @@ export const createEmployee: RequestHandler<unknown, unknown, EmployeeBody, unkn
             fullName,
             telephone,
             password: passwordHashed,
-            employeeCpr,
+            cpr,
             branchId
         });
         const subject = "New employee"
