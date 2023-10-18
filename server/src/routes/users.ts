@@ -6,7 +6,8 @@ const router = express.Router();
 
 router.get('/', requiresAuth, UserContoller.getAuthenticatedUser);
 //this should go to the customer route ig
-router.get('/allBusinesses', UserContoller.getAllBusinesses);
+router.get('/allBusinesses', requiresAuth, UserContoller.getAllBusinesses);
+router.get('/getUserInfo', requiresAuth, UserContoller.getUserInfo);
 router.post('/signup', UserContoller.signUpOwner);
 router.post('/login', UserContoller.login);
 router.post('/logout', UserContoller.logout);

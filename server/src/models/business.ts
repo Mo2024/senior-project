@@ -16,7 +16,7 @@ const businessSchema = new Schema({
     },
     status: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     ownerId: {
         type: Schema.Types.ObjectId,

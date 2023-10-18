@@ -10,7 +10,6 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        select: false,
     },
     password: {
         type: String,
@@ -20,12 +19,14 @@ const userSchema = new Schema({
     fullName: {
         type: String,
         required: true,
-        select: false,
     },
     telephone: {
         type: String,
         required: true,
-        select: false,
+    },
+    cpr: {
+        type: String,
+        required: true,
     },
 });
 
@@ -54,10 +55,7 @@ const ownerSchema = new Schema({
         type: String,
         required: true,
     },
-    ownerCpr: {
-        type: Number,
-        required: true,
-    },
+
 });
 
 ownerSchema.add(userSchema);
@@ -69,10 +67,6 @@ const OwnerModel = model<OwnerType>("Owner", Owner.schema);
 
 
 const employeeSchema = new Schema({
-    employeeCpr: {
-        type: Number,
-        required: true,
-    },
     branchId: {
         type: Schema.Types.ObjectId,
         ref: 'Branch',
@@ -88,10 +82,6 @@ type EmployeeType = InferSchemaType<typeof Employee.schema>;
 const EmployeeModel = model<EmployeeType>("Employee", Employee.schema);
 
 const adminSchema = new Schema({
-    adminCpr: {
-        type: Number,
-        required: true,
-    },
     businessId: {
         type: Schema.Types.ObjectId,
         ref: 'Business',

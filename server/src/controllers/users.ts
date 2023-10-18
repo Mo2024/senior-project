@@ -18,6 +18,16 @@ export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
         next(error)
     }
 }
+export const getUserInfo: RequestHandler = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    try {
+        const user = await UserModel.findById(authenticatedUserId);
+
+        res.status(201).json(user)
+    } catch (error) {
+        next(error)
+    }
+}
 interface userInfoBody {
     username?: string,
     email?: string,
@@ -31,7 +41,7 @@ interface SignUpOwnerBody extends userInfoBody {
     road?: string,
     block?: string,
     building?: string,
-    ownerCpr?: number,
+    cpr?: number,
 }
 export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unknown> = async (req, res, next) => {
     const {
@@ -45,10 +55,10 @@ export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unkn
         road,
         block,
         building,
-        ownerCpr,
+        cpr,
     } = req.body;
     try {
-        if (!username || !email || !password || !confirmPassword || !fullName || !telephone || !area || !road || !block || !building || !ownerCpr) {
+        if (!username || !email || !password || !confirmPassword || !fullName || !telephone || !area || !road || !block || !building || !cpr) {
             throw createHttpError(400, "Parameter Missing");
         }
 
@@ -56,7 +66,7 @@ export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unkn
             throw createHttpError(400, "Passwords do not match!");
         }
 
-        validateOwnerRegex(username, email, password, confirmPassword, fullName, telephone, area, road, block, building, ownerCpr)
+        validateOwnerRegex(username, email, password, confirmPassword, fullName, telephone, area, road, block, building, cpr)
         await checkIfCredentialsIsTaken(username, email)
 
         const passwordHashed = await bcrypt.hash(password, 10);
@@ -70,7 +80,7 @@ export const signUpOwner: RequestHandler<unknown, unknown, SignUpOwnerBody, unkn
             road,
             block,
             building,
-            ownerCpr,
+            cpr,
         });
 
         req.session.userId = newOwner._id as mongoose.Types.ObjectId;
@@ -181,23 +191,19 @@ interface IAddress {
 }
 
 export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, unknown> = async (req, res, next) => {
-    const { username, email, fullName, telephone, } = req.body;
+    const { username, email, fullName, telephone, cpr } = req.body;
     const role = req.session.role;
     const userId = req.session.userId;
     console.log(role)
 
     try {
         assertIsDefined(userId)
-        if (!username || !email || !fullName || !telephone) {
+        if (!username || !email || !fullName || !telephone || !cpr) {
             throw createHttpError(400, "Parameter Missing");
         }
         switch (role) {
             case 'Admin':
             case 'Employee': {
-                const { cpr } = req.body;
-                if (!cpr) {
-                    throw createHttpError(400, "Parameter Missing");
-                }
                 if (!ownerCprRegex.test(cpr.toString())) {
                     throw createHttpError(400, 'Invalid CPR format');
                 }
@@ -209,9 +215,9 @@ export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, un
                 }
                 let updatedFields = {}
                 if (user.__t == "Admin") {
-                    updatedFields = { username, email, fullName, telephone, adminCpr: cpr, };
+                    updatedFields = { username, email, fullName, telephone, cpr, };
                 } else if (user.__t == "Employee") {
-                    updatedFields = { username, email, fullName, telephone, employeeCpr: cpr, };
+                    updatedFields = { username, email, fullName, telephone, cpr: cpr, };
                 }
                 Object.assign(user, updatedFields);
                 await user.save();
@@ -219,8 +225,8 @@ export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, un
                 break;
             }
             case 'Owner': {
-                const { area, road, block, building, cpr, } = req.body;
-                if (!area || !road || !block || !building || !cpr) {
+                const { area, road, block, building } = req.body;
+                if (!area || !road || !block || !building) {
                     throw createHttpError(400, "Parameter Missing");
                 }
                 validateUpdateUserRegex(username, email, fullName, telephone)
@@ -231,7 +237,7 @@ export const updateUserInfo: RequestHandler<unknown, unknown, updateInfoBody, un
                 if (!user) {
                     throw createHttpError(401, "Invalid credentials")
                 }
-                const updatedFields = { username, email, fullName, telephone, area, road, block, building, ownerCpr: cpr, };
+                const updatedFields = { username, email, fullName, telephone, area, road, block, building, cpr: cpr, };
                 Object.assign(user, updatedFields);
                 await user.save();
                 res.status(200).json(user)

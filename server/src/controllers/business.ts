@@ -15,7 +15,7 @@ export const getBusinesses: RequestHandler = async (req, res, next) => {
 
     try {
         assertIsDefined(authenticatedUserId)
-        const businessModels = await BusinessModel.findOne({ ownerId: authenticatedUserId }).populate('branches').exec();
+        const businessModels = await BusinessModel.find({ ownerId: authenticatedUserId }).populate('branches').exec();
 
         res.status(201).json(businessModels)
     } catch (error) {
