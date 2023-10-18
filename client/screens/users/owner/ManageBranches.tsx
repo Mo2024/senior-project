@@ -92,6 +92,9 @@ function ManageBranches({ navigation, route }: ManageBranchesProp) {
         setBranches((prevBranches) => {
             return prevBranches.filter((branch) => branch._id !== branchId);
         });
+        setFetchedBranches((prevBranches) => {
+            return prevBranches.filter((branch) => branch._id !== branchId);
+        });
     }
     function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
         setIsError(isErrorParam)

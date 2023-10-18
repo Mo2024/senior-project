@@ -24,7 +24,7 @@ const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, na
     async function deleteBranch(branchId: mongoose.Types.ObjectId): Promise<void> {
         try {
             console.log('clicked')
-            await OwnerApi.deleteBusiness(branchId)
+            await OwnerApi.deleteBranch(branchId)
             deleteBranchProp(branchId)
             handleMessage(false, true, 'Business Deleted successfully')
             // setIsError(false)

@@ -59,3 +59,12 @@ export async function getBranches(businessId: mongoose.Types.ObjectId): Promise<
     const response = await fetchData(`${API_URL}/api/business/branches/${businessId}`, { method: 'GET' }) as any;
     return await response.json()
 }
+
+export async function deleteBranch(branchId: mongoose.Types.ObjectId): Promise<any> {
+    await deleteData(`${API_URL}/api/business/branch`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ branchId })
+    });
+    return;
+}
