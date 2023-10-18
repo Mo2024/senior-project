@@ -53,9 +53,9 @@ const RoundedBoxWithText = ({ title, handleMessage, branches, subtitle, business
             <View style={styles.roundedBox}>
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.subtitle}>{subtitle}</Text>
-                {/* <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(businessId) }} /> */}
                 <RoundedBoxBtn buttonName='View' handlePress={() => { navigation.navigate('ManageBranches', { branches, businessId }) }} />
                 <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness', { businessId: businessId, name: title, description: subtitle }); }} />
+                <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(businessId) }} />
             </View>
         </View>
     );
