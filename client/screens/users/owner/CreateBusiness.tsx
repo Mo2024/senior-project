@@ -18,6 +18,7 @@ function CreateBusiness({ navigation }: CreateBusinessProps) {
     async function onSubmit(credentials: object) {
         try {
             await OwnerApi.createBusiness(credentials as OwnerApi.newBusiness);
+            
             navigation.navigate('ManageBusinessess')
         } catch (error) {
             setIsError(true)

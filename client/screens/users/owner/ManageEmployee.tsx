@@ -9,6 +9,7 @@ import TopBar from '../../../components/TopBar';
 import MessageBox from '../../../components/MessageBox';
 import Field from '../../../components/Field';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
+import TopBarBtn from '../../../components/TopBarBtn';
 
 
 interface ManageEmployeeProp {
@@ -20,63 +21,81 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
-    const [currentSubScreen, setCurrentSubScreen] = useState('createEmployee');
+    const [createEmployeeIsActive, setCreateEmployeeIsActive] = useState(true)
+    const [transferEmployeeIsActive, setTransferEmployeeIsActive] = useState(false)
     return (
-        <View style={styles.container}>
-            <>
-                {
-                    isMessageVisible &&
+        <>
+            {
+                isMessageVisible &&
 
-                    <MessageBox
-                        type={isError}
-                        message={message}
-                        onClose={() => {
-                            setIsMessageVisible(false)
-                        }}
+                <MessageBox
+                    type={isError}
+                    message={message}
+                    onClose={() => {
+                        setIsMessageVisible(false)
+                    }}
 
-                    />
-                }
-                <StatusBar hidden={true} />
+                />
+            }
+            <StatusBar hidden={true} />
+            <SafeAreaView style={styles.SafeAreaView}>
+                <ScrollView>
 
-                <SafeAreaView style={styles.SafeAreaView}>
-                    <ScrollView>
+                    <View style={styles.container}>
 
-                        <View style={styles.container}>
-
-                            <TopBar title={'Manage Employees'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
-                            <View style={styles.formBox}>
-
-
-                                {/* 
-                                {currentSubScreen == 'createEmployee' &&
-
-                                    ({
-                                        Object.keys(credentialsObject).map(key =>
-                                            <React.Fragment key={key}>
-                                                <View style={styles.labelView}>
-                                                    <Text style={styles.Label}>{placeholderData[key]}</Text>
-                                                </View>
-                                                <Field
-                                                    handleChange={(updatedCredential) => {
-                                                        setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
-                                                    }}
-                                                    placeholder={placeholderData[key]}
-                                                    defaultValue={`${credentialsObject[key]}`}
-                                                    label={placeholderData[key]}
-                                                />
-                                            </React.Fragment>
-                                        )
-                                    })
-                                } */}
-
-                                {/* <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} /> */}
-                            </View>
+                        <TopBar title={'Employees'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
+                        <View style={{ flexDirection: 'row', marginVertical: 10 }}>
+                            <TopBarBtn
+                                buttonName='Create Employee'
+                                handlePress={() => {
+                                    setTransferEmployeeIsActive(prevState => false);
+                                    setCreateEmployeeIsActive(prevState => true);
+                                }}
+                                isActive={createEmployeeIsActive}
+                            />
+                            <View style={{ marginRight: 10 }} />
+                            <TopBarBtn
+                                buttonName='Transfer Employee'
+                                handlePress={() => {
+                                    setCreateEmployeeIsActive(prevState => false);
+                                    setTransferEmployeeIsActive(prevState => true);
+                                }}
+                                isActive={transferEmployeeIsActive}
+                            />
                         </View>
-                    </ScrollView>
-                </SafeAreaView>
-            </>
+                        <View style={styles.formBox}>
 
-        </View>
+
+
+                            {createEmployeeIsActive &&
+
+                                // ({
+                                //     Object.keys(credentialsObject).map(key =>
+                                //         <React.Fragment key={key}>
+                                //             <View style={styles.labelView}>
+                                //                 <Text style={styles.Label}>{placeholderData[key]}</Text>
+                                //             </View>
+                                //             <Field
+                                //                 handleChange={(updatedCredential) => {
+                                //                     setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
+                                //                 }}
+                                //                 placeholder={placeholderData[key]}
+                                //                 defaultValue={`${credentialsObject[key]}`}
+                                //                 label={placeholderData[key]}
+                                //             />
+                                //         </React.Fragment>
+                                //     )
+                                // })
+                                <Text>TEST</Text>
+                            }
+
+                            {/* <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} /> */}
+                        </View>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </>
+
     );
 }
 
