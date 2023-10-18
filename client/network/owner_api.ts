@@ -1,6 +1,6 @@
 import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
-import { Branch, Businesses, newBranchModel, newBusinessModel } from "../models/user";
+import { Branch, Businesses, newBranchModel, newBusinessModel, newEmployee } from "../models/user";
 import mongoose, { mongo } from "mongoose";
 
 
@@ -74,6 +74,16 @@ export async function editBranch(editBranch: newBranchModel): Promise<newBranchM
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editBranch)
+    });
+    return respone.json();
+}
+
+
+export async function createEmployee(newEmployee: newEmployee): Promise<newEmployee> {
+    const respone = await fetchData(`${API_URL}/api/business/employee`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newEmployee)
     });
     return respone.json();
 }

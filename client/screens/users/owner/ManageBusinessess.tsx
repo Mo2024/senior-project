@@ -130,15 +130,6 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                                 )
                             }
                             <SubmitButton buttonName='Create Business' handlePress={() => { setFetchedBusinessess([]); navigation.navigate('CreateBusiness') }} />
-
-                            {currentSubScreen == 'createBusiness' &&
-
-                                (
-                                    <>
-                                        <AppLoader />
-                                    </>
-                                )
-                            }
                         </View>
                     </View>
                 </ScrollView>

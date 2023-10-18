@@ -13,7 +13,7 @@ const SelectDropdownComponent = ({ options, selectedOption, handleOptionChange }
     return (
         <SelectDropdown
             data={options}
-            onSelect={(selectedItem: string) => handleOptionChange(selectedItem)}
+            onSelect={(selectedItem: string, index: number) => handleOptionChange(index as any)}
             defaultButtonText={selectedOption}
             buttonStyle={dropdownStyle}
             buttonTextStyle={{ color: '#72063c' }}

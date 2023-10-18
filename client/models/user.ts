@@ -49,3 +49,12 @@ export interface newBranchModel {
     closingTime: string,
     lateTime: string
 }
+
+export interface newEmployee {
+    branchId?: mongoose.Types.ObjectId,
+    email?: string,
+    username?: string,
+    fullName?: string,
+    telephone?: string,
+    cpr?: string,
+}

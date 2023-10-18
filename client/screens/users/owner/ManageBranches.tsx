@@ -161,15 +161,6 @@ function ManageBranches({ navigation, route }: ManageBranchesProp) {
                                 )
                             }
                             <SubmitButton buttonName='Create Branch' handlePress={() => { setFetchedBranches([]); navigation.navigate('CreateBranch', { businessId: businessIdState }) }} />
-
-                            {currentSubScreen == 'createBusiness' &&
-
-                                (
-                                    <>
-                                        <AppLoader />
-                                    </>
-                                )
-                            }
                         </View>
                     </View>
                 </ScrollView>
