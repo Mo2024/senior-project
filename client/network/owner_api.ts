@@ -68,3 +68,12 @@ export async function deleteBranch(branchId: mongoose.Types.ObjectId): Promise<a
     });
     return;
 }
+
+export async function editBranch(editBranch: newBranchModel): Promise<newBranchModel> {
+    const respone = await fetchData(`${API_URL}/api/business/branch`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editBranch)
+    });
+    return respone.json();
+}

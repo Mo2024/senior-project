@@ -43,7 +43,8 @@ export interface newBusinessModel {
 }
 export interface newBranchModel {
     name: string,
-    businessId: mongoose.Types.ObjectId,
+    businessId?: mongoose.Types.ObjectId,
+    branchId?: mongoose.Types.ObjectId,
     openingTime: string,
     closingTime: string,
     lateTime: string

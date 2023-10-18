@@ -13,11 +13,14 @@ interface RoundedBoxBranch {
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>,
+    openingTime: string,
+    closingTime: string,
+    lateTime: string,
 }
 const windowWidth = Dimensions.get('window').width;
 
 
-const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, navigation }: RoundedBoxBranch) => {
+const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, navigation, openingTime, closingTime, lateTime }: RoundedBoxBranch) => {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
@@ -50,7 +53,7 @@ const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, na
             <View style={styles.roundedBox}>
                 <Text style={styles.title}>{title}</Text>
                 <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBranch(branchId) }} />
-                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness', { businessId: branchId, name: title, }); }} />
+                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBranch', { branchId, name: title, openingTime, closingTime, lateTime }); }} />
             </View>
         </View>
     );

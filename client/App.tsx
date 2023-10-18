@@ -14,6 +14,7 @@ import CreateBusiness from "./screens/users/owner/CreateBusiness";
 import EditBusiness from "./screens/users/owner/EditBusiness";
 import ManageBranches from "./screens/users/owner/ManageBranches";
 import CreateBranch from "./screens/users/owner/CreateBranch";
+import EditBranch from "./screens/users/owner/EditBranch";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -67,6 +68,7 @@ export default function App() {
           <Stack.Screen name="CreateBusiness" component={CreateBusiness} />
           <Stack.Screen name="CreateBranch" component={CreateBranch} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />
+          <Stack.Screen name="EditBranch" component={EditBranch} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />
         </Stack.Navigator>
 

@@ -55,6 +55,13 @@ function ManageBranches({ navigation, route }: ManageBranchesProp) {
                         await SecureStore.deleteItemAsync('updatedBusiness');
                     }
 
+                    const editedInfoString = await SecureStore.getItemAsync('updatedBranch');
+                    if (editedInfoString) {
+                        const editedInfo = JSON.parse(editedInfoString);
+                        updateBranchState(editedInfo.name, editedInfo.openingTime, editedInfo.closingTime, editedInfo.lateTime, editedInfo.branchId)
+                        await SecureStore.deleteItemAsync('updatedBranch');
+                    }
+
                     setBranches(fetchedBranches)
 
                     // const editedInfoString = await SecureStore.getItemAsync('updatedBusiness');
@@ -76,17 +83,19 @@ function ManageBranches({ navigation, route }: ManageBranchesProp) {
         }, [fetchedBranches, businessIdState])
     )
 
-    // function updateBranchState(newName: string, newDesc: string, branchId: mongoose.Types.ObjectId) {
-    //     setBranches((prevBusinesses) => {
-    //         return prevBusinesses.map((branch) => {
-    //             if (branch._id === branchId) {
-    //                 branch.name = newName;
-    //                 branch.description = newDesc;
-    //             }
-    //             return branch;
-    //         });
-    //     });
-    // }
+    function updateBranchState(newName: string, newOpeningTime: string, newClosingTime: string, newLateTime: string, branchId: mongoose.Types.ObjectId) {
+        setBranches((prevBusinesses) => {
+            return prevBusinesses.map((branch) => {
+                if (branch._id === branchId) {
+                    branch.name = newName;
+                    branch.openingTime = newOpeningTime;
+                    branch.closingTime = newClosingTime;
+                    branch.lateTime = newLateTime;
+                }
+                return branch;
+            });
+        });
+    }
 
     function deleteBranch(branchId: mongoose.Types.ObjectId) {
         setBranches((prevBranches) => {
@@ -143,6 +152,9 @@ function ManageBranches({ navigation, route }: ManageBranchesProp) {
                                                 branchId={branch._id as mongoose.Types.ObjectId}
                                                 navigation={navigation}
                                                 route={route}
+                                                openingTime={branch.openingTime as string}
+                                                closingTime={branch.closingTime as string}
+                                                lateTime={branch.lateTime as string}
                                             />
                                         </React.Fragment>
                                     )
