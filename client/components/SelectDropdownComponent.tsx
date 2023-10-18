@@ -8,16 +8,6 @@ interface SelectDropdownProps {
     handleOptionChange: (selectedItem: string) => void
 }
 const SelectDropdownComponent = ({ options, selectedOption, handleOptionChange }: SelectDropdownProps) => {
-    const dropdownStyle = {
-        borderRadius: 100,
-        color: '#72063c',
-        width: '80%',
-        height: 45,
-        borderBottomColor: 'white',
-        backgroundColor: 'rgb(220,220,220)',
-        marginTop: 25,
-    };
-
 
 
     return (
@@ -38,5 +28,18 @@ const SelectDropdownComponent = ({ options, selectedOption, handleOptionChange }
             )}
         />);
 }
+
+const dropdownStyle = {
+    borderRadius: 100,
+    color: '#72063c',
+    width: '80%',
+    height: 45,
+    borderBottomColor: 'white',
+    backgroundColor: 'rgb(220,220,220)',
+    // marginTop: 25,
+    marginBottom: 10,
+
+};
+
 
 export default SelectDropdownComponent;

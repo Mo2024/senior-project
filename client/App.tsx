@@ -12,6 +12,8 @@ import OwnerNav from './components/OwnerNav';
 import { userRouter } from "./utils/functions";
 import CreateBusiness from "./screens/users/owner/CreateBusiness";
 import EditBusiness from "./screens/users/owner/EditBusiness";
+import ManageBranches from "./screens/users/owner/ManageBranches";
+import CreateBranch from "./screens/users/owner/CreateBranch";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -60,8 +62,10 @@ export default function App() {
         <Stack.Navigator initialRouteName={loggedIn ? userTypeNav : 'SignUpSignInScreen'} screenOptions={{ headerShown: false }} >
           <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
+          <Stack.Screen name="ManageBranches" component={ManageBranches} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           <Stack.Screen name="CreateBusiness" component={CreateBusiness} />
+          <Stack.Screen name="CreateBranch" component={CreateBranch} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />
         </Stack.Navigator>

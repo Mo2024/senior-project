@@ -18,7 +18,7 @@ export interface Business {
     __v?: number;
 }
 
-interface Branch {
+export interface Branch {
     _id?: mongoose.Types.ObjectId;
     name?: string;
     businessId?: string;
@@ -40,4 +40,11 @@ export interface newBusinessModel {
     filename: null | string,
     _id: string,
     __v: number
+}
+export interface newBranchModel {
+    name: string,
+    businessId: mongoose.Types.ObjectId,
+    openingTime: string,
+    closingTime: string,
+    lateTime: string
 }

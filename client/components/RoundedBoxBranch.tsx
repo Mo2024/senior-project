@@ -6,29 +6,26 @@ import * as OwnerApi from "../network/owner_api";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 
-interface RoundedBoxWithTextProps {
-    subtitle: string
+interface RoundedBoxBranch {
     title: string
-    deleteBusinessProp: (businessId: mongoose.Types.ObjectId) => void
-    businessId: mongoose.Types.ObjectId
+    deleteBranchProp: (branchId: mongoose.Types.ObjectId) => void
+    branchId: mongoose.Types.ObjectId
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>,
-    branches: any
-
 }
 const windowWidth = Dimensions.get('window').width;
 
 
-const RoundedBoxWithText = ({ title, handleMessage, branches, subtitle, businessId, deleteBusinessProp, navigation }: RoundedBoxWithTextProps) => {
+const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, navigation }: RoundedBoxBranch) => {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
-    async function deleteBusiness(businessId: mongoose.Types.ObjectId): Promise<void> {
+    async function deleteBranch(branchId: mongoose.Types.ObjectId): Promise<void> {
         try {
             console.log('clicked')
-            await OwnerApi.deleteBusiness(businessId)
-            deleteBusinessProp(businessId)
+            await OwnerApi.deleteBusiness(branchId)
+            deleteBranchProp(branchId)
             handleMessage(false, true, 'Business Deleted successfully')
             // setIsError(false)
             // setIsMessageVisible(true)
@@ -52,10 +49,8 @@ const RoundedBoxWithText = ({ title, handleMessage, branches, subtitle, business
         <View style={styles.container}>
             <View style={styles.roundedBox}>
                 <Text style={styles.title}>{title}</Text>
-                <Text style={styles.subtitle}>{subtitle}</Text>
-                {/* <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(businessId) }} /> */}
-                <RoundedBoxBtn buttonName='View' handlePress={() => { navigation.navigate('ManageBranches', { branches, businessId }) }} />
-                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness', { businessId: businessId, name: title, description: subtitle }); }} />
+                <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBranch(branchId) }} />
+                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness', { businessId: branchId, name: title, }); }} />
             </View>
         </View>
     );
@@ -102,4 +97,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default RoundedBoxWithText;
+export default RoundedBoxBranch;

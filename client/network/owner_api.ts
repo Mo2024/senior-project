@@ -1,7 +1,7 @@
 import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
-import { Businesses, newBusinessModel } from "../models/user";
-import mongoose from "mongoose";
+import { Branch, Businesses, newBranchModel, newBusinessModel } from "../models/user";
+import mongoose, { mongo } from "mongoose";
 
 
 export async function getMyBusinessess(): Promise<Businesses> {
@@ -43,4 +43,19 @@ export async function editBusiness(editBusiness: newBusiness): Promise<newBusine
         body: JSON.stringify(editBusiness)
     });
     return respone.json();
+}
+
+
+export async function createBranch(credentials: newBranchModel): Promise<newBranchModel> {
+    const respone = await fetchData(`${API_URL}/api/business/branch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
+    });
+    return respone.json();
+}
+
+export async function getBranches(businessId: mongoose.Types.ObjectId): Promise<Branch[]> {
+    const response = await fetchData(`${API_URL}/api/business/branches/${businessId}`, { method: 'GET' }) as any;
+    return await response.json()
 }

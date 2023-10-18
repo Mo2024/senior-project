@@ -6,45 +6,65 @@ import TopBar from '../../../components/TopBar';
 import MessageBox from '../../../components/MessageBox';
 import React, { useState } from 'react';
 import * as OwnerApi from "../../../network/owner_api";
-import { Businesses } from '../../../models/user';
+import { Branch, Businesses } from '../../../models/user';
 import mongoose from 'mongoose';
 import RoundedBoxWithText from '../../../components/RoundedBoxWithText';
 import AppLoader from '../../../components/AppLoader';
 import TopBarBtn from '../../../components/TopBarBtn';
 import SubmitButton from '../../../components/SubmitButton';
 import * as SecureStore from 'expo-secure-store';
+import RoundedBoxBranch from '../../../components/RoundedBoxBranch';
 
-interface ManageBusinessessProp {
+interface ManageBranchesProp {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
 }
 
-function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
+function ManageBranches({ navigation, route }: ManageBranchesProp) {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [currentSubScreen, setCurrentSubScreen] = useState('viewBusiness');
     const [isLoading, setIsLoading] = useState(true);
-    const [fetchedBusinessess, setFetchedBusinessess] = useState<Businesses>([])
-    const [businessess, setBusinessess] = useState<Businesses>([])
+    const [businessIdState, setBusinessId] = useState<mongoose.Types.ObjectId>();
+    // const [fetchedBusinessess, setFetchedBusinessess] = useState<Businesses>([])
+    const [fetchedBranches, setFetchedBranches] = useState<Branch[]>([])
+    const [branchesState, setBranches] = useState<Branch[]>([])
+    const { businessId } = route.params || {};
 
     useFocusEffect(
         React.useCallback(() => {
-            async function fetchLoggedInUserInfo() {
+            async function fetchBranches() {
                 try {
                     setIsLoading(true);
-                    if (fetchedBusinessess.length === 0) {
-                        const fetchedBusinessess = await OwnerApi.getMyBusinessess() as Businesses
-                        setFetchedBusinessess(fetchedBusinessess)
+                    setBusinessId((prevBusinessIdState) => {
+                        if (!prevBusinessIdState) {
+                            return businessId;
+                        }
+                        return prevBusinessIdState;
+                    });
+                    console.log(businessIdState)
+                    if (fetchedBranches.length === 0) {
+                        const fetchedBranchesApi = await OwnerApi.getBranches(businessIdState as mongoose.Types.ObjectId) as Branch[]
+                        setFetchedBranches(fetchedBranchesApi)
                     }
-                    const editedInfoString = await SecureStore.getItemAsync('updatedBusiness');
-                    if (editedInfoString) {
-                        const editedInfo = JSON.parse(editedInfoString);
-                        updateBusinessState(editedInfo.name, editedInfo.description, editedInfo.businessId)
+                    const newBranchInfo = await SecureStore.getItemAsync('newBranchInfo');
+                    if (newBranchInfo) {
+                        const newBranch = JSON.parse(newBranchInfo);
+                        setFetchedBranches([...fetchedBranches, newBranch])
                         await SecureStore.deleteItemAsync('updatedBusiness');
                     }
 
-                    setBusinessess(fetchedBusinessess)
+                    setBranches(fetchedBranches)
+
+                    // const editedInfoString = await SecureStore.getItemAsync('updatedBusiness');
+                    // if (editedInfoString) {
+                    //     const editedInfo = JSON.parse(editedInfoString);
+                    //     updateBusinessState(editedInfo.name, editedInfo.description, editedInfo.businessId)
+                    //     await SecureStore.deleteItemAsync('updatedBusiness');
+                    // }
+
+                    // setBusinessess(fetchedBusinessess)
 
                     setIsLoading(false);
 
@@ -52,27 +72,25 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                     console.log(error)
                 }
             }
-            fetchLoggedInUserInfo()
-        }, [fetchedBusinessess])
+            fetchBranches()
+        }, [fetchedBranches, businessIdState])
     )
 
-    function updateBusinessState(newName: string, newDesc: string, businessId: mongoose.Types.ObjectId) {
-        setFetchedBusinessess((prevBusinesses) => {
-            return prevBusinesses.map((business) => {
-                if (business._id === businessId) {
-                    business.name = newName;
-                    business.description = newDesc;
-                }
-                return business;
-            });
-        });
-    }
-    function deleteBusiness(businessId: mongoose.Types.ObjectId) {
-        setBusinessess((prevBusinesses) => {
-            return prevBusinesses.filter((business) => business._id !== businessId);
-        });
-        setFetchedBusinessess((prevBusinesses) => {
-            return prevBusinesses.filter((business) => business._id !== businessId);
+    // function updateBranchState(newName: string, newDesc: string, branchId: mongoose.Types.ObjectId) {
+    //     setBranches((prevBusinesses) => {
+    //         return prevBusinesses.map((branch) => {
+    //             if (branch._id === branchId) {
+    //                 branch.name = newName;
+    //                 branch.description = newDesc;
+    //             }
+    //             return branch;
+    //         });
+    //     });
+    // }
+
+    function deleteBranch(branchId: mongoose.Types.ObjectId) {
+        setBranches((prevBranches) => {
+            return prevBranches.filter((branch) => branch._id !== branchId);
         });
     }
     function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
@@ -108,28 +126,26 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                 <ScrollView>
 
                     <View style={styles.container}>
-                        <TopBar title={'My Business'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
+                        <TopBar title={'Branches'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
                             {currentSubScreen == 'viewBusiness' &&
 
                                 (
-                                    businessess.map((business, i) =>
+                                    branchesState.map((branch, i) =>
                                         <React.Fragment key={i}>
-                                            <RoundedBoxWithText
-                                                title={business.name as string}
-                                                deleteBusinessProp={deleteBusiness}
-                                                businessId={business._id as mongoose.Types.ObjectId}
-                                                subtitle={business.description as string}
+                                            <RoundedBoxBranch
+                                                title={branch.name as string}
+                                                deleteBranchProp={deleteBranch}
                                                 handleMessage={handleMessage}
+                                                branchId={branch._id as mongoose.Types.ObjectId}
                                                 navigation={navigation}
                                                 route={route}
-                                                branches={business.branches}
                                             />
                                         </React.Fragment>
                                     )
                                 )
                             }
-                            <SubmitButton buttonName='Create Business' handlePress={() => { setFetchedBusinessess([]); navigation.navigate('CreateBusiness') }} />
+                            <SubmitButton buttonName='Create Branch' handlePress={() => { setFetchedBranches([]); navigation.navigate('CreateBranch', { businessId: businessIdState }) }} />
 
                             {currentSubScreen == 'createBusiness' &&
 
@@ -190,4 +206,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default ManageBusinessess;
+export default ManageBranches;

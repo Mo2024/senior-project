@@ -25,7 +25,7 @@ function EditBusiness({ navigation, route }: EditBusinessProps) {
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { businessId, name, description, updateBusinessState } = route.params || {};
+    const { businessId, name, description } = route.params || {};
 
 
     useFocusEffect(
