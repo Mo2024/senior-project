@@ -1,6 +1,6 @@
 import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
-import { Branch, Businesses, newBranchModel, newBusinessModel, newEmployee } from "../models/user";
+import { Branch, Businesses, Employee, newBranchModel, newBusinessModel, newEmployee } from "../models/user";
 import mongoose, { mongo } from "mongoose";
 
 
@@ -84,6 +84,25 @@ export async function createEmployee(newEmployee: newEmployee): Promise<newEmplo
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newEmployee)
+    });
+    return respone.json();
+}
+
+export async function getEmployees(branchId: mongoose.Types.ObjectId): Promise<Employee[]> {
+    const response = await fetchData(`${API_URL}/api/business/employees/${branchId}`, { method: 'GET' }) as any;
+    return await response.json()
+}
+
+export interface transferEmployeeI {
+    branchId: mongoose.Types.ObjectId,
+    employeeId: mongoose.Types.ObjectId
+}
+
+export async function transferEmployee(credentials: transferEmployeeI): Promise<newBranchModel> {
+    const respone = await fetchData(`${API_URL}/api/business/employee/transferBranch`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
     });
     return respone.json();
 }

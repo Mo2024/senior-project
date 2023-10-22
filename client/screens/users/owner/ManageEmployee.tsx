@@ -11,8 +11,9 @@ import Field from '../../../components/Field';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import TopBarBtn from '../../../components/TopBarBtn';
 import * as OwnerApi from "../../../network/owner_api";
-import { Businesses, newEmployee } from '../../../models/user';
-import SelectDropdownComponent from '../../../components/SelectDropdownComponent';
+import { Businesses, Employee, newEmployee } from '../../../models/user';
+import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
+import mongoose from 'mongoose';
 
 
 interface ManageEmployeeProp {
@@ -30,9 +31,16 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
     const [businessess, setBusinessess] = useState<Businesses>([])
     const [businessNames, setBusinessNames] = useState([])
     const [businessIds, setBusinessIds] = useState([])
+    const [businessTransferNames, setTransferBusinessNames] = useState([])
+    const [businessTransferIds, setTransferBusinessIds] = useState([])
+    const [employeeNames, setEmployeeNames] = useState([])
+    const [employeeIds, setEmployeeIds] = useState([])
     const [branchesNames, setBranchesNames] = useState([])
     const [branchesIds, setBranchesIds] = useState([])
+    const [branchesTransferNames, setTransferBranchesNames] = useState([])
+    const [branchesTransferIds, setTransferBranchesIds] = useState([])
     const [branchId, setBranchId] = useState<any>()
+    const [transferBranchId, setTransferBranchId] = useState<any>()
     const [employeeData, setEmployeeData] = useState({
         username: "",
         email: "",
@@ -44,7 +52,11 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
 
     const [emptyState, setEmptyState] = useState('')
     const [selectedBusiness, setSelectedBusiness] = useState('Select Business');
-    const [selectedBranch, setSelectedBranch] = useState('Select Business');
+    const [selectedBranch, setSelectedBranch] = useState('Select Branch');
+    const [selectedTransferBusiness, setSelectedTransferBusiness] = useState('Select New Business');
+    const [selectedTransferBranch, setSelectedTransferBranch] = useState('Select New Branch');
+    const [selectedEmployee, setSelectedEmployee] = useState('Select Employee');
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState<any>();
     useFocusEffect(
         React.useCallback(() => {
             async function fetchLoggedInUserInfo() {
@@ -56,6 +68,10 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
                     setBusinessNames(businessNames as any)
                     const businessIds = fetchedBusinessess.map(business => business._id);
                     setBusinessIds(businessIds as any)
+                    const businessTransferNames = fetchedBusinessess.map(business => business.name);
+                    setTransferBusinessNames(businessTransferNames as any)
+                    const businessTransferIds = fetchedBusinessess.map(business => business._id);
+                    setTransferBusinessIds(businessTransferIds as any)
                     setIsLoading(false);
 
                 } catch (error) {
@@ -75,13 +91,36 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
         setBranchesIds((prevIds) => (business?.branches?.map(branch => branch._id)) as any);
 
     }
-    function handleBranchOptionChange(index: any) {
+    async function handleBranchOptionChange(index: any) {
         const selectedBranchName = branchesNames[index as number]
         setSelectedBranch(selectedBranchName)
         setBranchId((prevId: any) => branchesIds[index as number])
+        if (transferEmployeeIsActive) {
+            const fetchedEmployees = await OwnerApi.getEmployees(branchesIds[index as number]) as Employee[]
+            setEmployeeNames((prevNames) => (fetchedEmployees.map(employee => employee.fullName)) as any);
+            setEmployeeIds((prevIds) => (fetchedEmployees.map(employee => employee._id)) as any);
+        }
+    }
+    function handleBusinesTransfersOptionChange(index: any) {
+        const selectedBusinessName = businessTransferNames[index as number]
+        setSelectedTransferBusiness(selectedBusinessName)
+        const businessId = businessTransferIds[index as number]
+        const business = businessess.find(business => business._id === businessId);
+        setTransferBranchesNames((prevNames) => (business?.branches?.map(branch => branch.name)) as any);
+        setTransferBranchesIds((prevIds) => (business?.branches?.map(branch => branch._id)) as any);
+
+    }
+    async function handleBranchTransferOptionChange(index: any) {
+        const selectedBranchName = branchesTransferNames[index as number]
+        setSelectedTransferBranch(selectedBranchName)
+        setTransferBranchId((prevId: any) => branchesTransferIds[index as number])
+    }
+    async function handleEmployeeOptionChange(index: any) {
+        const selectedEmployeeId = employeeIds[index as number]
+        setSelectedEmployeeId(selectedEmployeeId)
     }
 
-    async function onSubmit() {
+    async function onSubmitCreate() {
         try {
             const credentials = {
                 ...employeeData,
@@ -89,6 +128,29 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
             }
             console.log(credentials)
             await OwnerApi.createEmployee(credentials as newEmployee);
+
+            setIsError(false)
+            setIsMessageVisible(true)
+            setMessage('Employee Created Successfully')
+        } catch (error) {
+            setIsError(true)
+            let errorMessage = ''
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setMessage(errorMessage)
+            setIsMessageVisible(true)
+
+        }
+    }
+    async function onSubmitTransfer() {
+        try {
+            const credentials = {
+                employeeId: selectedEmployeeId,
+                branchId: transferBranchId
+            }
+            console.log(credentials)
+            await OwnerApi.transferEmployee(credentials as OwnerApi.transferEmployeeI);
 
             setIsError(false)
             setIsMessageVisible(true)
@@ -131,6 +193,9 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
                             setBranchId('')
                             setBranchesNames([])
                             setBranchesIds([])
+                            setEmployeeIds([])
+                            setEmployeeNames([])
+                            setTransferBranchesIds([])
                             setEmployeeData({
                                 username: "",
                                 email: "",
@@ -179,7 +244,7 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
                                     <View style={styles.labelView}>
                                         <Text style={styles.Label}>Business</Text>
                                     </View>
-                                    <SelectDropdownComponent
+                                    <SelectDropdownIndex
                                         options={businessNames}
                                         selectedOption={selectedBusiness}
                                         handleOptionChange={handleBusinessOptionChange}
@@ -187,7 +252,7 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
                                     <View style={styles.labelView}>
                                         <Text style={styles.Label}>Branch</Text>
                                     </View>
-                                    <SelectDropdownComponent
+                                    <SelectDropdownIndex
                                         options={branchesNames}
                                         selectedOption={selectedBranch}
                                         handleOptionChange={handleBranchOptionChange}
@@ -256,10 +321,59 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
                                         defaultValue={employeeData.cpr}
                                         placeholder={'CPR'}
                                     />
+
+
+                                    <SubmitButton buttonName="Submit" handlePress={() => onSubmitCreate()} />
                                 </>
                             }
 
-                            <SubmitButton buttonName="Submit" handlePress={() => onSubmit()} />
+                            {transferEmployeeIsActive &&
+                                <>
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Business</Text>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={businessNames}
+                                        selectedOption={selectedBusiness}
+                                        handleOptionChange={handleBusinessOptionChange}
+                                    />
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Branch</Text>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={branchesNames}
+                                        selectedOption={selectedBranch}
+                                        handleOptionChange={handleBranchOptionChange}
+                                    />
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Employee</Text>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={employeeNames}
+                                        selectedOption={selectedEmployee}
+                                        handleOptionChange={handleEmployeeOptionChange}
+                                    />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Business</Text>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={businessTransferNames}
+                                        selectedOption={selectedTransferBusiness}
+                                        handleOptionChange={handleBusinesTransfersOptionChange}
+                                    />
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Branch</Text>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={branchesTransferNames}
+                                        selectedOption={selectedTransferBranch}
+                                        handleOptionChange={handleBranchTransferOptionChange}
+                                    />
+                                    <SubmitButton buttonName="Submit" handlePress={() => onSubmitTransfer()} />
+                                </>
+                            }
+
                         </View>
                     </View>
                 </ScrollView>

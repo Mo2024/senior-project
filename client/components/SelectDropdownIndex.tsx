@@ -7,13 +7,13 @@ interface SelectDropdownProps {
     selectedOption: string
     handleOptionChange: (selectedItem: string) => void
 }
-const SelectDropdownComponent = ({ options, selectedOption, handleOptionChange }: SelectDropdownProps) => {
+const SelectDropdownIndex = ({ options, selectedOption, handleOptionChange }: SelectDropdownProps) => {
 
 
     return (
         <SelectDropdown
             data={options}
-            onSelect={(selectedItem: string) => handleOptionChange(selectedItem)}
+            onSelect={(selectedItem: string, index: number) => handleOptionChange(index as any)}
             defaultButtonText={selectedOption}
             buttonStyle={dropdownStyle}
             buttonTextStyle={{ color: '#72063c' }}
@@ -42,4 +42,4 @@ const dropdownStyle = {
 };
 
 
-export default SelectDropdownComponent;
+export default SelectDropdownIndex;
