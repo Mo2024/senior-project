@@ -16,6 +16,7 @@ import ManageBranches from "./screens/users/owner/ManageBranches";
 import CreateBranch from "./screens/users/owner/CreateBranch";
 import EditBranch from "./screens/users/owner/EditBranch";
 import ManageEmployee from "./screens/users/owner/ManageEmployee";
+import ManageBranch from "./screens/users/owner/ManageBranch";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,6 +66,7 @@ export default function App() {
           <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="ManageBranches" component={ManageBranches} />
+          <Stack.Screen name="ManageBranch" component={ManageBranch} />
           <Stack.Screen name="ManageEmployee" component={ManageEmployee} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           <Stack.Screen name="CreateBusiness" component={CreateBusiness} />

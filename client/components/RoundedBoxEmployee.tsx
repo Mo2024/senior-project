@@ -1,34 +1,34 @@
 import mongoose from 'mongoose';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import RoundedBoxBtn from './RoundedBoxBtn';
 import * as OwnerApi from "../network/owner_api";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface RoundedBoxBranch {
-    title: string
-    deleteBranchProp: (branchId: mongoose.Types.ObjectId) => void
-    branchId: mongoose.Types.ObjectId
-    handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
+    name: string
+    employeeId: mongoose.Types.ObjectId
     navigation: NativeStackNavigationProp<any>
+    deleteEmployee: (employeeId: mongoose.Types.ObjectId) => void
     route: RouteProp<any>,
-    openingTime: string,
-    closingTime: string,
-    lateTime: string,
+    handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
+
+
 }
 const windowWidth = Dimensions.get('window').width;
 
 
-const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, navigation, openingTime, closingTime, lateTime }: RoundedBoxBranch) => {
+const RoundedBoxEmployee = ({ employeeId, deleteEmployee, name, handleMessage }: RoundedBoxBranch) => {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
-    async function deleteBranch(branchId: mongoose.Types.ObjectId): Promise<void> {
+    async function deleteBranch(employeeId: mongoose.Types.ObjectId): Promise<void> {
         try {
             console.log('clicked')
-            await OwnerApi.deleteBranch(branchId)
-            deleteBranchProp(branchId)
+            await OwnerApi.deleteEmployee(employeeId)
+            deleteEmployee(employeeId)
             handleMessage(false, true, 'Business Deleted successfully')
             // setIsError(false)
             // setIsMessageVisible(true)
@@ -47,17 +47,19 @@ const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, na
 
         }
     }
-
     return (
         <View style={styles.container}>
             <View style={styles.roundedBox}>
-                <Text style={styles.title}>{title}</Text>
-                <RoundedBoxBtn buttonName='View' handlePress={() => { navigation.navigate('ManageBranch', { branchId, name: title }); }} />
-                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBranch', { branchId, name: title, openingTime, closingTime, lateTime }); }} />
-                <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBranch(branchId) }} />
+                <Text style={styles.title}>{name}</Text>
+                <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => deleteBranch(employeeId)}>
+                    <Ionicons name="trash" color={'white'} size={25} />
+                </TouchableOpacity>
             </View>
         </View>
     );
+
 };
 
 const styles = StyleSheet.create({
@@ -98,7 +100,19 @@ const styles = StyleSheet.create({
     //     justifyContent: 'center',
     //     borderColor: 'white'
     // },
+    iconButton: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        borderWidth: 1,
+        borderRadius: 5,
+        width: 30,
+        height: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderColor: 'white',
+    },
 });
 
 
-export default RoundedBoxBranch;
+export default RoundedBoxEmployee;
