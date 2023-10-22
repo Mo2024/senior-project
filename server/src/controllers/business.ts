@@ -645,9 +645,9 @@ export const editEmployeeBranch: RequestHandler<unknown, unknown, IEmployeeId, u
         }
 
 
-        if (!branch.businessId._id.equals(employee.branchId.businessId)) {
-            throw createHttpError(401, 'Employee does not belong to this business!')
-        }
+        // if (!branch.businessId._id.equals(employee.branchId.businessId)) {
+        //     throw createHttpError(401, 'Employee does not belong to this business!')
+        // }
         employee.branchId = branchId;
         await employee.save();
 
