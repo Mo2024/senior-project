@@ -26,9 +26,7 @@ function ManageBranch({ navigation, route }: ManageBranchesProp) {
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [branchIdState, setBranchId] = useState<mongoose.Types.ObjectId>();
     // const [fetchedBusinessess, setFetchedBusinessess] = useState<Businesses>([])
-    const [fetchedEmployees, setFetchedEmployees] = useState<Employee[]>([])
     const [employeesState, setEmployees] = useState<Employee[]>([])
     const { branchId, name } = route.params || {};
 
@@ -39,19 +37,9 @@ function ManageBranch({ navigation, route }: ManageBranchesProp) {
             async function fetchBranches() {
                 try {
                     setIsLoading(true);
-                    setBranchId((prevBusinessIdState) => {
-                        if (!prevBusinessIdState) {
-                            return branchId;
-                        }
-                        return prevBusinessIdState;
-                    });
-                    console.log(branchIdState)
-                    if (fetchedEmployees.length === 0) {
-                        const fetchedBranchesApi = await OwnerApi.getEmployees(branchIdState as mongoose.Types.ObjectId) as Employee[]
-                        setFetchedEmployees(fetchedBranchesApi)
-                    }
 
-                    setEmployees(fetchedEmployees)
+                    const fetchedBranchesApi = await OwnerApi.getEmployees(branchId as mongoose.Types.ObjectId) as Employee[]
+                    setEmployees(fetchedBranchesApi)
                     setIsLoading(false);
 
                 } catch (error) {
@@ -59,14 +47,11 @@ function ManageBranch({ navigation, route }: ManageBranchesProp) {
                 }
             }
             fetchBranches()
-        }, [fetchedEmployees, branchIdState])
+        }, [])
     )
 
     function deleteEmployee(employeeId: mongoose.Types.ObjectId) {
         setEmployees((prevEmployees) => {
-            return prevEmployees.filter((employee) => employee._id !== employeeId);
-        });
-        setFetchedEmployees((prevEmployees) => {
             return prevEmployees.filter((employee) => employee._id !== employeeId);
         });
     }
