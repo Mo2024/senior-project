@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import SubmitButton from '../../../components/SubmitButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp, useFocusEffect } from '@react-navigation/native';
+import { CommonActions, RouteProp, useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import * as UserApi from "../../../network/user_api";
@@ -112,6 +112,15 @@ function Profile({ navigation }: LoggedInScreenProps) {
         }
     }
 
+    function logoutBtn() {
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'SignUpSignInScreen' }],
+            })
+        );
+    }
+
     if (isLoading) {
         return (
             <>
@@ -160,6 +169,32 @@ function Profile({ navigation }: LoggedInScreenProps) {
                                 </React.Fragment>
                             )}
                             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+                            {/* <SubmitButton buttonName="Log Out" handlePress={logoutBtn} /> */}
+                            <View>
+                                <View style={styles.rowContainer}>
+                                    <TouchableOpacity onPress={() => navigation.navigate('ChangePasswordScreen')}>
+                                        <Text style={styles.UpdatePassword}>
+                                            Change Password
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity onPress={() => navigation.navigate('ForgetPasswordScreen', { isLoggedIn: true })}>
+                                        <Text style={styles.ForgetPassword}>
+                                            Forget Password
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={styles.centeredContainer}>
+                                    <TouchableOpacity onPress={logoutBtn}>
+                                        <Text style={styles.stylingBottomText}>
+                                            Log Out
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+
                         </View>
                     </View>
                 </ScrollView>
@@ -206,7 +241,33 @@ const styles = StyleSheet.create({
     },
     labelView: {
         width: '75%'
-    }
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        // marginBottom: 10,
+        // marginHorizontal: 10
+    },
+    centeredContainer: {
+        alignItems: 'center', // Center the items horizontally
+    },
+    stylingBottomText: {
+        // Your text styles
+        color: "#72063c",
+
+        marginBottom: 10, // Adjust the spacing between the texts
+    },
+    UpdatePassword: {
+        marginRight: 10,
+        color: "#72063c",
+
+    },
+    ForgetPassword: {
+        marginLeft: 10,
+        color: "#72063c",
+
+    },
+
 
 
 });

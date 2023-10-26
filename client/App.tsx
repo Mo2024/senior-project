@@ -18,6 +18,7 @@ import EditBranch from "./screens/users/owner/EditBranch";
 import ManageEmployee from "./screens/users/owner/ManageEmployee";
 import ManageBranch from "./screens/users/owner/ManageBranch";
 import ForgetPasswordScreen from "./screens/ForgetPasswordScreen";
+import ChangePasswordScreen from "./screens/ChangePasswordScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -67,6 +68,7 @@ export default function App() {
           <Stack.Screen name="SignUpSignInScreen" component={SignUpSignInScreen} />
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
+          <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
           <Stack.Screen name="ManageBranches" component={ManageBranches} />
           <Stack.Screen name="ManageBranch" component={ManageBranch} />
           <Stack.Screen name="ManageEmployee" component={ManageEmployee} />

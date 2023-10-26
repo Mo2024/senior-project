@@ -95,3 +95,16 @@ export async function forgetPasswordVerCode(credentials: forgotPasswordCodeI): P
     });
     return respone.json();
 }
+export interface UpdatePasswordInfoBody {
+    currentPwd?: string,
+    newPwd?: string,
+    confirmNewPwd?: string,
+}
+export async function updatePassword(credentials: UpdatePasswordInfoBody): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/users/updatePassword`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
+    });
+    return respone.json();
+}

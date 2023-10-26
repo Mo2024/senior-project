@@ -26,6 +26,8 @@ function ForgetPasswordScreen({ navigation, route }: ForgetPasswordScreenProps) 
 
     const [emailSection, setEmailSection] = useState(true);
     const [verCodeSection, setVerCodeSection] = useState(false);
+    const { isLoggedIn } = route.params || {};
+
 
     async function onSubmitEmail(email: object) {
         try {
@@ -47,7 +49,11 @@ function ForgetPasswordScreen({ navigation, route }: ForgetPasswordScreenProps) 
     async function onSubmitVerCode(credentials: object) {
         try {
             await UserApi.forgetPasswordVerCode(credentials as UserApi.forgotPasswordCodeI)
-            navigation.navigate('LogInScreen')
+            if (isLoggedIn) {
+                navigation.navigate('Profile')
+            } else {
+                navigation.navigate('LogInScreen')
+            }
         } catch (error) {
             setIsError(true)
             let errorMessage = ''
