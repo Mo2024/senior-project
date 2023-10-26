@@ -322,7 +322,7 @@ export const forgotPasswordEmail: RequestHandler<unknown, unknown, ForgotPasswor
         req.session.email = email;
         // needs to send email
         await sendEmail(email, 'Forget Password code', `Your code is ${randomCode}`)
-        res.status(201);
+        res.status(201).json({ message: 'Verification Code Sent Successfully' });
     } catch (error) {
         next(error);
     }
