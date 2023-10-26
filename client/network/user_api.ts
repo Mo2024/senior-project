@@ -72,3 +72,26 @@ export async function signup(credentials: SignupCredentials): Promise<UserModel>
     });
     return respone.json();
 }
+
+export async function forgetPasswordEmail(credentials: { email: string }): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/users/forgotPasswordEmail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
+    });
+    return respone.json();
+}
+
+export interface forgotPasswordCodeI {
+    code?: string,
+    newPwd?: string,
+    confirmNewPwd?: string,
+}
+export async function forgetPasswordVerCode(credentials: forgotPasswordCodeI): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/users/forgotPasswordCode`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
+    });
+    return respone.json();
+}

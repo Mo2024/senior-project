@@ -50,21 +50,24 @@ function LogInScreen({ navigation }: LogInScreenProps) {
 
 
     return (
-        <AuthFormComponent
-            credentialsObject={credentialsObject}
-            credentialsObjectUpdate={(updatedCredentialsObject) => { setCredentialsObject(updatedCredentialsObject); console.log(credentialsObject) }}
-            placeholderData={placeholderData}
-            navigation={navigation}
-            onSubmit={onSubmit}
-            title="Sign In"
-            formBoxTitle="Welcome!"
-            isMessageVisible={isMessageVisible}
-            isError={isError}
-            message={message}
-            onClose={() => {
-                setIsMessageVisible(false)
-            }}
-        />
+        <>
+            <AuthFormComponent
+                credentialsObject={credentialsObject}
+                credentialsObjectUpdate={(updatedCredentialsObject) => { setCredentialsObject(updatedCredentialsObject); console.log(credentialsObject) }}
+                placeholderData={placeholderData}
+                navigation={navigation}
+                onSubmit={onSubmit}
+                title="Sign In"
+                formBoxTitle="Welcome!"
+                isMessageVisible={isMessageVisible}
+                isError={isError}
+                message={message}
+                onClose={() => {
+                    setIsMessageVisible(false)
+                }}
+                login={true}
+            />
+        </>
 
     );
 }

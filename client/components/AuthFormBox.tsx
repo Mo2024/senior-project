@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, SafeAreaView } from 'react-native';
+import { Dimensions, StyleSheet, View, Text, TextInput, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import PrimaryButton from '../components/PrimaryButton';
 import Field from '../components/Field';
 import React, { useState } from 'react';
@@ -25,9 +25,10 @@ interface AuthFormBoxProps {
     isError: boolean
     message: string
     onClose: () => void
+    login: boolean
     credentialsObjectUpdate: (credentialsObject: { [key: string]: string }) => void
 }
-const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, credentialsObject, placeholderData, navigation, onSubmit, title, formBoxTitle, credentialsObjectUpdate }: AuthFormBoxProps) => {
+const AuthFormComponent = ({ login, message, isMessageVisible, isError, onClose, credentialsObject, placeholderData, navigation, onSubmit, title, formBoxTitle, credentialsObjectUpdate }: AuthFormBoxProps) => {
     return (
         // <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <>
@@ -68,6 +69,13 @@ const AuthFormComponent = ({ message, isMessageVisible, isError, onClose, creden
                                 </React.Fragment>
                             )}
                             <SubmitButton buttonName="Submit" handlePress={() => onSubmit(credentialsObject)} />
+                            {login &&
+                                <TouchableOpacity onPress={() => navigation.navigate('ForgetPasswordScreen')}>
+                                    <Text style={styles.forgetPasswordText}>
+                                        Forget Password
+                                    </Text>
+                                </TouchableOpacity>
+                            }
 
                         </View>
                     </View>
@@ -117,6 +125,9 @@ const styles = StyleSheet.create({
     },
     labelView: {
         width: '75%'
+    },
+    forgetPasswordText: {
+        color: "#72063c",
     }
 });
 
