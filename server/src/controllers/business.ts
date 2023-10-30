@@ -295,7 +295,7 @@ interface AdminBody {
     email?: string
     fullName?: string
     telephone?: string
-    adminCpr?: number
+    cpr?: number
     businessId?: Schema.Types.ObjectId
 }
 
@@ -305,7 +305,7 @@ export const createAdmin: RequestHandler<unknown, unknown, AdminBody, unknown> =
         email,
         fullName,
         telephone,
-        adminCpr,
+        cpr,
         businessId
 
     } = req.body;
@@ -313,11 +313,11 @@ export const createAdmin: RequestHandler<unknown, unknown, AdminBody, unknown> =
 
     try {
         assertIsDefined(authenticatedUserId)
-        if (!username || !email || !fullName || !telephone || !adminCpr || !businessId) {
+        if (!username || !email || !fullName || !telephone || !cpr || !businessId) {
 
             throw createHttpError(400, "Parameter Missing")
         }
-        validateEmployeeRegex(businessId, adminCpr, username, email, fullName, telephone)
+        validateEmployeeRegex(businessId, cpr, username, email, fullName, telephone)
 
         const business = await BusinessModel.findById(businessId).exec()
         if (!business) {
@@ -348,7 +348,7 @@ export const createAdmin: RequestHandler<unknown, unknown, AdminBody, unknown> =
             fullName,
             telephone,
             password: passwordHashed,
-            adminCpr,
+            cpr,
             businessId
         });
         const subject = "New Admin"
