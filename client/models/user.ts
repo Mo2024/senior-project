@@ -58,6 +58,14 @@ export interface newEmployee {
     telephone?: string,
     cpr?: string,
 }
+export interface newAdmin {
+    businessId?: mongoose.Types.ObjectId,
+    email?: string,
+    username?: string,
+    fullName?: string,
+    telephone?: string,
+    cpr?: string,
+}
 
 export interface Employee {
     _id: mongoose.Types.ObjectId;

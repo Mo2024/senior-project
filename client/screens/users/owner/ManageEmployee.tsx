@@ -11,9 +11,10 @@ import Field from '../../../components/Field';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import TopBarBtn from '../../../components/TopBarBtn';
 import * as OwnerApi from "../../../network/owner_api";
-import { Businesses, Employee, newEmployee } from '../../../models/user';
+import { Businesses, Employee, newAdmin, newEmployee } from '../../../models/user';
 import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
 import mongoose from 'mongoose';
+import SelectDropdownComponent from '../../../components/SelectDropdownComponent';
 
 
 interface ManageEmployeeProp {
@@ -49,9 +50,11 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
         cpr: "",
     })
 
+    const [selectedBusinessId, setSelectedBusinessId] = useState<any>()
 
     const [emptyState, setEmptyState] = useState('')
     const [selectedBusiness, setSelectedBusiness] = useState('Select Business');
+    const [employeeType, setEmployeeType] = useState('Select Employee Type')
     const [selectedBranch, setSelectedBranch] = useState('Select Branch');
     const [selectedTransferBusiness, setSelectedTransferBusiness] = useState('Select New Business');
     const [selectedTransferBranch, setSelectedTransferBranch] = useState('Select New Branch');
@@ -91,6 +94,15 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
         setBranchesIds((prevIds) => (business?.branches?.map(branch => branch._id)) as any);
 
     }
+
+    function handleBusinessOptionChangeAdmin(index: any) {
+        const selectedBusinessName = businessNames[index as number]
+        setSelectedBusiness(selectedBusinessName)
+        const businessId = businessIds[index as number]
+        console.log(businessId)
+        setSelectedBusinessId(businessId)
+
+    }
     async function handleBranchOptionChange(index: any) {
         const selectedBranchName = branchesNames[index as number]
         setSelectedBranch(selectedBranchName)
@@ -122,16 +134,30 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
 
     async function onSubmitCreate() {
         try {
-            const credentials = {
-                ...employeeData,
-                branchId
+
+            if (employeeType == 'Employee') {
+                const credentials = {
+                    ...employeeData,
+                    branchId
+                }
+                await OwnerApi.createEmployee(credentials as newEmployee);
+            } else if (employeeType == 'Admin') {
+                const credentials = {
+                    ...employeeData,
+                    businessId: selectedBusinessId
+                }
+                console.log(credentials)
+                await OwnerApi.createAdmin(credentials as newAdmin);
+            } else {
+                setIsError(true)
+                setIsMessageVisible(true)
+                setMessage('Please choose a valid type')
+                return
             }
-            console.log(credentials)
-            await OwnerApi.createEmployee(credentials as newEmployee);
 
             setIsError(false)
             setIsMessageVisible(true)
-            setMessage('Employee Created Successfully')
+            setMessage(`${employeeType} Created Successfully`)
         } catch (error) {
             setIsError(true)
             let errorMessage = ''
@@ -242,88 +268,119 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
                             {createEmployeeIsActive &&
                                 <>
                                     <View style={styles.labelView}>
-                                        <Text style={styles.Label}>Business</Text>
+                                        <Text style={styles.Label}>Type</Text>
                                     </View>
-                                    <SelectDropdownIndex
-                                        options={businessNames}
-                                        selectedOption={selectedBusiness}
-                                        handleOptionChange={handleBusinessOptionChange}
+                                    <SelectDropdownComponent
+                                        options={['Employee', 'Admin']}
+                                        selectedOption={employeeType}
+                                        handleOptionChange={(type) => { setEmployeeType(type); console.log(type) }}
                                     />
-                                    <View style={styles.labelView}>
-                                        <Text style={styles.Label}>Branch</Text>
-                                    </View>
-                                    <SelectDropdownIndex
-                                        options={branchesNames}
-                                        selectedOption={selectedBranch}
-                                        handleOptionChange={handleBranchOptionChange}
-                                    />
+                                    {employeeType == 'Admin' &&
+                                        <>
+
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Business</Text>
+                                            </View>
+                                            <SelectDropdownIndex
+                                                options={businessNames}
+                                                selectedOption={selectedBusiness}
+                                                handleOptionChange={handleBusinessOptionChangeAdmin}
+                                            />
+                                        </>
+                                    }
+                                    {employeeType == 'Employee' &&
+                                        <>
+
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Business</Text>
+                                            </View>
+                                            <SelectDropdownIndex
+                                                options={businessNames}
+                                                selectedOption={selectedBusiness}
+                                                handleOptionChange={handleBusinessOptionChange}
+                                            />
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Branch</Text>
+                                            </View>
+                                            <SelectDropdownIndex
+                                                options={branchesNames}
+                                                selectedOption={selectedBranch}
+                                                handleOptionChange={handleBranchOptionChange}
+                                            />
+                                        </>
+                                    }
+
+                                    {employeeType !== 'Select Employee Type' &&
+                                        <>
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Username</Text>
+                                            </View>
+                                            <Field
+                                                handleChange={(updatedCredential) => {
+                                                    setEmployeeData({ ...employeeData, username: updatedCredential })
+                                                }}
+                                                placeholder={'Username'}
+                                                defaultValue={employeeData.username}
+
+                                            />
 
 
-                                    <View style={styles.labelView}>
-                                        <Text style={styles.Label}>Username</Text>
-                                    </View>
-                                    <Field
-                                        handleChange={(updatedCredential) => {
-                                            setEmployeeData({ ...employeeData, username: updatedCredential })
-                                        }}
-                                        placeholder={'Username'}
-                                        defaultValue={employeeData.username}
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Email</Text>
+                                            </View>
+                                            <Field
+                                                handleChange={(updatedCredential) => {
+                                                    setEmployeeData({ ...employeeData, email: updatedCredential })
+                                                }}
+                                                placeholder={'Email'}
+                                                defaultValue={employeeData.email}
 
-                                    />
-
-
-                                    <View style={styles.labelView}>
-                                        <Text style={styles.Label}>Email</Text>
-                                    </View>
-                                    <Field
-                                        handleChange={(updatedCredential) => {
-                                            setEmployeeData({ ...employeeData, email: updatedCredential })
-                                        }}
-                                        placeholder={'Email'}
-                                        defaultValue={employeeData.email}
-
-                                    />
+                                            />
 
 
-                                    <View style={styles.labelView}>
-                                        <Text style={styles.Label}>Full Name</Text>
-                                    </View>
-                                    <Field
-                                        handleChange={(updatedCredential) => {
-                                            setEmployeeData({ ...employeeData, fullName: updatedCredential })
-                                        }}
-                                        placeholder={'Full Name'}
-                                        defaultValue={employeeData.fullName}
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Full Name</Text>
+                                            </View>
+                                            <Field
+                                                handleChange={(updatedCredential) => {
+                                                    setEmployeeData({ ...employeeData, fullName: updatedCredential })
+                                                }}
+                                                placeholder={'Full Name'}
+                                                defaultValue={employeeData.fullName}
 
-                                    />
-
-
-                                    <View style={styles.labelView}>
-                                        <Text style={styles.Label}>Telephone</Text>
-                                    </View>
-                                    <Field
-                                        handleChange={(updatedCredential) => {
-                                            setEmployeeData({ ...employeeData, telephone: updatedCredential })
-                                        }}
-                                        placeholder={'Telephone'}
-                                        defaultValue={employeeData.telephone}
-
-                                    />
+                                            />
 
 
-                                    <View style={styles.labelView}>
-                                        <Text style={styles.Label}>CPR</Text>
-                                    </View>
-                                    <Field
-                                        handleChange={(updatedCredential) => {
-                                            setEmployeeData({ ...employeeData, cpr: updatedCredential })
-                                        }}
-                                        defaultValue={employeeData.cpr}
-                                        placeholder={'CPR'}
-                                    />
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>Telephone</Text>
+                                            </View>
+                                            <Field
+                                                handleChange={(updatedCredential) => {
+                                                    setEmployeeData({ ...employeeData, telephone: updatedCredential })
+                                                }}
+                                                placeholder={'Telephone'}
+                                                defaultValue={employeeData.telephone}
+
+                                            />
 
 
-                                    <SubmitButton buttonName="Submit" handlePress={() => onSubmitCreate()} />
+                                            <View style={styles.labelView}>
+                                                <Text style={styles.Label}>CPR</Text>
+                                            </View>
+                                            <Field
+                                                handleChange={(updatedCredential) => {
+                                                    setEmployeeData({ ...employeeData, cpr: updatedCredential })
+                                                }}
+                                                defaultValue={employeeData.cpr}
+                                                placeholder={'CPR'}
+                                            />
+                                            <SubmitButton buttonName="Submit" handlePress={() => onSubmitCreate()} />
+                                        </>
+
+                                    }
+
+
+
                                 </>
                             }
 
