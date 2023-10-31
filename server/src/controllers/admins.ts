@@ -259,7 +259,7 @@ export const deleteCategory: RequestHandler<unknown, unknown, IdeleteCategory, u
             .populate({ path: "businessId", select: "ownerId status" }) as ICategoryPopulate | null;
 
         if (!category) {
-            throw createHttpError(404, 'Coupon not found!')
+            throw createHttpError(404, 'Category not found!')
         }
 
         if (!category.businessId._id.equals(adminBusinessId)) {
