@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import RoundedBoxBtn from './RoundedBoxBtn';
-import * as OwnerApi from "../network/owner_api";
+import * as AdminApi from "../network/admin_api";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 
 interface CategoryTextBoxProps {
     title: string
-    deleteBusinessProp: (businessId: mongoose.Types.ObjectId) => void
-    businessId: mongoose.Types.ObjectId
+    deleteCategoryProp: (categoryId: mongoose.Types.ObjectId) => void
+    categoryId: mongoose.Types.ObjectId
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>,
@@ -18,16 +18,13 @@ interface CategoryTextBoxProps {
 const windowWidth = Dimensions.get('window').width;
 
 
-const CategoryTextBox = ({ title, handleMessage, businessId, deleteBusinessProp, navigation }: CategoryTextBoxProps) => {
-    const [isError, setIsError] = useState(false);
-    const [isMessageVisible, setIsMessageVisible] = useState(false);
-    const [message, setMessage] = useState('');
-    async function deleteBusiness(businessId: mongoose.Types.ObjectId): Promise<void> {
+const CategoryTextBox = ({ title, handleMessage, categoryId, deleteCategoryProp, navigation }: CategoryTextBoxProps) => {
+    async function deleteBusiness(categoryId: mongoose.Types.ObjectId): Promise<void> {
         try {
             console.log('clicked')
-            await OwnerApi.deleteBusiness(businessId)
-            deleteBusinessProp(businessId)
-            handleMessage(false, true, 'Business Deleted successfully')
+            await AdminApi.deleteCategory(categoryId)
+            deleteCategoryProp(categoryId)
+            handleMessage(false, true, 'Category Deleted successfully')
             // setIsError(false)
             // setIsMessageVisible(true)
             // setMessage('Business Deleted successfully')
@@ -51,7 +48,7 @@ const CategoryTextBox = ({ title, handleMessage, businessId, deleteBusinessProp,
             <View style={styles.roundedBox}>
                 <Text style={styles.title}>{title}</Text>
                 <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness'); }} />
-                <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(businessId) }} />
+                <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(categoryId) }} />
             </View>
         </View>
     );

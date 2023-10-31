@@ -59,12 +59,9 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
     }
 
     function deleteBusiness(businessId: mongoose.Types.ObjectId) {
-        // setBusinessess((prevBusinesses) => {
-        //     return prevBusinesses.filter((business) => business._id !== businessId);
-        // });
-        // setFetchedBusinessess((prevBusinesses) => {
-        //     return prevBusinesses.filter((business) => business._id !== businessId);
-        // });
+        setFetchedCategories((prevCategories) => {
+            return prevCategories.filter((category) => category._id !== businessId);
+        });
     }
 
     if (isLoading) {
@@ -140,8 +137,8 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
                                                 <React.Fragment key={i}>
                                                     <CategoryTextBox
                                                         title={category.name as string}
-                                                        deleteBusinessProp={deleteBusiness}
-                                                        businessId={category.businessId._id as mongoose.Types.ObjectId}
+                                                        deleteCategoryProp={deleteBusiness}
+                                                        categoryId={category._id as mongoose.Types.ObjectId}
                                                         handleMessage={handleMessage}
                                                         navigation={navigation}
                                                         route={route}

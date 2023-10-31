@@ -17,3 +17,11 @@ export async function createCategory(category: { name: string }): Promise<any> {
     });
     return respone.json();
 }
+export async function deleteCategory(categoryId: mongoose.Types.ObjectId): Promise<any> {
+    await deleteData(`${API_URL}/api/admins/category`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryId })
+    });
+    return;
+}
