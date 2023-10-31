@@ -294,7 +294,7 @@ export const editCategory: RequestHandler<unknown, unknown, IEditCategory, unkno
             throw createHttpError(400, 'Invalid Branch name');
         }
         if (!mongoose.isValidObjectId(categoryId)) {
-            throw createHttpError(404, 'Invalid coupon id!')
+            throw createHttpError(404, 'Invalid category id!')
         }
 
         const category = await CategoryModel.findById(categoryId)
