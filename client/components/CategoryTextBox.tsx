@@ -47,7 +47,7 @@ const CategoryTextBox = ({ title, handleMessage, categoryId, deleteCategoryProp,
         <View style={styles.container}>
             <View style={styles.roundedBox}>
                 <Text style={styles.title}>{title}</Text>
-                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditBusiness'); }} />
+                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditCategory', { name: title, categoryId }); }} />
                 <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(categoryId) }} />
             </View>
         </View>

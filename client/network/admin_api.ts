@@ -25,3 +25,12 @@ export async function deleteCategory(categoryId: mongoose.Types.ObjectId): Promi
     });
     return;
 }
+
+export async function editCategory(editCategory: { name: string, categoryId: mongoose.Types.ObjectId }): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/admins/category`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editCategory)
+    });
+    return respone.json();
+}
