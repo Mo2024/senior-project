@@ -20,6 +20,7 @@ import ManageBranch from "./screens/users/owner/ManageBranch";
 import ForgetPasswordScreen from "./screens/ForgetPasswordScreen";
 import ChangePasswordScreen from "./screens/ChangePasswordScreen";
 import AdminNav from "./components/AdminNav";
+import CreateCategory from "./screens/users/admins/CreateCategory";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -76,6 +77,7 @@ export default function App() {
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           <Stack.Screen name="CreateBusiness" component={CreateBusiness} />
           <Stack.Screen name="CreateBranch" component={CreateBranch} />
+          <Stack.Screen name="CreateCategory" component={CreateCategory} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name="EditBranch" component={EditBranch} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />

@@ -79,3 +79,14 @@ export interface Employee {
     __v: number;
 }
 
+interface BusinessInCategory {
+    _id: mongoose.Types.ObjectId;
+    ownerId: string;
+}
+
+export interface Category {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    businessId: BusinessInCategory;
+    __v: number;
+}

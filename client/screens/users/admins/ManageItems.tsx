@@ -4,26 +4,77 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import SubmitButton from '../../../components/SubmitButton';
 import { logout } from '../../../network/user_api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CommonActions, RouteProp } from '@react-navigation/native';
-import { useState } from 'react'
+import { CommonActions, RouteProp, useFocusEffect } from '@react-navigation/native';
+import React, { useState } from 'react'
 import MessageBox from '../../../components/MessageBox';
 import TopBar from '../../../components/TopBar';
 import TopBarBtn from '../../../components/TopBarBtn';
+import AppLoader from '../../../components/AppLoader';
+import { Category } from '../../../models/user';
+import * as AdminApi from '../../../network/admin_api'
+import RoundedBoxWithText from '../../../components/RoundedBoxWithText';
+import mongoose from 'mongoose';
+import CategoryTextBox from '../../../components/CategoryTextBox';
 
 interface ManageItemsProp {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
 }
 
-function ManageItems({ navigation }: ManageItemsProp) {
+function ManageItems({ navigation, route }: ManageItemsProp) {
 
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     const [itemsIsActive, setItemsIsActive] = useState(true)
     const [categoriesIsActive, setCategoriesIsActive] = useState(false)
+    const [fetchedCategories, setFetchedCategories] = useState<Category[]>([])
 
+    useFocusEffect(
+        React.useCallback(() => {
+            async function fetchLoggedInUserInfo() {
+                try {
+                    setIsLoading(true);
+
+                    const fetchedCategories = await AdminApi.getCategories() as Category[]
+                    setFetchedCategories(fetchedCategories)
+
+
+                    setIsLoading(false);
+
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            fetchLoggedInUserInfo()
+        }, [])
+    )
+
+    function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
+        setIsError(isErrorParam)
+        setIsMessageVisible(isVisibleParam)
+        setMessage(message)
+    }
+
+    function deleteBusiness(businessId: mongoose.Types.ObjectId) {
+        // setBusinessess((prevBusinesses) => {
+        //     return prevBusinesses.filter((business) => business._id !== businessId);
+        // });
+        // setFetchedBusinessess((prevBusinesses) => {
+        //     return prevBusinesses.filter((business) => business._id !== businessId);
+        // });
+    }
+
+    if (isLoading) {
+        return (
+            <>
+                <AppLoader />
+            </>
+        );
+
+    }
     return (
         <>
             {
@@ -83,6 +134,23 @@ function ManageItems({ navigation }: ManageItemsProp) {
 
                             {categoriesIsActive &&
                                 <>
+                                    {
+                                        (
+                                            fetchedCategories.map((category, i) =>
+                                                <React.Fragment key={i}>
+                                                    <CategoryTextBox
+                                                        title={category.name as string}
+                                                        deleteBusinessProp={deleteBusiness}
+                                                        businessId={category.businessId._id as mongoose.Types.ObjectId}
+                                                        handleMessage={handleMessage}
+                                                        navigation={navigation}
+                                                        route={route}
+                                                    />
+                                                </React.Fragment>
+                                            )
+                                        )
+                                    }
+                                    <SubmitButton buttonName='Create Category' handlePress={() => { navigation.navigate('CreateCategory') }} />
 
                                 </>
                             }

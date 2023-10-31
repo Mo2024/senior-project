@@ -4,22 +4,23 @@ import * as OwnerApi from "../../../network/owner_api";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommonActions, RouteProp } from '@react-navigation/native';
 import AuthFormComponent from '../../../components/AuthFormBox';
+import * as AdminApi from '../../../network/admin_api'
 
-interface CreateBusinessProps {
+interface CreateCategoryProps {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
 }
 
-function CreateBusiness({ navigation }: CreateBusinessProps) {
-    const [credentialsObject, setCredentialsObject] = useState<{ [key: string]: string }>({ name: '', description: '' })
+function CreateCategory({ navigation }: CreateCategoryProps) {
+    const [credentialsObject, setCredentialsObject] = useState<{ [key: string]: string }>({ name: '' })
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
     async function onSubmit(credentials: object) {
         try {
-            await OwnerApi.createBusiness(credentials as OwnerApi.newBusiness);
+            await AdminApi.createCategory(credentials as OwnerApi.newBusiness);
 
-            navigation.navigate('ManageBusinessess')
+            navigation.navigate('ManageItems')
         } catch (error) {
             setIsError(true)
             let errorMessage = ''
@@ -34,8 +35,6 @@ function CreateBusiness({ navigation }: CreateBusinessProps) {
 
     let placeholderData = {
         name: "Name",
-        description: "Description",
-
     } as { [key: string]: string }
 
 
@@ -47,7 +46,7 @@ function CreateBusiness({ navigation }: CreateBusinessProps) {
             placeholderData={placeholderData}
             navigation={navigation}
             onSubmit={onSubmit}
-            title="Create Business"
+            title="Create Category"
             formBoxTitle={null}
             isMessageVisible={isMessageVisible}
             isError={isError}
@@ -88,4 +87,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default CreateBusiness;
+export default CreateCategory;
