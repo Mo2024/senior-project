@@ -1,6 +1,6 @@
 import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
-import { Branch, Businesses, Category, Employee, newAdmin, newBranchModel, newBusinessModel, newEmployee } from "../models/user";
+import { Branch, Businesses, Category, Employee, newAdmin, newBranchModel, newBusinessModel, newEmployee, newItem } from "../models/user";
 import mongoose, { mongo } from "mongoose";
 
 
@@ -31,6 +31,16 @@ export async function editCategory(editCategory: { name: string, categoryId: mon
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editCategory)
+    });
+    return respone.json();
+}
+
+
+export async function createItem(item: newItem): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/admins/category`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(item)
     });
     return respone.json();
 }

@@ -10,11 +10,13 @@ import MessageBox from '../../../components/MessageBox';
 import TopBar from '../../../components/TopBar';
 import TopBarBtn from '../../../components/TopBarBtn';
 import AppLoader from '../../../components/AppLoader';
-import { Category } from '../../../models/user';
+import { Category, newItem } from '../../../models/user';
 import * as AdminApi from '../../../network/admin_api'
 import RoundedBoxWithText from '../../../components/RoundedBoxWithText';
 import mongoose from 'mongoose';
 import CategoryTextBox from '../../../components/CategoryTextBox';
+import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
+import Field from '../../../components/Field';
 
 interface ManageItemsProp {
     navigation: NativeStackNavigationProp<any>
@@ -23,6 +25,11 @@ interface ManageItemsProp {
 
 function ManageItems({ navigation, route }: ManageItemsProp) {
 
+    const [itemData, setItemData] = useState({
+        name: "",
+        description: "",
+        price: "",
+    })
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
@@ -31,6 +38,12 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
     const [itemsIsActive, setItemsIsActive] = useState(true)
     const [categoriesIsActive, setCategoriesIsActive] = useState(false)
     const [fetchedCategories, setFetchedCategories] = useState<Category[]>([])
+
+
+    const [categoryNames, setCategoryNames] = useState([])
+    const [categoryIds, setCategoryIds] = useState([])
+    const [selectedCategory, setSelectedCategory] = useState('Select a Category')
+    const [selectedCategoryId, setSelectedCategoryId] = useState<mongoose.Types.ObjectId>()
 
     useFocusEffect(
         React.useCallback(() => {
@@ -41,6 +54,11 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
                     const fetchedCategories = await AdminApi.getCategories() as Category[]
                     setFetchedCategories(fetchedCategories)
 
+
+                    const categoryNames = fetchedCategories.map(category => category.name);
+                    setCategoryNames(categoryNames as any)
+                    const categoryIds = fetchedCategories.map(category => category._id);
+                    setCategoryIds(categoryIds as any)
 
                     setIsLoading(false);
 
@@ -64,6 +82,38 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
         });
     }
 
+    async function onSubmit() {
+
+        try {
+
+            let credentials = { ...itemData, categoryId: selectedCategoryId }
+            await AdminApi.createItem(credentials);
+
+            setIsError(false)
+            setIsMessageVisible(true)
+            setMessage(`Item Created Successfully`)
+        } catch (error) {
+            setIsError(true)
+            let errorMessage = ''
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setMessage(errorMessage)
+            setIsMessageVisible(true)
+
+        }
+    }
+
+
+    function handleCategoryOptionChange(index: any) {
+        const selectedCategoryName = categoryNames[index as number]
+        setSelectedCategory(selectedCategoryName)
+        const categoryId = categoryIds[index as number]
+        console.log(categoryId)
+        setSelectedCategoryId(categoryId)
+
+    }
+
     if (isLoading) {
         return (
             <>
@@ -82,8 +132,13 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
                     message={message}
                     onClose={() => {
                         setIsMessageVisible(false)
-
                         if (!isError) {
+                            setSelectedCategory('Select a Category')
+                            setItemData({
+                                name: "",
+                                description: "",
+                                price: "",
+                            })
 
                         }
 
@@ -123,8 +178,51 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
 
                             {itemsIsActive &&
                                 <>
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Category</Text>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={categoryNames}
+                                        selectedOption={selectedCategory}
+                                        handleOptionChange={handleCategoryOptionChange}
+                                    />
 
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>name</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setItemData({ ...itemData, name: updatedCredential })
+                                        }}
+                                        placeholder={'Name'}
+                                        defaultValue={itemData.name}
 
+                                    />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>description</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setItemData({ ...itemData, description: updatedCredential })
+                                        }}
+                                        placeholder={'Description'}
+                                        defaultValue={itemData.description}
+
+                                    />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>price</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setItemData({ ...itemData, price: updatedCredential })
+                                        }}
+                                        placeholder={'Price'}
+                                        defaultValue={itemData.price}
+
+                                    />
+                                    <SubmitButton buttonName='Create Item' handlePress={onSubmit} />
 
                                 </>
                             }

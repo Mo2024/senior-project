@@ -90,3 +90,10 @@ export interface Category {
     businessId: BusinessInCategory;
     __v: number;
 }
+
+export interface newItem {
+    name?: string,
+    description?: string,
+    price?: string,
+    categoryId?: mongoose.Types.ObjectId
+}
