@@ -6,6 +6,9 @@ const router = express.Router();
 router.post('/attendance', EmployeesContoller.attendance);
 router.get('/items', EmployeesContoller.getItems);
 
+router.route('/category')
+    .get(EmployeesContoller.getCategories)
+
 router.route('/stock')
     .get(EmployeesContoller.getStocks)
     .post(EmployeesContoller.addStock)

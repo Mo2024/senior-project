@@ -10,6 +10,7 @@ import { ItemInBranchModel } from "../models/itemInBranch";
 import { assertIsDefined } from "../util/assertIsDefined";
 import { qtyRegex, uuidRegex } from "../util/regex";
 import { IitemPopulate } from "./admins";
+import { IBusinessId } from "./business";
 
 interface attendanceBody {
     attendanceCode: string;
@@ -124,7 +125,7 @@ export const updateStock: RequestHandler<unknown, unknown, IitemIdBody, unknown>
     const { itemId, qty } = req.body
     const authenticatedUserId = req.session.userId;
     const userBusinessId = req.session.businessId;
-    const userBranchId = req.session.businessId;
+    const userBranchId = req.session.branchId;
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(userBranchId)
@@ -168,7 +169,7 @@ export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = 
     const { itemId, qty } = req.body
     const authenticatedUserId = req.session.userId;
     const userBusinessId = req.session.businessId;
-    const userBranchId = req.session.businessId;
+    const userBranchId = req.session.branchId;
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(userBranchId)
@@ -210,7 +211,7 @@ export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = 
 }
 export const getStocks: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
-    const userBranchId = req.session.businessId;
+    const userBranchId = req.session.branchId;
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(userBranchId)
@@ -225,7 +226,7 @@ export const deleteStock: RequestHandler<unknown, unknown, IitemIdBody, unknown>
     const { itemId } = req.body
     const authenticatedUserId = req.session.userId;
     const userBusinessId = req.session.businessId;
-    const userBranchId = req.session.businessId;
+    const userBranchId = req.session.branchId;
     try {
         assertIsDefined(authenticatedUserId)
         assertIsDefined(userBranchId)
@@ -257,6 +258,36 @@ export const deleteStock: RequestHandler<unknown, unknown, IitemIdBody, unknown>
         await itemInBranch.deleteOne();
 
         res.sendStatus(204);
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface ICategoryPopulate extends Document {
+    save(): unknown;
+    deleteOne(): unknown;
+    name: string,
+    businessId: {
+        _id: Types.ObjectId;
+        ownerId: Types.ObjectId;
+        status: boolean;
+    },
+}
+
+export const getCategories: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+        const categories = await CategoryModel.find({ businessId: adminBusinessId })
+            .populate({ path: "businessId", select: "ownerId" }) as Array<ICategoryPopulate> | null;
+        if (!categories) {
+            throw createHttpError(404, 'Categories not found!')
+        }
+        res.status(201).json(categories)
     } catch (error) {
         next(error)
     }
