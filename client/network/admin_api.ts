@@ -8,6 +8,10 @@ export async function getCategories(): Promise<Category[]> {
     const response = await fetchData(`${API_URL}/api/admins/category`, { method: 'GET' }) as Category[] | any;
     return await response.json()
 }
+export async function getItems(catId: mongoose.Types.ObjectId): Promise<any> {
+    const response = await fetchData(`${API_URL}/api/admins/items/${catId}`, { method: 'GET' }) as any;
+    return await response.json()
+}
 
 export async function createCategory(category: { name: string }): Promise<any> {
     const respone = await fetchData(`${API_URL}/api/admins/category`, {
@@ -22,6 +26,14 @@ export async function deleteCategory(categoryId: mongoose.Types.ObjectId): Promi
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ categoryId })
+    });
+    return;
+}
+export async function deleteItem(itemId: mongoose.Types.ObjectId): Promise<any> {
+    await deleteData(`${API_URL}/api/admins/item`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemId })
     });
     return;
 }
@@ -41,6 +53,21 @@ export async function createItem(item: newItem): Promise<any> {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(item)
+    });
+    return respone.json();
+}
+interface IEditItem {
+    itemId?: mongoose.Types.ObjectId
+    name?: string,
+    description?: string,
+    price?: string,
+    categoryId?: mongoose.Types.ObjectId
+}
+export async function editItem(editItem: IEditItem): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/admins/item`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editItem)
     });
     return respone.json();
 }

@@ -1,30 +1,35 @@
 import mongoose from 'mongoose';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import RoundedBoxBtn from './RoundedBoxBtn';
 import * as AdminApi from "../network/admin_api";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
-interface CategoryTextBoxProps {
-    title: string
-    deleteCategoryProp: (categoryId: mongoose.Types.ObjectId) => void
+interface RoundedBoxItem {
+    name: string
+    itemId: mongoose.Types.ObjectId
+    navigation: NativeStackNavigationProp<any>
+    deleteItem: (itemId: mongoose.Types.ObjectId) => void
+    route: RouteProp<any>,
+    description: string,
+    price: string,
     categoryId: mongoose.Types.ObjectId
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
-    navigation: NativeStackNavigationProp<any>
-    route: RouteProp<any>,
+
 
 }
 const windowWidth = Dimensions.get('window').width;
 
 
-const CategoryTextBox = ({ title, handleMessage, categoryId, deleteCategoryProp, navigation }: CategoryTextBoxProps) => {
-    async function deleteBusiness(categoryId: mongoose.Types.ObjectId): Promise<void> {
+const RoundedBoxItem = ({ categoryId, price, description, navigation, itemId, deleteItem: deleteItem, name, handleMessage }: RoundedBoxItem) => {
+    async function deleteBranch(itemId: mongoose.Types.ObjectId): Promise<void> {
         try {
             console.log('clicked')
-            await AdminApi.deleteCategory(categoryId)
-            deleteCategoryProp(categoryId)
-            handleMessage(false, true, 'Category Deleted successfully')
+            await AdminApi.deleteItem(itemId)
+            deleteItem(itemId)
+            handleMessage(false, true, 'Item Deleted successfully')
             // setIsError(false)
             // setIsMessageVisible(true)
             // setMessage('Business Deleted successfully')
@@ -42,17 +47,22 @@ const CategoryTextBox = ({ title, handleMessage, categoryId, deleteCategoryProp,
 
         }
     }
-
     return (
-        <View style={styles.container}>
-            <View style={styles.roundedBox}>
-                <Text style={styles.title}>{title}</Text>
-                <RoundedBoxBtn buttonName='View' handlePress={() => { navigation.navigate('ViewCategory', { name: title, categoryId }); }} />
-                <RoundedBoxBtn buttonName='Edit' handlePress={() => { navigation.navigate('EditCategory', { name: title, categoryId }); }} />
-                <RoundedBoxBtn buttonName='Delete' handlePress={() => { deleteBusiness(categoryId) }} />
+        <TouchableOpacity onPress={() => { navigation.navigate('EditItem', { itemId, name, price, description, categoryId }) }}>
+
+            <View style={styles.container}>
+                <View style={styles.roundedBox}>
+                    <Text style={styles.title}>{name}</Text>
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        onPress={() => deleteBranch(itemId)}>
+                        <Ionicons name="trash" color={'white'} size={25} />
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
+
 };
 
 const styles = StyleSheet.create({
@@ -93,7 +103,19 @@ const styles = StyleSheet.create({
     //     justifyContent: 'center',
     //     borderColor: 'white'
     // },
+    iconButton: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        borderWidth: 1,
+        borderRadius: 5,
+        width: 30,
+        height: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderColor: 'white',
+    },
 });
 
 
-export default CategoryTextBox;
+export default RoundedBoxItem;

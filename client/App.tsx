@@ -22,6 +22,8 @@ import ChangePasswordScreen from "./screens/ChangePasswordScreen";
 import AdminNav from "./components/AdminNav";
 import CreateCategory from "./screens/users/admins/CreateCategory";
 import EditCategory from "./screens/users/admins/EditCategory";
+import ViewCategory from "./screens/users/admins/ViewCategory";
+import EditItem from "./screens/users/admins/EditItem";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -77,11 +79,13 @@ export default function App() {
           <Stack.Screen name="ManageEmployee" component={ManageEmployee} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           <Stack.Screen name="CreateBusiness" component={CreateBusiness} />
+          <Stack.Screen name="ViewCategory" component={ViewCategory} />
           <Stack.Screen name="CreateBranch" component={CreateBranch} />
           <Stack.Screen name="CreateCategory" component={CreateCategory} />
           <Stack.Screen name="EditCategory" component={EditCategory} initialParams={{ name: '', categoryId: '' }} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name="EditBranch" component={EditBranch} initialParams={{ businessId: '', name: '', description: '' }} />
+          <Stack.Screen name="EditItem" component={EditItem} initialParams={{ itemId: "", name: "", price: "", description: "", categoryId: "" }} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />
           <Stack.Screen name='AdminNav' component={AdminNav} />
         </Stack.Navigator>
