@@ -26,6 +26,7 @@ import ViewCategory from "./screens/users/admins/ViewCategory";
 import EditItem from "./screens/users/admins/EditItem";
 import EmployeeNav from "./components/EmployeeNav";
 import ItemsInCategories from "./screens/users/employees/ItemsInCategories";
+import AddProductItem from "./screens/users/employees/AddProductItem";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -85,6 +86,7 @@ export default function App() {
           <Stack.Screen name="ViewCategory" component={ViewCategory} />
           <Stack.Screen name="CreateBranch" component={CreateBranch} />
           <Stack.Screen name="CreateCategory" component={CreateCategory} />
+          <Stack.Screen name="AddProductItem" component={AddProductItem} initialParams={{ categoryId: '' }} />
           <Stack.Screen name="ItemsInCategories" component={ItemsInCategories} initialParams={{ categoryId: '' }} />
           <Stack.Screen name="EditCategory" component={EditCategory} initialParams={{ name: '', categoryId: '' }} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />

@@ -12,33 +12,46 @@ import TopBarBtn from '../../../components/TopBarBtn';
 import AppLoader from '../../../components/AppLoader';
 import RoundedBox from '../../../components/RoundedBox';
 import { Category } from '../../../models/user';
-import * as EmployeeApi from '../../../network/employee_api'
+import newItemInBranch, * as EmployeeApi from '../../../network/employee_api'
 import RoundedBoxItem2 from '../../../components/RoundedBoxItem2';
+import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
+import Field from '../../../components/Field';
 
 
-interface ItemsInCategoriesProp {
+interface AddProductItemProp {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
 }
 
-function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
-
+function AddProductItem({ navigation, route }: AddProductItemProp) {
+    const [isError, setIsError] = useState(false);
+    const [isMessageVisible, setIsMessageVisible] = useState(false);
+    const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
     const [fetchedItems, setFetchedItems] = useState<any[]>([])
     const { categoryId } = route.params || {};
 
-
+    const [itemNames, setItemNames] = useState([])
+    const [itemIds, setItemIds] = useState([])
+    const [selectedItem, setSelectedItem] = useState('Select an Item')
+    const [selectedItemId, setSelectedItemId] = useState('Select an Item')
+    const [qty, setQty] = useState('')
     useFocusEffect(
         React.useCallback(() => {
             async function fetchLoggedInUserInfo() {
                 try {
                     setIsLoading(true);
 
-                    const fetchedItems = await EmployeeApi.getItemsInBranch(categoryId) as any
-                    console.log(fetchedItems)
+                    console.log(categoryId)
+                    const fetchedItems = await EmployeeApi.getItems(categoryId) as any
                     setFetchedItems(fetchedItems)
 
+
+                    const itemNames = fetchedItems.map((item: { name: any; }) => item.name);
+                    setItemNames(itemNames as any)
+                    const itemIds = fetchedItems.map((item: { _id: any; }) => item._id);
+                    setItemIds(itemIds as any)
 
                     setIsLoading(false);
 
@@ -51,6 +64,32 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
     )
 
 
+    function handleItemOptionChange(index: any) {
+        const selectedItemName = itemNames[index as number]
+        setSelectedItem(selectedItemName)
+        const itemId = itemIds[index as number]
+        setSelectedItemId(itemId)
+    }
+
+
+    async function onSubmit() {
+
+        try {
+
+            let credentials = { itemId: selectedItemId, qty, categoryId } as any
+            await EmployeeApi.addItemToBranch(credentials);
+            navigation.goBack();
+        } catch (error) {
+            setIsError(true)
+            let errorMessage = ''
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setMessage(errorMessage)
+            setIsMessageVisible(true)
+
+        }
+    }
     if (isLoading) {
         return (
             <>
@@ -61,6 +100,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
     }
     return (
         <>
+
             <StatusBar hidden={true} />
             <SafeAreaView style={styles.SafeAreaView}>
                 <ScrollView>
@@ -69,13 +109,29 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
 
                         <TopBar title={'Stocks'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
-                            <TouchableOpacity style={styles.addButton} onPress={() => { navigation.navigate('AddProductItem', { categoryId }) }}>
-                                <Text style={styles.addButtonText}>Add Product to Branch</Text>
-                            </TouchableOpacity>
 
-                            {fetchedItems.map((item, index) => (
-                                <RoundedBoxItem2 key={index} text={item.name} quantity={item.quantity} itemId={item.categoryId} />
-                            ))}
+
+                            <View style={styles.labelView}>
+                                <Text style={styles.Label}>Category</Text>
+                            </View>
+                            <SelectDropdownIndex
+                                options={itemNames}
+                                selectedOption={selectedItem}
+                                handleOptionChange={handleItemOptionChange}
+                            />
+
+                            <View style={styles.labelView}>
+                                <Text style={styles.Label}>description</Text>
+                            </View>
+                            <Field
+                                handleChange={(updatedCredential) => {
+                                    setQty(updatedCredential)
+                                }}
+                                placeholder={'Price'}
+                                defaultValue={qty}
+
+                            />
+                            <SubmitButton buttonName="Add Item" handlePress={onSubmit} />
 
 
                         </View>
@@ -146,4 +202,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default ItemsInCategories;
+export default AddProductItem;
