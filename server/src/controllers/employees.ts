@@ -96,25 +96,25 @@ export const attendance: RequestHandler<unknown, unknown, attendanceBody, unknow
 
 }
 
-export const getItems: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
-    const authenticatedUserId = req.session.userId;
-    const businessId = req.session.businessId;
-    try {
-        assertIsDefined(authenticatedUserId)
-        assertIsDefined(businessId)
+// export const getItems: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
+//     const authenticatedUserId = req.session.userId;
+//     const businessId = req.session.businessId;
+//     try {
+//         assertIsDefined(authenticatedUserId)
+//         assertIsDefined(businessId)
 
-        const matchingCategories = await CategoryModel.find({ businessId }).exec();
-        const items = await ItemModel.find({ categoryId: { $in: matchingCategories } });
+//         const matchingCategories = await CategoryModel.find({ businessId }).exec();
+//         const items = await ItemModel.find({ categoryId: { $in: matchingCategories } });
 
-        if (!items) {
-            throw createHttpError(404, 'Items not found!')
-        }
-        res.status(201).json(items)
-    } catch (error) {
-        next(error)
-    }
+//         if (!items) {
+//             throw createHttpError(404, 'Items not found!')
+//         }
+//         res.status(201).json(items)
+//     } catch (error) {
+//         next(error)
+//     }
 
-}
+// }
 
 interface IitemIdBody {
     itemId?: Types.ObjectId,
@@ -288,6 +288,38 @@ export const getCategories: RequestHandler<IBusinessId, unknown, unknown, unknow
             throw createHttpError(404, 'Categories not found!')
         }
         res.status(201).json(categories)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface itemsParamsI {
+    categoryId: mongoose.Types.ObjectId
+}
+
+export const getItems: RequestHandler<itemsParamsI, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    const { categoryId } = req.params
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(adminBusinessId)
+
+        if (!categoryId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(categoryId)) {
+            throw createHttpError(404, 'Invalid item id!')
+        }
+        const items = await ItemModel.find({ categoryId });
+
+        if (!items) {
+            throw createHttpError(404, 'Items not found!')
+        }
+
+        res.status(201).json(items)
     } catch (error) {
         next(error)
     }
