@@ -37,7 +37,7 @@ export async function editCategory(editCategory: { name: string, categoryId: mon
 
 
 export async function createItem(item: newItem): Promise<any> {
-    const respone = await fetchData(`${API_URL}/api/admins/category`, {
+    const respone = await fetchData(`${API_URL}/api/admins/item`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(item)
