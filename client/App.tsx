@@ -24,6 +24,7 @@ import CreateCategory from "./screens/users/admins/CreateCategory";
 import EditCategory from "./screens/users/admins/EditCategory";
 import ViewCategory from "./screens/users/admins/ViewCategory";
 import EditItem from "./screens/users/admins/EditItem";
+import EmployeeNav from "./components/EmployeeNav";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -39,6 +40,7 @@ export default function App() {
         const user = await UserApi.getLoggedInUser()
         if (!user) await SecureStore.deleteItemAsync('userInfo'); setIsLoggedIn(false);
         // setUserType(user.__t)
+        console.log(user)
         setUserTypeNav(await userRouter(user.__t) as string)
         await SecureStore.setItemAsync('userInfo', JSON.stringify(user))
         setIsLoggedIn(true);
@@ -88,6 +90,7 @@ export default function App() {
           <Stack.Screen name="EditItem" component={EditItem} initialParams={{ itemId: "", name: "", price: "", description: "", categoryId: "" }} />
           <Stack.Screen name='OwnerNav' component={OwnerNav} />
           <Stack.Screen name='AdminNav' component={AdminNav} />
+          <Stack.Screen name='EmployeeNav' component={EmployeeNav} />
         </Stack.Navigator>
 
       </NavigationContainer>
