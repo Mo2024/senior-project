@@ -9,6 +9,7 @@ router.post('/attendance', EmployeesContoller.attendance);
 router.route('/category')
     .get(EmployeesContoller.getCategories)
 router.get('/items/:categoryId', EmployeesContoller.getItems);
+router.get('/itemsInBranch/:categoryId', EmployeesContoller.getItemsInBranch);
 
 router.route('/stock')
     .get(EmployeesContoller.getStocks)

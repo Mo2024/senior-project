@@ -20,6 +20,11 @@ const itemInBranchSchema = new Schema({
         ref: 'Item',
         required: true
     },
+    categoryId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
+    },
 });
 const ItemInBranchModel = model("ItemInBranchModel", itemInBranchSchema);
 export { ItemInBranchModel };

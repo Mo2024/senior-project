@@ -119,6 +119,7 @@ export const attendance: RequestHandler<unknown, unknown, attendanceBody, unknow
 interface IitemIdBody {
     itemId?: Types.ObjectId,
     qty?: number
+    categoryId?: Types.ObjectId
 }
 
 export const updateStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = async (req, res, next) => {
@@ -166,7 +167,7 @@ export const updateStock: RequestHandler<unknown, unknown, IitemIdBody, unknown>
 
 }
 export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = async (req, res, next) => {
-    const { itemId, qty } = req.body
+    const { itemId, qty, categoryId } = req.body
     const authenticatedUserId = req.session.userId;
     const userBusinessId = req.session.businessId;
     const userBranchId = req.session.branchId;
@@ -175,7 +176,7 @@ export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = 
         assertIsDefined(userBranchId)
         assertIsDefined(userBusinessId)
 
-        if (!itemId || !qty) {
+        if (!itemId || !qty || !categoryId) {
             throw createHttpError(400, "Parameter Missing")
         }
         if (!qtyRegex.test(qty.toString())) {
@@ -195,13 +196,13 @@ export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = 
             throw createHttpError(401, 'You update stock to an item outside your business!')
         }
 
-        const itemInBranch = await ItemInBranchModel.findOne({ branchId: userBranchId, itemId: item._id })
+        const itemInBranch = await ItemInBranchModel.findOne({ branchId: userBranchId, itemId: item._id, categoryId })
 
         if (itemInBranch) {
             throw createHttpError(409, 'Item in branch already exists!')
         }
 
-        const newItemInBranch = await ItemInBranchModel.create({ branchId: userBranchId, itemId: item._id, quantity: qty })
+        const newItemInBranch = await ItemInBranchModel.create({ branchId: userBranchId, itemId: item._id, quantity: qty, categoryId })
 
         res.status(201).json(newItemInBranch)
     } catch (error) {
@@ -314,6 +315,35 @@ export const getItems: RequestHandler<itemsParamsI, unknown, unknown, unknown> =
             throw createHttpError(404, 'Invalid item id!')
         }
         const items = await ItemModel.find({ categoryId });
+
+        if (!items) {
+            throw createHttpError(404, 'Items not found!')
+        }
+
+        res.status(201).json(items)
+    } catch (error) {
+        next(error)
+    }
+
+}
+export const getItemsInBranch: RequestHandler<itemsParamsI, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const adminBusinessId = req.session.businessId;
+    const branchId = req.session.branchId;
+    const { categoryId } = req.params
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(branchId)
+        assertIsDefined(adminBusinessId)
+
+        if (!categoryId) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!mongoose.isValidObjectId(categoryId)) {
+            throw createHttpError(404, 'Invalid item id!')
+        }
+        const items = await ItemInBranchModel.find({ categoryId, branchId });
 
         if (!items) {
             throw createHttpError(404, 'Items not found!')
