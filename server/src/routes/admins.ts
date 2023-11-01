@@ -20,10 +20,12 @@ router.route('/category')
 
 //items
 router.route('/item')
-    .get(AdminContoller.getItems)
+    .get(AdminContoller.getItem)
     .post(AdminContoller.createItem)
     .delete(AdminContoller.deleteItem)
     .patch(AdminContoller.editItem);
+
+router.get('/items/:categoryId', AdminContoller.getItems);
 
 //tables
 router.route('/table')
