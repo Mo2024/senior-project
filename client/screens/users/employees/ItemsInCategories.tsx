@@ -15,16 +15,17 @@ import { Category } from '../../../models/user';
 import * as EmployeeApi from '../../../network/employee_api'
 
 
-interface ManageStockProp {
+interface ItemsInCategoriesProp {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
 }
 
-function ManageStock({ navigation, route }: ManageStockProp) {
+function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
 
     const [isLoading, setIsLoading] = useState(true);
 
-    const [fetchedCategories, setFetchedCategories] = useState<Category[]>([])
+    const [fetchedItems, setFetchedItems] = useState<Category[]>([])
+    const { categoryId } = route.params || {};
 
 
     useFocusEffect(
@@ -33,8 +34,9 @@ function ManageStock({ navigation, route }: ManageStockProp) {
                 try {
                     setIsLoading(true);
 
-                    const fetchedCategories = await EmployeeApi.getCategories() as Category[]
-                    setFetchedCategories(fetchedCategories)
+                    console.log(categoryId)
+                    const fetchedItems = await EmployeeApi.getItems(categoryId) as any
+                    setFetchedItems(fetchedItems)
 
 
                     setIsLoading(false);
@@ -64,28 +66,28 @@ function ManageStock({ navigation, route }: ManageStockProp) {
 
                     <View style={styles.container}>
 
-                        <TopBar title={'Stocks'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
+                        <TopBar title={'Stocks'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
 
 
                             {(() => {
                                 const rowBoxes = [];
 
-                                for (let i = 0; i < Math.ceil(fetchedCategories.length / 2); i++) {
+                                for (let i = 0; i < Math.ceil(fetchedItems.length / 2); i++) {
                                     let extraCat = i + 1;
-                                    const category = fetchedCategories[i];
-                                    const category2 = fetchedCategories[extraCat];
+                                    const category = fetchedItems[i];
+                                    const category2 = fetchedItems[extraCat];
                                     rowBoxes.push(
                                         <View style={styles.row} key={i}>
                                             <RoundedBox
                                                 text={category.name}
-                                                onPress={() => { navigation.navigate('ItemsInCategories', { categoryId: category._id }) }}
+                                                onPress={() => { navigation.navigate('ItemsInCategories', { category: category._id }) }}
                                             />
 
                                             {category2 && (
                                                 <RoundedBox
                                                     text={category2.name}
-                                                    onPress={() => { navigation.navigate('ItemsInCategories', { categoryId: category._id }) }}
+                                                    onPress={() => { navigation.navigate('ItemsInCategories', { category: category._id }) }}
                                                 />)
                                             }
                                         </View>
@@ -150,4 +152,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default ManageStock;
+export default ItemsInCategories;
