@@ -1,4 +1,4 @@
-import fetchData from "../utils/functions";
+import fetchData, { deleteData } from "../utils/functions";
 import { API_URL } from '@env';
 import { Category } from "../models/user";
 import mongoose from "mongoose";
@@ -31,4 +31,14 @@ export async function addItemToBranch(newItemInBranch: newItemInBranch): Promise
         body: JSON.stringify(newItemInBranch)
     });
     return respone.json();
+}
+
+export async function deleteItemInBranch(credentials: any): Promise<any> {
+    console.log(credentials)
+    await deleteData(`${API_URL}/api/employees/stock`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemId: credentials })
+    });
+    return;
 }

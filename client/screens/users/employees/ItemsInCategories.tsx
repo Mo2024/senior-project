@@ -14,6 +14,7 @@ import RoundedBox from '../../../components/RoundedBox';
 import { Category } from '../../../models/user';
 import * as EmployeeApi from '../../../network/employee_api'
 import RoundedBoxItem2 from '../../../components/RoundedBoxItem2';
+import mongoose from 'mongoose';
 
 
 interface ItemsInCategoriesProp {
@@ -22,7 +23,9 @@ interface ItemsInCategoriesProp {
 }
 
 function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
-
+    const [isError, setIsError] = useState(false);
+    const [isMessageVisible, setIsMessageVisible] = useState(false);
+    const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
     const [fetchedItems, setFetchedItems] = useState<any[]>([])
@@ -36,7 +39,6 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
                     setIsLoading(true);
 
                     const fetchedItems = await EmployeeApi.getItemsInBranch(categoryId) as any
-                    console.log(fetchedItems)
                     setFetchedItems(fetchedItems)
 
 
@@ -50,7 +52,17 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
         }, [])
     )
 
+    function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
+        setIsError(isErrorParam)
+        setIsMessageVisible(isVisibleParam)
+        setMessage(message)
+    }
 
+    function deleteItemInCategory(itemId: mongoose.Types.ObjectId) {
+        setFetchedItems((prevItems) => {
+            return prevItems.filter((item) => item.itemId._id !== itemId);
+        });
+    }
     if (isLoading) {
         return (
             <>
@@ -74,7 +86,15 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
                             </TouchableOpacity>
 
                             {fetchedItems.map((item, index) => (
-                                <RoundedBoxItem2 key={index} text={item.name} quantity={item.quantity} itemId={item.categoryId} />
+
+                                <RoundedBoxItem2
+                                    key={index}
+                                    text={item.itemId.name}
+                                    quantity={item.quantity}
+                                    itemId={item.itemId._id}
+                                    deleteProp={deleteItemInCategory}
+                                    handleMessage={handleMessage}
+                                />
                             ))}
 
 
