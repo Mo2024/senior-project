@@ -71,10 +71,10 @@ function ManageStock({ navigation, route }: ManageStockProp) {
                             {(() => {
                                 const rowBoxes = [];
 
-                                for (let i = 0; i < Math.ceil(fetchedCategories.length / 2); i++) {
-                                    let extraCat = i + 1;
+                                for (let i = 0; i < fetchedCategories.length; i += 2) {
                                     const category = fetchedCategories[i];
-                                    const category2 = fetchedCategories[extraCat];
+                                    const category2 = fetchedCategories[i + 1];
+
                                     rowBoxes.push(
                                         <View style={styles.row} key={i}>
                                             <RoundedBox
@@ -85,14 +85,16 @@ function ManageStock({ navigation, route }: ManageStockProp) {
                                             {category2 && (
                                                 <RoundedBox
                                                     text={category2.name}
-                                                    onPress={() => { navigation.navigate('ItemsInCategories', { categoryId: category._id }) }}
+                                                    onPress={() => { navigation.navigate('ItemsInCategories', { categoryId: category2._id }) }}
                                                 />)
                                             }
                                         </View>
                                     );
                                 }
+
                                 return rowBoxes;
                             })()}
+
 
 
                         </View>
