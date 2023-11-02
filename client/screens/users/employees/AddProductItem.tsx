@@ -100,7 +100,18 @@ function AddProductItem({ navigation, route }: AddProductItemProp) {
     }
     return (
         <>
+            {
+                isMessageVisible &&
 
+                <MessageBox
+                    type={isError}
+                    message={message}
+                    onClose={() => {
+                        setIsMessageVisible(false)
+                    }}
+
+                />
+            }
             <StatusBar hidden={true} />
             <SafeAreaView style={styles.SafeAreaView}>
                 <ScrollView>
@@ -121,13 +132,13 @@ function AddProductItem({ navigation, route }: AddProductItemProp) {
                             />
 
                             <View style={styles.labelView}>
-                                <Text style={styles.Label}>description</Text>
+                                <Text style={styles.Label}>Quantity</Text>
                             </View>
                             <Field
                                 handleChange={(updatedCredential) => {
                                     setQty(updatedCredential)
                                 }}
-                                placeholder={'Price'}
+                                placeholder={'Quantity'}
                                 defaultValue={qty}
 
                             />

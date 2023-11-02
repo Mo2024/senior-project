@@ -153,6 +153,7 @@ export const updateStock: RequestHandler<unknown, unknown, IitemIdBody, unknown>
         }
 
         const itemInBranch = await ItemInBranchModel.findOne({ branchId: userBranchId, itemId: item._id })
+        console.log(itemInBranch)
 
         if (!itemInBranch) {
             throw createHttpError(404, 'Item in branch not found!')
@@ -343,7 +344,7 @@ export const getItemsInBranch: RequestHandler<itemsParamsI, unknown, unknown, un
         if (!mongoose.isValidObjectId(categoryId)) {
             throw createHttpError(404, 'Invalid item id!')
         }
-        const items = await ItemInBranchModel.find({ categoryId, branchId });
+        const items = await ItemInBranchModel.find({ categoryId, branchId }).populate('itemId');
 
         if (!items) {
             throw createHttpError(404, 'Items not found!')

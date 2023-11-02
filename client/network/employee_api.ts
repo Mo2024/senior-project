@@ -42,3 +42,12 @@ export async function deleteItemInBranch(credentials: any): Promise<any> {
     });
     return;
 }
+
+export async function editItemInBranch(crredentiasl: any): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/employees/stock`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(crredentiasl)
+    });
+    return respone.json();
+}

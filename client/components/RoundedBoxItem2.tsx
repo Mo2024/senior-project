@@ -2,15 +2,20 @@ import mongoose from 'mongoose';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import * as EmployeeApi from '../network/employee_api'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 
 interface RoundedBox2 {
     text: string,
     quantity: number,
     itemId: mongoose.Types.ObjectId,
+    categoryId: mongoose.Types.ObjectId,
     deleteProp: (itemId: mongoose.Types.ObjectId) => void
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
+    navigation: NativeStackNavigationProp<any>
+    route: RouteProp<any>
 }
-function RoundedBoxItem2({ text, quantity, itemId, deleteProp, handleMessage }: RoundedBox2) {
+function RoundedBoxItem2({ text, quantity, itemId, deleteProp, handleMessage, navigation, categoryId }: RoundedBox2) {
 
     async function deleteItemInCategory() {
         try {
@@ -42,7 +47,7 @@ function RoundedBoxItem2({ text, quantity, itemId, deleteProp, handleMessage }: 
                 {/* <Button title="Edit" onPress={() => { }} color="#72063c" /> */}
                 {/* <Button title="Delete" onPress={() => { }} color="#72063c" /> */}
                 <View style={[styles.btn, { borderColor: '#fff', borderWidth: 1, borderRadius: 5 }]}>
-                    <Button title="Edit" onPress={() => { /* handle edit */ }} color="#72063c" />
+                    <Button title="Edit" onPress={() => { navigation.navigate('EditProductItem', { quantity, itemId, categoryId }) }} color="#72063c" />
                 </View>
                 <View style={[styles.btn, { borderColor: '#fff', borderWidth: 1, borderRadius: 5 }]}>
                     <Button title="Delete" onPress={deleteItemInCategory} color="#72063c" />

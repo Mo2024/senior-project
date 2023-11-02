@@ -1,5 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Text, SafeAreaView, ScrollView, TouchableOpacity, Pressable, TouchableWithoutFeedback } from 'react-native';
+import PrimaryButton from '../../../components/PrimaryButton';
+import SubmitButton from '../../../components/SubmitButton';
+import { logout } from '../../../network/user_api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommonActions, RouteProp, useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react'
@@ -9,35 +12,36 @@ import TopBarBtn from '../../../components/TopBarBtn';
 import AppLoader from '../../../components/AppLoader';
 import RoundedBox from '../../../components/RoundedBox';
 import { Category } from '../../../models/user';
-import * as EmployeeApi from '../../../network/employee_api'
+import newItemInBranch, * as EmployeeApi from '../../../network/employee_api'
 import RoundedBoxItem2 from '../../../components/RoundedBoxItem2';
-import mongoose from 'mongoose';
+import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
+import Field from '../../../components/Field';
 
 
-interface ItemsInCategoriesProp {
+interface EditProductItemProp {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
 }
 
-function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
+function EditProductItem({ navigation, route }: EditProductItemProp) {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
     const [fetchedItems, setFetchedItems] = useState<any[]>([])
-    const { categoryId } = route.params || {};
+    const { categoryId, itemId, quantity } = route.params || {};
 
-
+    const [itemNames, setItemNames] = useState([])
+    const [itemIds, setItemIds] = useState([])
+    const [selectedItem, setSelectedItem] = useState('Select an Item')
+    const [selectedItemId, setSelectedItemId] = useState(itemId)
+    const [qty, setQty] = useState(quantity)
     useFocusEffect(
         React.useCallback(() => {
             async function fetchLoggedInUserInfo() {
                 try {
-                    setIsLoading(true);
-
-                    const fetchedItems = await EmployeeApi.getItemsInBranch(categoryId) as any
-                    setFetchedItems(fetchedItems)
-
+                    setIsLoading(true)
 
                     setIsLoading(false);
 
@@ -49,16 +53,33 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
         }, [])
     )
 
-    function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
-        setIsError(isErrorParam)
-        setIsMessageVisible(isVisibleParam)
-        setMessage(message)
+
+    function handleItemOptionChange(index: any) {
+        const selectedItemName = itemNames[index as number]
+        setSelectedItem(selectedItemName)
+        const itemId = itemIds[index as number]
+        setSelectedItemId(itemId)
     }
 
-    function deleteItemInCategory(itemId: mongoose.Types.ObjectId) {
-        setFetchedItems((prevItems) => {
-            return prevItems.filter((item) => item.itemId._id !== itemId);
-        });
+
+    async function onSubmit() {
+
+        try {
+
+            let credentials = { itemId: selectedItemId, qty, categoryId } as any
+            console.log(credentials)
+            await EmployeeApi.editItemInBranch(credentials);
+            navigation.goBack();
+        } catch (error) {
+            setIsError(true)
+            let errorMessage = ''
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setMessage(errorMessage)
+            setIsMessageVisible(true)
+
+        }
     }
     if (isLoading) {
         return (
@@ -70,6 +91,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
     }
     return (
         <>
+
             <StatusBar hidden={true} />
             <SafeAreaView style={styles.SafeAreaView}>
                 <ScrollView>
@@ -78,24 +100,19 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
 
                         <TopBar title={'Stocks'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
-                            <TouchableOpacity style={styles.addButton} onPress={() => { navigation.navigate('AddProductItem', { categoryId }) }}>
-                                <Text style={styles.addButtonText}>Add Product to Branch</Text>
-                            </TouchableOpacity>
 
-                            {fetchedItems.map((item, index) => (
+                            <View style={styles.labelView}>
+                                <Text style={styles.Label}>Quantity</Text>
+                            </View>
+                            <Field
+                                handleChange={(updatedCredential) => {
+                                    setQty(updatedCredential)
+                                }}
+                                placeholder={'Quantity'}
+                                defaultValue={qty.toString()}
 
-                                <RoundedBoxItem2
-                                    key={index}
-                                    text={item.itemId.name}
-                                    quantity={item.quantity}
-                                    itemId={item.itemId._id}
-                                    deleteProp={deleteItemInCategory}
-                                    handleMessage={handleMessage}
-                                    navigation={navigation}
-                                    route={route}
-                                    categoryId={categoryId}
-                                />
-                            ))}
+                            />
+                            <SubmitButton buttonName="Edit Item" handlePress={onSubmit} />
 
 
                         </View>
@@ -166,4 +183,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default ItemsInCategories;
+export default EditProductItem;
