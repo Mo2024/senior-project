@@ -14,6 +14,7 @@ export async function getLoggedInUserInfo(): Promise<UserModel> {
 export interface LoginCredentials {
     username: string,
     password: string,
+    type: string
 }
 
 export async function login(credentials: LoginCredentials): Promise<UserModel> {

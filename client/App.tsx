@@ -28,6 +28,7 @@ import EmployeeNav from "./components/EmployeeNav";
 import ItemsInCategories from "./screens/users/employees/ItemsInCategories";
 import AddProductItem from "./screens/users/employees/AddProductItem";
 import EditProductItem from "./screens/users/employees/EditProductItem";
+import AttendanceQrCode from "./screens/AttendanceQrCode";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -79,6 +80,7 @@ export default function App() {
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
           <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
+          <Stack.Screen name="AttendanceQrCode" component={AttendanceQrCode} />
           <Stack.Screen name="ManageBranches" component={ManageBranches} />
           <Stack.Screen name="ManageBranch" component={ManageBranch} />
           <Stack.Screen name="ManageEmployee" component={ManageEmployee} />

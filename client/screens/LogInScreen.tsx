@@ -19,9 +19,23 @@ function LogInScreen({ navigation }: LogInScreenProps) {
     const [message, setMessage] = useState('');
     async function onSubmit(credentials: object) {
         try {
+            let navResult = '';
+            let user;
             await validateLogin(credentials as UserApi.LoginCredentials)
-            const user = await UserApi.login(credentials as UserApi.LoginCredentials);
-            let navResult = await userRouter(user.__t) as string
+            if (/^branch\d+/.test(credentialsObject.username)) {
+                let creds = { ...credentials, type: "AttendanceUser" }
+                user = await UserApi.login(creds as UserApi.LoginCredentials);
+                // user.__t = 'AttendanceUser'
+                user = { ...user, __t: 'AttendanceUser' }
+                navResult = await userRouter('AttendanceUser') as string
+
+            } else {
+                let creds = { ...credentials, type: "normal" }
+                user = await UserApi.login(creds as UserApi.LoginCredentials);
+                navResult = await userRouter(user.__t) as string
+            }
+            console.log(user)
+
             await SecureStore.setItemAsync('userInfo', JSON.stringify(user));
             navigation.dispatch(
                 CommonActions.reset({

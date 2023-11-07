@@ -96,4 +96,41 @@ type AdminType = InferSchemaType<typeof Admin.schema>;
 
 const AdminModel = model<AdminType>("Admin", Admin.schema);
 
-export { UserModel, OwnerModel, EmployeeModel, AdminModel }
+const attendanceUserSchema = new Schema({
+    branchId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Branch',
+        required: true
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
+        select: false,
+    },
+});
+type AttendanceUserType = InferSchemaType<typeof attendanceUserSchema>;
+const AttendanceUserModel = model<AttendanceUserType>("AttendanceUser", attendanceUserSchema);
+
+// attendanceUserSchema.add(userSchema);
+
+// const AttendanceUser = User.discriminator("AttendanceUser", attendanceUserSchema);
+// type AttendanceUserType = InferSchemaType<typeof AttendanceUser.schema>;
+
+// const AttendanceUserModel = model<AttendanceUserType>("AttendanceUser", AttendanceUser.schema);
+
+
+const highestCountSchema = new Schema({
+    highestCount: {
+        type: Number,
+        default: 0,
+    },
+});
+
+const HighestCountModel = model('HighestCount', highestCountSchema);
+
+export { HighestCountModel, UserModel, OwnerModel, EmployeeModel, AdminModel, AttendanceUserModel }

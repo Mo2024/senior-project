@@ -94,5 +94,7 @@ export async function userRouter(userType: string) {
         return 'EmployeeNav'
     } else if (userType == 'Admin') {
         return 'AdminNav'
+    } else if (userType == 'AttendanceUser') {
+        return 'AttendanceQrCode'
     }
 }
