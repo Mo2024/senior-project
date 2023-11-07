@@ -10,6 +10,10 @@ export async function getLoggedInUserInfo(): Promise<UserModel> {
     const response = await fetchData(`${API_URL}/api/users/getUserInfo`, { method: 'GET' }) as any;
     return await response.json()
 }
+export async function getQrCode(): Promise<any> {
+    const response = await fetchData(`${API_URL}/api/users/QrCode`, { method: 'GET' }) as any;
+    return await response.json()
+}
 
 export interface LoginCredentials {
     username: string,

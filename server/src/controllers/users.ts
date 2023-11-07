@@ -172,6 +172,7 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
         req.session.userId = user._id;
         if (type == 'AttendanceUser') {
             req.session.role = 'AttendanceUser';
+            req.session.branchId = user.branchId;
         }
         if (type !== 'AttendanceUser') {
             req.session.email = user.email;
@@ -458,4 +459,15 @@ export const generateVerificationCode: RequestHandler<unknown, unknown, ForgotPa
         next(error);
     }
 
+}
+
+export const getQrCode: RequestHandler = async (req, res, next) => {
+    const branchId = req.session.branchId;
+    try {
+        const qrCode = await BranchModel.findById(branchId);
+
+        res.status(201).json({ attendanceCode: qrCode?.attendanceCode })
+    } catch (error) {
+        next(error)
+    }
 }

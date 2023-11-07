@@ -1,6 +1,6 @@
 import express from 'express';
 import * as UserContoller from "../controllers/users";
-import { isOwner, requiresAuth } from '../middleware/auth';
+import { isAttendanceUser, isOwner, requiresAuth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -18,6 +18,7 @@ router.post('/forgotPasswordEmail', UserContoller.forgotPasswordEmail);
 router.patch('/forgotPasswordCode', UserContoller.forgotPasswordCode);
 
 
+router.get('/QrCode', isAttendanceUser, UserContoller.getQrCode);
 router.get('/branches/generateVCode', isOwner, UserContoller.generateVerificationCode);
 router.post('/branches/updateUserPwd', isOwner, UserContoller.updateAttendanceUserPassword);
 
