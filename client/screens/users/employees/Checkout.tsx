@@ -21,6 +21,7 @@ import PromptBox from '../../../components/PromptBox';
 import * as SecureStore from 'expo-secure-store';
 import RoundedBox from '../../../components/RoundedBox';
 import * as EmployeeApi from '../../../network/employee_api'
+import Rectangle from '../../../components/Rectangle';
 interface props {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
@@ -62,6 +63,16 @@ function Checkout({ navigation, route }: props) {
 
     }
 
+    function handleRectanglePress(_id: mongoose.Types.ObjectId) {
+
+    }
+
+    function handleIncrement(_id: mongoose.Types.ObjectId) {
+
+    }
+    function handleDecrement(_id: mongoose.Types.ObjectId) {
+
+    }
     return (
         <>
             {
@@ -96,7 +107,15 @@ function Checkout({ navigation, route }: props) {
 
                         <TopBar title={'Checkout'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
-
+                            {customerOrderObjects.map((orderObject: any) => (
+                                <Rectangle
+                                    key={orderObject._id}
+                                    orderName={orderObject.name}
+                                    quantity={orderObject.qty}
+                                    onIncrement={() => handleIncrement(orderObject._id)}
+                                    onDecrement={() => handleDecrement(orderObject._id)}
+                                />
+                            ))}
 
                         </View>
 
@@ -159,6 +178,12 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+    },
+    rectangle: {
+        backgroundColor: '#e0e0e0',
+        padding: 10,
+        marginVertical: 10,
+        borderRadius: 10,
     },
 
 });
