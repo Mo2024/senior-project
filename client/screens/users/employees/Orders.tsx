@@ -11,7 +11,7 @@ import Field from '../../../components/Field';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import TopBarBtn from '../../../components/TopBarBtn';
 import * as OwnerApi from "../../../network/owner_api";
-import { Businesses, Employee, newAdmin, newEmployee } from '../../../models/user';
+import { Businesses, Category, Employee, newAdmin, newEmployee } from '../../../models/user';
 import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
 import mongoose from 'mongoose';
 import SelectDropdownComponent from '../../../components/SelectDropdownComponent';
@@ -19,6 +19,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Alert } from 'react-bootstrap';
 import PromptBox from '../../../components/PromptBox';
 import * as SecureStore from 'expo-secure-store';
+import RoundedBox from '../../../components/RoundedBox';
+import * as EmployeeApi from '../../../network/employee_api'
 
 
 interface ManageEmployeeProp {
@@ -32,6 +34,7 @@ function Orders({ navigation }: ManageEmployeeProp) {
     const [isPromptVisible, setIsPromptVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchedCategories, setFetchedCategories] = useState<Category[]>([])
 
     const [customerOrdersNames, setCustomerOrdersNames] = useState<any>([]);
     const [customerOrdersObjects, setCustomerOrdersObjects] = useState<any>([]);
@@ -43,7 +46,7 @@ function Orders({ navigation }: ManageEmployeeProp) {
     const [newOrderName, setNewOrderName] = useState<string>('')
     useFocusEffect(
         React.useCallback(() => {
-            async function fetchLoggedInUserInfo() {
+            async function fetchItemsNeeded() {
                 try {
                     setIsLoading(true);
                     const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
@@ -59,34 +62,20 @@ function Orders({ navigation }: ManageEmployeeProp) {
                         setCustomerOrdersObjects(parsedCustomerOrdersObjects);
                     }
 
+
+                    const fetchedCategories = await EmployeeApi.getCategories() as Category[]
+                    setFetchedCategories(fetchedCategories)
+
+
                     setIsLoading(false);
 
                 } catch (error) {
                     console.log(error)
                 }
             }
-            fetchLoggedInUserInfo()
+            fetchItemsNeeded()
         }, [])
     )
-
-
-
-    async function onSubmit() {
-        try {
-            setIsError(false)
-            setIsMessageVisible(true)
-            setMessage(`Created Successfully`)
-        } catch (error) {
-            setIsError(true)
-            let errorMessage = ''
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            setMessage(errorMessage)
-            setIsMessageVisible(true)
-
-        }
-    }
 
     function handleCurrentCustomerChange(index: any) {
         setCurrentCustomerIndex(index)
@@ -187,6 +176,47 @@ function Orders({ navigation }: ManageEmployeeProp) {
                                 selectedOption={currentCustomerOrder}
                                 handleOptionChange={handleCurrentCustomerChange}
                             />
+
+                            {(() => {
+                                const rowBoxes = [];
+
+                                for (let i = 0; i < fetchedCategories.length; i += 2) {
+                                    const category = fetchedCategories[i];
+                                    const category2 = fetchedCategories[i + 1];
+
+                                    rowBoxes.push(
+                                        <View style={styles.row} key={i}>
+                                            <RoundedBox
+                                                text={category.name}
+                                                onPress={() => {
+                                                    if (currentCustomerIndex == -1) {
+                                                        setIsError(true)
+                                                        setIsMessageVisible(true)
+                                                        setMessage(`Please select an order!`)
+                                                    } else {
+                                                        navigation.navigate('ItemsInCategories', { categoryId: category._id, isOrder: true, currentCustomerIndex })
+                                                    }
+                                                }}
+                                            />
+
+                                            {category2 && (
+                                                <RoundedBox
+                                                    text={category2.name}
+                                                    onPress={() => {
+                                                        if (currentCustomerIndex == -1) {
+
+                                                        } else {
+                                                            navigation.navigate('ItemsInCategories', { categoryId: category2._id, isOrder: true, currentCustomerIndex })
+                                                        }
+                                                    }}
+                                                />)
+                                            }
+                                        </View>
+                                    );
+                                }
+
+                                return rowBoxes;
+                            })()}
                         </View>
 
                     </View>
@@ -245,7 +275,10 @@ const styles = StyleSheet.create({
         marginRight: 30,
         marginLeft: 30,
     },
-
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
 
 });
 

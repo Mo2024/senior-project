@@ -26,7 +26,8 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
     const [isLoading, setIsLoading] = useState(true);
 
     const [fetchedItems, setFetchedItems] = useState<any[]>([])
-    const { categoryId } = route.params || {};
+    const [fetchedItemsInBranch, setFetchedItemsInBranch] = useState<any[]>([])
+    const { categoryId, isOrder, currentCustomerIndex } = route.params || {};
 
 
     useFocusEffect(
@@ -34,9 +35,33 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
             async function fetchLoggedInUserInfo() {
                 try {
                     setIsLoading(true);
+                    let fetchedItemsInBranch: any[] = await EmployeeApi.getItemsInBranch(categoryId) as any
+                    let fetchedItems
+                    if (isOrder) {
+                        fetchedItems = await EmployeeApi.getItems(categoryId) as any
+                        const updatedFetchedItems = fetchedItems.map((item: any) => {
+                            const matchingItemInBranch = fetchedItemsInBranch.find(
+                                (itemInBranch) => {
+                                    return itemInBranch.itemId._id.toString() === item._id.toString()
+                                }
+                            );
 
-                    const fetchedItems = await EmployeeApi.getItemsInBranch(categoryId) as any
-                    setFetchedItems(fetchedItems)
+                            if (matchingItemInBranch) {
+                                return {
+                                    ...item,
+                                    quantity: matchingItemInBranch.quantity,
+                                };
+
+                            } else {
+                                return item;
+                            }
+                        });
+                        setFetchedItems(updatedFetchedItems)
+                    }
+
+
+
+                    setFetchedItemsInBranch(fetchedItemsInBranch)
 
 
                     setIsLoading(false);
@@ -60,6 +85,11 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
             return prevItems.filter((item) => item.itemId._id !== itemId);
         });
     }
+
+    async function handleAddToCartItem(qty: number, name: string, _id: mongoose.Types.ObjectId) {
+
+        console.log({ name, _id, qty })
+    }
     if (isLoading) {
         return (
             <>
@@ -76,26 +106,67 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
 
                     <View style={styles.container}>
 
-                        <TopBar title={'Stocks'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
+                        <TopBar title={isOrder ? 'Items' : 'Stocks'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
-                            <TouchableOpacity style={styles.addButton} onPress={() => { navigation.navigate('AddProductItem', { categoryId }) }}>
-                                <Text style={styles.addButtonText}>Add Product to Branch</Text>
-                            </TouchableOpacity>
 
-                            {fetchedItems.map((item, index) => (
+                            {!isOrder &&
+                                <>
+                                    <TouchableOpacity style={styles.addButton} onPress={() => { navigation.navigate('AddProductItem', { categoryId }) }}>
+                                        <Text style={styles.addButtonText}>Add Product to Branch</Text>
+                                    </TouchableOpacity>
 
-                                <RoundedBoxItem2
-                                    key={index}
-                                    text={item.itemId.name}
-                                    quantity={item.quantity}
-                                    itemId={item.itemId._id}
-                                    deleteProp={deleteItemInCategory}
-                                    handleMessage={handleMessage}
-                                    navigation={navigation}
-                                    route={route}
-                                    categoryId={categoryId}
-                                />
-                            ))}
+                                    {fetchedItemsInBranch.map((item, index) => (
+
+                                        <RoundedBoxItem2
+                                            key={index}
+                                            text={item.itemId.name}
+                                            quantity={item.quantity}
+                                            itemId={item.itemId._id}
+                                            deleteProp={deleteItemInCategory}
+                                            handleMessage={handleMessage}
+                                            navigation={navigation}
+                                            route={route}
+                                            categoryId={categoryId}
+                                        />
+                                    ))}
+                                </>
+                            }
+
+                            {isOrder &&
+                                <>
+                                    {(() => {
+                                        const rowBoxes = [];
+
+                                        for (let i = 0; i < fetchedItems.length; i += 2) {
+                                            const item = fetchedItems[i];
+                                            const item2 = fetchedItems[i + 1];
+
+                                            rowBoxes.push(
+                                                <View style={styles.row} key={i}>
+                                                    <RoundedBox
+                                                        text={item.name}
+                                                        onPress={() => { item.quantity ? handleAddToCartItem(item.quantity, item.name, item._id) : null }}
+                                                        qty={item.quantity}
+                                                        isItem={true}
+                                                    />
+
+                                                    {item2 && (
+                                                        <RoundedBox
+                                                            text={item2.name}
+                                                            onPress={() => { item2.quantity ? handleAddToCartItem(item2.quantity, item2.name, item2._id) : null }}
+                                                            qty={item2.quantity}
+                                                            isItem={true}
+
+                                                        />)
+                                                    }
+                                                </View>
+                                            );
+                                        }
+
+                                        return rowBoxes;
+                                    })()}
+                                </>
+                            }
 
 
                         </View>

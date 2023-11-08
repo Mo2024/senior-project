@@ -91,7 +91,7 @@ export default function App() {
           <Stack.Screen name="CreateCategory" component={CreateCategory} />
           <Stack.Screen name="EditProductItem" component={EditProductItem} initialParams={{ categoryId: '', itemId: '', quantity: '' }} />
           <Stack.Screen name="AddProductItem" component={AddProductItem} initialParams={{ categoryId: '' }} />
-          <Stack.Screen name="ItemsInCategories" component={ItemsInCategories} initialParams={{ categoryId: '' }} />
+          <Stack.Screen name="ItemsInCategories" component={ItemsInCategories} initialParams={{ categoryId: '', isOrder: '', currentCustomerIndex: '' }} />
           <Stack.Screen name="EditCategory" component={EditCategory} initialParams={{ name: '', categoryId: '' }} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />
           <Stack.Screen name="EditBranch" component={EditBranch} initialParams={{ businessId: '', name: '', description: '' }} />
