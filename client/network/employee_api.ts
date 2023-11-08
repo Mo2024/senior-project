@@ -32,6 +32,14 @@ export async function addItemToBranch(newItemInBranch: newItemInBranch): Promise
     });
     return respone.json();
 }
+export async function submitAttendance(attendanceObj: { attendanceCode: string }): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/employees/attendance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(attendanceObj)
+    });
+    return respone.json();
+}
 
 export async function deleteItemInBranch(credentials: any): Promise<any> {
     console.log(credentials)

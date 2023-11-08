@@ -36,7 +36,7 @@ export const attendance: RequestHandler<unknown, unknown, attendanceBody, unknow
             throw createHttpError(404, 'Branch not found!')
         }
         if (branch.attendanceCode !== attendanceCode) {
-            throw createHttpError(404, "Invalid QR Code!");
+            throw createHttpError(404, "Invalid QR Code! Try refreshing the Qr Code");
         }
 
         const openingTime = branch.openingTime;

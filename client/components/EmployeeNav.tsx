@@ -6,6 +6,7 @@ import ManageItems from '../screens/users/admins/ManageItems';
 import ManageSelfCheckout from '../screens/users/admins/ManageSelfCheckout';
 import Statistics from '../screens/users/admins/Statistics';
 import ManageStock from '../screens/users/employees/ManageStock';
+import CameraScreen from '../screens/users/employees/Camera';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,6 +20,17 @@ const EmployeeNav = () => {
                     <Ionicons name="ios-folder" color={'#72063c'} size={size} />
                 ),
             }} />
+            <Tab.Screen
+                name="Camera"
+                component={CameraScreen}
+                options={{
+                    headerShown: false,
+                    tabBarLabel: 'Camera',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="ios-camera" color={'#72063c'} size={size} />
+                    ),
+                }}
+            />
             <Tab.Screen name="Profile" component={Profile} options={{
                 headerShown: false,
                 tabBarLabel: 'Profile',
