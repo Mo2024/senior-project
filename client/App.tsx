@@ -29,6 +29,7 @@ import ItemsInCategories from "./screens/users/employees/ItemsInCategories";
 import AddProductItem from "./screens/users/employees/AddProductItem";
 import EditProductItem from "./screens/users/employees/EditProductItem";
 import AttendanceQrCode from "./screens/AttendanceQrCode";
+import Checkout from "./screens/users/employees/Checkout";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -91,6 +92,7 @@ export default function App() {
           <Stack.Screen name="CreateCategory" component={CreateCategory} />
           <Stack.Screen name="EditProductItem" component={EditProductItem} initialParams={{ categoryId: '', itemId: '', quantity: '' }} />
           <Stack.Screen name="AddProductItem" component={AddProductItem} initialParams={{ categoryId: '' }} />
+          <Stack.Screen name="Checkout" component={Checkout} initialParams={{ currentCustomerIndex: '' }} />
           <Stack.Screen name="ItemsInCategories" component={ItemsInCategories} initialParams={{ categoryId: '', isOrder: '', currentCustomerIndex: '' }} />
           <Stack.Screen name="EditCategory" component={EditCategory} initialParams={{ name: '', categoryId: '' }} />
           <Stack.Screen name="EditBusiness" component={EditBusiness} initialParams={{ businessId: '', name: '', description: '' }} />

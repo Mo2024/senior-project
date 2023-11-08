@@ -167,7 +167,12 @@ function Orders({ navigation }: ManageEmployeeProp) {
                                 <TouchableOpacity onPress={handleDeleteIconPress}>
                                     <Ionicons name="ios-trash" color={'#72063c'} size={30} style={styles.icon} />
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => { }}>
+                                <TouchableOpacity onPress={() => {
+                                    if (currentCustomerIndex == -1) {
+
+                                    } else { navigation.navigate('Checkout', { currentCustomerIndex }) }
+                                }
+                                }>
                                     <Ionicons name="ios-cart" color={'#72063c'} size={30} />
                                 </TouchableOpacity>
                             </View>
