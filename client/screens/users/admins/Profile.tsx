@@ -151,6 +151,8 @@ function Profile({ navigation }: LoggedInScreenProps) {
                                         placeholder={placeholderData[key]}
                                         defaultValue={`${credentialsObject[key]}`}
                                         label={placeholderData[key]}
+                                        editable={key === 'cpr' ? false : true}
+
                                     />
                                 </React.Fragment>
                             )}

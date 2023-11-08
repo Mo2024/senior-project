@@ -7,12 +7,24 @@ import ManageSelfCheckout from '../screens/users/admins/ManageSelfCheckout';
 import Statistics from '../screens/users/admins/Statistics';
 import ManageStock from '../screens/users/employees/ManageStock';
 import CameraScreen from '../screens/users/employees/Camera';
+import Orders from '../screens/users/employees/Orders';
 
 const Tab = createBottomTabNavigator();
 
 const EmployeeNav = () => {
     return (
         <Tab.Navigator screenOptions={{ tabBarLabelStyle: { color: '#72063c' } }}>
+            <Tab.Screen
+                name="Orders"
+                component={Orders}
+                options={{
+                    headerShown: false,
+                    tabBarLabel: 'Orders',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="ios-cart" color={'#72063c'} size={size} />
+                    ),
+                }}
+            />
             <Tab.Screen name="ManageStock" component={ManageStock} options={{
                 tabBarLabel: 'Stock',
                 headerShown: false,

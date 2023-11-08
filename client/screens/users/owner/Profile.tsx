@@ -162,6 +162,7 @@ function Profile({ navigation }: LoggedInScreenProps) {
                                         handleChange={(updatedCredential) => {
                                             setCredentialsObject({ ...credentialsObject, [key]: updatedCredential });
                                         }}
+                                        editable={key === 'cpr' ? false : true}
                                         placeholder={placeholderData[key]}
                                         defaultValue={`${credentialsObject[key]}`}
                                         label={placeholderData[key]}
