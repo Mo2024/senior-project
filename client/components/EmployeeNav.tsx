@@ -25,7 +25,7 @@ const EmployeeNav = () => {
                 component={CameraScreen}
                 options={{
                     headerShown: false,
-                    tabBarLabel: 'Camera',
+                    tabBarLabel: 'Attendance',
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="ios-camera" color={'#72063c'} size={size} />
                     ),
