@@ -34,6 +34,7 @@ function Checkout({ navigation, route }: props) {
     const [isLoading, setIsLoading] = useState(true);
 
     const [customerOrderObjects, setCustomerOrderObjects] = useState<any>([]);
+    const [customerOrdersObjects, setCustomerOrdersObjects] = useState<any>([]);
 
     const [reciptEmail, setReciptEmail] = useState<string>('')
     const { currentCustomerIndex } = route.params || {};
@@ -46,6 +47,7 @@ function Checkout({ navigation, route }: props) {
                     const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
                     const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
                     if (parsedCustomerOrdersObjects !== null) {
+                        setCustomerOrdersObjects(parsedCustomerOrdersObjects)
                         setCustomerOrderObjects(parsedCustomerOrdersObjects[currentCustomerIndex]);
                     }
 
@@ -63,15 +65,55 @@ function Checkout({ navigation, route }: props) {
 
     }
 
-    function handleRectanglePress(_id: mongoose.Types.ObjectId) {
 
+    async function handleIncrement(_id: mongoose.Types.ObjectId) {
+        let updatedCustomerOrderObjects: any;
+        setCustomerOrderObjects((prevCustomerOrderObjects: any) => {
+            updatedCustomerOrderObjects = prevCustomerOrderObjects.map((orderObject: any) => {
+                if (orderObject._id.toString() === _id.toString()) {
+                    return { ...orderObject, qty: orderObject.qty + 1 };
+                }
+                return orderObject;
+            });
+            return updatedCustomerOrderObjects
+        });
+        const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
+        const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
+
+        let updatedCustomerOrdersObjects = parsedCustomerOrdersObjects.map((item: any, index: number) => {
+            if (index == currentCustomerIndex) {
+                return updatedCustomerOrderObjects
+            }
+            return item
+        })
+        console.log(updatedCustomerOrderObjects)
+        setCustomerOrdersObjects(updatedCustomerOrdersObjects);
+        await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(updatedCustomerOrdersObjects))
     }
+    async function handleDecrement(_id: mongoose.Types.ObjectId) {
+        let updatedCustomerOrderObjects: any;
+        setCustomerOrderObjects((prevCustomerOrderObjects: any) => {
+            updatedCustomerOrderObjects = prevCustomerOrderObjects.map((orderObject: any) => {
+                if (orderObject._id.toString() === _id.toString() && orderObject.qty > 0) {
+                    return { ...orderObject, qty: orderObject.qty - 1 };
+                }
+                return orderObject;
+            });
+            updatedCustomerOrderObjects = updatedCustomerOrderObjects.filter((orderObject: any) => orderObject.qty > 0);
 
-    function handleIncrement(_id: mongoose.Types.ObjectId) {
+            return updatedCustomerOrderObjects
+        });
+        const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
+        const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
 
-    }
-    function handleDecrement(_id: mongoose.Types.ObjectId) {
-
+        let updatedCustomerOrdersObjects = parsedCustomerOrdersObjects.map((item: any, index: number) => {
+            if (index == currentCustomerIndex) {
+                return updatedCustomerOrderObjects
+            }
+            return item
+        })
+        setCustomerOrdersObjects(updatedCustomerOrdersObjects);
+        await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(updatedCustomerOrdersObjects))
     }
     return (
         <>
@@ -116,6 +158,10 @@ function Checkout({ navigation, route }: props) {
                                     onDecrement={() => handleDecrement(orderObject._id)}
                                 />
                             ))}
+                            <SubmitButton
+                                buttonName='Place Order'
+                                handlePress={() => { setIsPromptVisible(true) }}
+                            />
 
                         </View>
 

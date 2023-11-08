@@ -17,12 +17,12 @@ const Rectangle: React.FC<RectangleProps> = ({ orderName, quantity, onIncrement,
                     <Text>{orderName}</Text>
                 </View>
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={onIncrement}>
-                        <Ionicons name="add" size={20} />
-                    </TouchableOpacity>
-                    <Text>{` ${quantity} `}</Text>
                     <TouchableOpacity style={styles.button} onPress={onDecrement}>
                         <Ionicons name="remove" size={20} />
+                    </TouchableOpacity>
+                    <Text>{` ${quantity} `}</Text>
+                    <TouchableOpacity style={styles.button} onPress={onIncrement}>
+                        <Ionicons name="add" size={20} />
                     </TouchableOpacity>
                 </View>
             </View>

@@ -8,9 +8,11 @@ import { CategoryModel } from "../models/category";
 import { ItemModel } from "../models/item";
 import { ItemInBranchModel } from "../models/itemInBranch";
 import { assertIsDefined } from "../util/assertIsDefined";
-import { qtyRegex, uuidRegex } from "../util/regex";
+import { emailRegex, qtyRegex, uuidRegex } from "../util/regex";
 import { IitemPopulate } from "./admins";
 import { IBusinessId } from "./business";
+import { OrderModel } from "../models/order";
+import { sendEmail } from "../util/functions";
 
 interface attendanceBody {
     attendanceCode: string;
@@ -351,6 +353,87 @@ export const getItemsInBranch: RequestHandler<itemsParamsI, unknown, unknown, un
         }
 
         res.status(201).json(items)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+interface order {
+    qty: number,
+    _id: mongoose.Types.ObjectId,
+    name: string
+}
+interface orderI {
+    order: order[]
+    email: string
+}
+
+
+interface ItemInBranch {
+    quantity: number;
+    branchId: mongoose.Types.ObjectId;
+    itemId: mongoose.Types.ObjectId;
+    categoryId: mongoose.Types.ObjectId;
+}
+
+export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = async (req, res, next) => {
+    const { order, email } = req.body
+    const branchId = req.session.branchId
+    const employeeId = req.session.userId
+    let msg = null;
+    let shouldBreak = false
+    try {
+
+        if (!order || !email) {
+            throw createHttpError(400, "Parameter Missing")
+        }
+        if (!emailRegex.test(email)) {
+            throw createHttpError(400, 'Invalid email format');
+        }
+        for (const item of order) {
+            if (shouldBreak) {
+                break;
+            }
+
+            const itemFromDB = await ItemInBranchModel.findOne({ itemId: item._id, branchId: branchId }) as any;
+
+            if (!itemFromDB) {
+                msg = `${item.name} is not available in branch!`;
+                shouldBreak = true;
+            } else if (itemFromDB.quantity < item.qty) {
+                msg = `${item.name} has ${itemFromDB.quantity} stock left!`;
+                shouldBreak = true;
+            }
+
+            console.log(itemFromDB.quantity);
+            console.log(item.qty);
+        }
+
+        if (msg !== null) {
+            throw createHttpError(404, msg);
+        }
+
+        await Promise.all(order.map(async (item: order) => {
+            const itemFromDB = await ItemInBranchModel.findOne({ itemId: item._id, branchId: branchId }) as any
+            itemFromDB.quantity = itemFromDB.quantity - item.qty;
+            await itemFromDB.save();
+        }));
+
+        const newOrder = new OrderModel({
+            branchId,
+            items: order,
+            employeeId
+        });
+        await newOrder.save();
+
+        const itemsString = order.map(item => `${item.name} (${item.qty})`).join('\n');
+
+        // Include itemsString in the email subject
+        const emailSubject = `Your order:\n${itemsString}`;
+        await sendEmail(email, 'Order', emailSubject)
+
+        res.sendStatus(204);
     } catch (error) {
         next(error)
     }

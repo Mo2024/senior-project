@@ -10,6 +10,7 @@ router.route('/category')
     .get(EmployeesContoller.getCategories)
 router.get('/items/:categoryId', EmployeesContoller.getItems);
 router.get('/itemsInBranch/:categoryId', EmployeesContoller.getItemsInBranch);
+router.post('/makeOrder', EmployeesContoller.makeOrder);
 
 router.route('/stock')
     .get(EmployeesContoller.getStocks)
