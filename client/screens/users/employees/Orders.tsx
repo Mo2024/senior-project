@@ -36,7 +36,7 @@ function Orders({ navigation }: ManageEmployeeProp) {
     const [customerOrdersNames, setCustomerOrdersNames] = useState<any>([]);
     const [customerOrdersObjects, setCustomerOrdersObjects] = useState<any>([]);
     const [currentCustomerOrder, setCurrentCustomerOrder] = useState('Select An Order');
-    const [currentCustomerIndex, setCurrentCustomerIndex] = useState<number>();
+    const [currentCustomerIndex, setCurrentCustomerIndex] = useState<number>(-1);
 
     const [createOrders, setCreateOrders] = useState(true)
     const [viewOrders, setViewOrders] = useState(false)
@@ -93,11 +93,11 @@ function Orders({ navigation }: ManageEmployeeProp) {
     }
 
     async function handleAddIconPress() {
-        let newCustomerOrdersNames = await SecureStore.setItemAsync('customerOrdersNames', JSON.stringify([...customerOrdersNames, newOrderName]));
-        let newCustomerOrdersObjects = await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify([...customerOrdersObjects, []]));
+        await SecureStore.setItemAsync('customerOrdersNames', JSON.stringify([...customerOrdersNames, newOrderName]));
+        await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify([...customerOrdersObjects, []]));
 
-        setCustomerOrdersNames(newCustomerOrdersNames);
-        setCustomerOrdersObjects(newCustomerOrdersObjects);
+        setCustomerOrdersNames([...customerOrdersNames, newOrderName]);
+        setCustomerOrdersObjects([...customerOrdersObjects, []]);
         setIsPromptVisible(false)
 
     }
