@@ -1,20 +1,28 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface RectangleProps {
     orderName: string;
     quantity: number;
     onIncrement: () => void;
     onDecrement: () => void;
+    price: number
 }
 
-const Rectangle: React.FC<RectangleProps> = ({ orderName, quantity, onIncrement, onDecrement }) => {
+const Rectangle: React.FC<RectangleProps> = ({ price, orderName, quantity, onIncrement, onDecrement }) => {
+    const totalCost = quantity * price;
+
     return (
         <View style={styles.rectangle}>
             <View style={styles.row}>
                 <View style={styles.ordername}>
                     <Text>{orderName}</Text>
+                </View>
+                <View style={styles.TotalItem}>
+                    {/* Display total cost */}
+                    <Text>{`$${totalCost.toFixed(2)}`}</Text>
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={onDecrement}>
@@ -53,6 +61,11 @@ const styles = StyleSheet.create({
     },
     button: {
         marginHorizontal: 5, // Adjust the margin as needed
+    },
+    TotalItem: {
+        flex: 1, // This ensures it takes up remaining space
+        justifyContent: 'center', // Center content vertically
+        alignItems: 'flex-end', // Align content to the right
     },
 });
 

@@ -57,6 +57,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
                                 return item;
                             }
                         });
+                        console.log(updatedFetchedItems)
                         setFetchedItems(updatedFetchedItems)
                     }
 
@@ -87,7 +88,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
         });
     }
 
-    async function handleAddToCartItem(qty: number, name: string, _id: mongoose.Types.ObjectId) {
+    async function handleAddToCartItem(qty: number, name: string, _id: mongoose.Types.ObjectId, price: number) {
         const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
         const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
 
@@ -97,7 +98,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
             parsedCustomerOrdersObjects[currentCustomerIndex][existingItemIndex].qty += qty;
 
         } else {
-            const newItem = { name, _id, qty };
+            const newItem = { name, _id, qty, price };
             parsedCustomerOrdersObjects[currentCustomerIndex].push(newItem);
         }
         await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(parsedCustomerOrdersObjects));
@@ -160,7 +161,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
                                                 <View style={styles.row} key={i}>
                                                     <RoundedBox
                                                         text={item.name}
-                                                        onPress={() => { item.quantity ? handleAddToCartItem(1, item.name, item._id) : null }}
+                                                        onPress={() => { item.quantity ? handleAddToCartItem(1, item.name, item._id, item.price) : null }}
                                                         qty={item.quantity}
                                                         isItem={true}
                                                     />
@@ -168,7 +169,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
                                                     {item2 && (
                                                         <RoundedBox
                                                             text={item2.name}
-                                                            onPress={() => { item2.quantity ? handleAddToCartItem(1, item2.name, item2._id) : null }}
+                                                            onPress={() => { item2.quantity ? handleAddToCartItem(1, item2.name, item2._id, item2.price) : null }}
                                                             qty={item2.quantity}
                                                             isItem={true}
 

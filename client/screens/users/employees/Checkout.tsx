@@ -38,7 +38,7 @@ function Checkout({ navigation, route }: props) {
 
     const [reciptEmail, setReciptEmail] = useState<string>('')
     const { currentCustomerIndex } = route.params || {};
-
+    const [totalPrice, setTotalPrice] = useState<number>()
     useFocusEffect(
         React.useCallback(() => {
             async function fetchItemsNeeded() {
@@ -51,6 +51,13 @@ function Checkout({ navigation, route }: props) {
                         setCustomerOrderObjects(parsedCustomerOrdersObjects[currentCustomerIndex]);
                     }
 
+                    setTotalPrice(() => {
+                        let totalSum = 0
+                        parsedCustomerOrdersObjects[currentCustomerIndex].map((item: any) => {
+                            totalSum += item.qty * item.price
+                        })
+                        return totalSum
+                    })
                     setIsLoading(false);
 
                 } catch (error) {
@@ -86,7 +93,14 @@ function Checkout({ navigation, route }: props) {
             }
             return item
         })
-        console.log(updatedCustomerOrderObjects)
+        setTotalPrice(() => {
+            let totalSum = 0
+            updatedCustomerOrderObjects.map((item: any) => {
+                console.log(item)
+                totalSum += item.qty * item.price
+            })
+            return totalSum
+        })
         setCustomerOrdersObjects(updatedCustomerOrdersObjects);
         await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(updatedCustomerOrdersObjects))
     }
@@ -111,6 +125,14 @@ function Checkout({ navigation, route }: props) {
                 return updatedCustomerOrderObjects
             }
             return item
+        })
+        setTotalPrice(() => {
+            let totalSum = 0
+            updatedCustomerOrderObjects.map((item: any) => {
+                console.log(item)
+                totalSum += item.qty * item.price
+            })
+            return totalSum
         })
         setCustomerOrdersObjects(updatedCustomerOrdersObjects);
         await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(updatedCustomerOrdersObjects))
@@ -156,8 +178,12 @@ function Checkout({ navigation, route }: props) {
                                     quantity={orderObject.qty}
                                     onIncrement={() => handleIncrement(orderObject._id)}
                                     onDecrement={() => handleDecrement(orderObject._id)}
+                                    price={orderObject.price}
                                 />
                             ))}
+                            <Text style={styles.totalPriceText}>
+                                Total: ${totalPrice ? totalPrice.toFixed(2) : '0.00'}
+                            </Text>
                             <SubmitButton
                                 buttonName='Place Order'
                                 handlePress={() => { setIsPromptVisible(true) }}
@@ -230,6 +256,11 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 10,
         borderRadius: 10,
+    },
+    totalPriceText: {
+        fontWeight: 'bold',
+        fontSize: 18, // Adjust the font size as needed
+        marginTop: 10, // Adjust the margin as needed
     },
 
 });
