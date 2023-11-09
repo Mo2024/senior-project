@@ -11,6 +11,8 @@ import { assertIsDefined } from "../util/assertIsDefined";
 import { validateCouponRegex, validateEditItemRegex, validateItemRegex } from "../util/functions";
 import { businessNameRegex } from "../util/regex";
 import { IBranchId, IBusinessId, IbranchPopulate } from "./business";
+import { AttendanceUserModel } from "../models/user";
+import attendance from "../models/attendance";
 
 export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
@@ -232,6 +234,24 @@ export const getCategories: RequestHandler<IBusinessId, unknown, unknown, unknow
             throw createHttpError(404, 'Categories not found!')
         }
         res.status(201).json(categories)
+    } catch (error) {
+        next(error)
+    }
+}
+
+interface employeeIdI {
+    employeeId: mongoose.Types.ObjectId
+}
+export const getAttendance: RequestHandler<employeeIdI, unknown, unknown, unknown> = async (req, res, next) => {
+    const { employeeId } = req.params
+
+    try {
+        const attendanceRecords = await attendance.find({ employeeId }).exec();
+
+        if (!attendanceRecords) {
+            throw createHttpError(404, 'Employee not found!')
+        }
+        res.status(201).json(attendanceRecords)
     } catch (error) {
         next(error)
     }

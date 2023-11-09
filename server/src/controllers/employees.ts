@@ -371,14 +371,6 @@ interface orderI {
     name: string
 }
 
-
-interface ItemInBranch {
-    quantity: number;
-    branchId: mongoose.Types.ObjectId;
-    itemId: mongoose.Types.ObjectId;
-    categoryId: mongoose.Types.ObjectId;
-}
-
 export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = async (req, res, next) => {
     const { order, email, name } = req.body
     const branchId = req.session.branchId

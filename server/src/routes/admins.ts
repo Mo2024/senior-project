@@ -34,6 +34,7 @@ router.route('/table')
     .patch(AdminContoller.editTable);
 
 router.get('/table/:branchId', AdminContoller.getTables);
+router.get('/attendance/:employeeId', AdminContoller.getAttendance);
 router.get('/branches', AdminContoller.getBranches);
 
 export default router;
