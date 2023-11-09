@@ -433,7 +433,7 @@ export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = asyn
         const emailSubject = `Your order:\n${itemsString}`;
         await sendEmail(email, 'Order', emailSubject)
 
-        res.sendStatus(204);
+        res.status(201).json(newOrder)
     } catch (error) {
         next(error)
     }

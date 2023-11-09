@@ -59,3 +59,23 @@ export async function editItemInBranch(crredentiasl: any): Promise<any> {
     });
     return respone.json();
 }
+
+export interface orderI {
+    _id: mongoose.Types.ObjectId;
+    qty: number;
+    name: string;
+
+}
+export interface makeOrderI {
+    email: string,
+    order: orderI[]
+}
+
+export async function makeOrder(orderObj: makeOrderI): Promise<any> {
+    const respone = await fetchData(`${API_URL}/api/employees/makeOrder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderObj)
+    });
+    return respone.json();
+}

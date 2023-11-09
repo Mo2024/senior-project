@@ -49,6 +49,8 @@ function Orders({ navigation }: ManageEmployeeProp) {
             async function fetchItemsNeeded() {
                 try {
                     setIsLoading(true);
+                    setCurrentCustomerIndex(-1)
+                    setCurrentCustomerOrder('Select an order')
                     const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
                     const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
                     const parsedCustomerOrdersNames = JSON.parse(fetchedCustomerOrdersNames as string);

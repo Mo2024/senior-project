@@ -69,7 +69,32 @@ function Checkout({ navigation, route }: props) {
     )
 
     async function handleConfirmOrder() {
+        try {
 
+
+            await EmployeeApi.makeOrder({ email: reciptEmail, order: customerOrderObjects });
+            const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
+            let parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
+            const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
+            let parsedCustomerOrdersNames = JSON.parse(fetchedCustomerOrdersNames as string);
+            if (parsedCustomerOrdersObjects !== null) {
+                console.log(parsedCustomerOrdersObjects)
+                parsedCustomerOrdersObjects = parsedCustomerOrdersObjects.filter((element: any, index: any) => index !== currentCustomerIndex);
+                await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(parsedCustomerOrdersObjects));
+                parsedCustomerOrdersNames = parsedCustomerOrdersNames.filter((element: any, index: any) => index !== currentCustomerIndex);
+                await SecureStore.setItemAsync('customerOrdersNames', JSON.stringify(parsedCustomerOrdersNames));
+            }
+            navigation.navigate('Orders')
+        } catch (error) {
+            setIsError(true)
+            let errorMessage = ''
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setMessage(errorMessage)
+            setIsMessageVisible(true)
+
+        }
     }
 
 
