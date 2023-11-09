@@ -21,6 +21,9 @@ import PromptBox from '../../../components/PromptBox';
 import * as SecureStore from 'expo-secure-store';
 import RoundedBox from '../../../components/RoundedBox';
 import * as EmployeeApi from '../../../network/employee_api'
+import AppLoader from '../../../components/AppLoader';
+import Rectangle from '../../../components/Rectangle';
+import OrderMadeRectangle from '../../../components/OrderMadeRectangle';
 
 
 interface ManageEmployeeProp {
@@ -28,7 +31,7 @@ interface ManageEmployeeProp {
     route: RouteProp<any>
 }
 
-function Orders({ navigation }: ManageEmployeeProp) {
+function Orders({ navigation, route }: ManageEmployeeProp) {
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
@@ -44,41 +47,69 @@ function Orders({ navigation }: ManageEmployeeProp) {
     const [createOrders, setCreateOrders] = useState(true)
     const [viewOrders, setViewOrders] = useState(false)
     const [newOrderName, setNewOrderName] = useState<string>('')
+    const [fetchedOrders, setFetchedOrders] = useState<any>()
+    const { isReroute } = route.params || {}
+    useEffect(() => {
+        async function fetchItemsNeeded() {
+            try {
+                setIsLoading(true);
+                setCurrentCustomerIndex(-1)
+                setCurrentCustomerOrder('Select an order')
+                const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
+                const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
+                const parsedCustomerOrdersNames = JSON.parse(fetchedCustomerOrdersNames as string);
+                const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
+
+                if (parsedCustomerOrdersNames !== null) {
+                    setCustomerOrdersNames(parsedCustomerOrdersNames);
+                }
+
+                if (parsedCustomerOrdersObjects !== null) {
+                    setCustomerOrdersObjects(parsedCustomerOrdersObjects);
+                }
+
+
+                const fetchedCategories = await EmployeeApi.getCategories() as Category[]
+                setFetchedCategories(fetchedCategories)
+
+                const fetchedOrders = await EmployeeApi.getOrdersInBranch() as Businesses
+                setFetchedOrders(fetchedOrders)
+
+
+
+                setIsLoading(false);
+
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchItemsNeeded()
+    }, []);
     useFocusEffect(
         React.useCallback(() => {
+            // Your code here will run when the screen gains focus
             async function fetchItemsNeeded() {
-                try {
-                    setIsLoading(true);
-                    setCurrentCustomerIndex(-1)
-                    setCurrentCustomerOrder('Select an order')
-                    const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
-                    const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
-                    const parsedCustomerOrdersNames = JSON.parse(fetchedCustomerOrdersNames as string);
-                    const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
+                // if (isReroute === true) {
+                console.log('works')
+                // }
+                // Fetch data or perform tasks here
+                const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
+                const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
+                const parsedCustomerOrdersNames = JSON.parse(fetchedCustomerOrdersNames as string);
+                const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
 
-                    if (parsedCustomerOrdersNames !== null) {
-                        setCustomerOrdersNames(parsedCustomerOrdersNames);
-                    }
-
-                    if (parsedCustomerOrdersObjects !== null) {
-                        setCustomerOrdersObjects(parsedCustomerOrdersObjects);
-                    }
-
-
-                    const fetchedCategories = await EmployeeApi.getCategories() as Category[]
-                    setFetchedCategories(fetchedCategories)
-
-
-                    setIsLoading(false);
-
-                } catch (error) {
-                    console.log(error)
+                if (parsedCustomerOrdersNames !== null) {
+                    setCustomerOrdersNames(parsedCustomerOrdersNames);
                 }
-            }
-            fetchItemsNeeded()
-        }, [])
-    )
 
+                if (parsedCustomerOrdersObjects !== null) {
+                    setCustomerOrdersObjects(parsedCustomerOrdersObjects);
+                }
+
+            }
+            fetchItemsNeeded();
+        }, [])
+    );
     function handleCurrentCustomerChange(index: any) {
         setCurrentCustomerIndex(index)
     }
@@ -107,7 +138,14 @@ function Orders({ navigation }: ManageEmployeeProp) {
         setCurrentCustomerOrder('Select An Order')
         setCurrentCustomerIndex(-1)
     }
+    if (isLoading) {
+        return (
+            <>
+                <AppLoader />
+            </>
+        );
 
+    }
     return (
         <>
             {
@@ -162,68 +200,89 @@ function Orders({ navigation }: ManageEmployeeProp) {
                         </View>
                         <View style={styles.formBox}>
 
-                            <View style={styles.iconRow}>
-                                <TouchableOpacity onPress={() => { setIsPromptVisible(true) }}>
-                                    <Ionicons name="ios-add-circle" color={'#72063c'} size={30} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleDeleteIconPress}>
-                                    <Ionicons name="ios-trash" color={'#72063c'} size={30} style={styles.icon} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {
-                                    if (currentCustomerIndex == -1) {
+                            {createOrders &&
+                                <>
+                                    <View style={styles.iconRow}>
+                                        <TouchableOpacity onPress={() => { setIsPromptVisible(true) }}>
+                                            <Ionicons name="ios-add-circle" color={'#72063c'} size={30} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={handleDeleteIconPress}>
+                                            <Ionicons name="ios-trash" color={'#72063c'} size={30} style={styles.icon} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => {
+                                            if (currentCustomerIndex == -1) {
 
-                                    } else { navigation.navigate('Checkout', { currentCustomerIndex }) }
-                                }
-                                }>
-                                    <Ionicons name="ios-cart" color={'#72063c'} size={30} />
-                                </TouchableOpacity>
-                            </View>
-                            <SelectDropdownIndex
-                                options={customerOrdersNames}
-                                selectedOption={currentCustomerOrder}
-                                handleOptionChange={handleCurrentCustomerChange}
-                            />
+                                            } else { navigation.navigate('Checkout', { currentCustomerIndex }) }
+                                        }
+                                        }>
+                                            <Ionicons name="ios-cart" color={'#72063c'} size={30} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <SelectDropdownIndex
+                                        options={customerOrdersNames}
+                                        selectedOption={currentCustomerOrder}
+                                        handleOptionChange={handleCurrentCustomerChange}
+                                    />
 
-                            {(() => {
-                                const rowBoxes = [];
+                                    {(() => {
+                                        const rowBoxes = [];
 
-                                for (let i = 0; i < fetchedCategories.length; i += 2) {
-                                    const category = fetchedCategories[i];
-                                    const category2 = fetchedCategories[i + 1];
+                                        for (let i = 0; i < fetchedCategories.length; i += 2) {
+                                            const category = fetchedCategories[i];
+                                            const category2 = fetchedCategories[i + 1];
 
-                                    rowBoxes.push(
-                                        <View style={styles.row} key={i}>
-                                            <RoundedBox
-                                                text={category.name}
-                                                onPress={() => {
-                                                    if (currentCustomerIndex == -1) {
-                                                        setIsError(true)
-                                                        setIsMessageVisible(true)
-                                                        setMessage(`Please select an order!`)
-                                                    } else {
-                                                        navigation.navigate('ItemsInCategories', { categoryId: category._id, isOrder: true, currentCustomerIndex })
+                                            rowBoxes.push(
+                                                <View style={styles.row} key={i}>
+                                                    <RoundedBox
+                                                        text={category.name}
+                                                        onPress={() => {
+                                                            if (currentCustomerIndex == -1) {
+                                                                setIsError(true)
+                                                                setIsMessageVisible(true)
+                                                                setMessage(`Please select an order!`)
+                                                            } else {
+                                                                navigation.navigate('ItemsInCategories', { categoryId: category._id, isOrder: true, currentCustomerIndex })
+                                                            }
+                                                        }}
+                                                    />
+
+                                                    {category2 && (
+                                                        <RoundedBox
+                                                            text={category2.name}
+                                                            onPress={() => {
+                                                                if (currentCustomerIndex == -1) {
+                                                                    setIsError(true)
+                                                                    setIsMessageVisible(true)
+                                                                    setMessage(`Please select an order!`)
+                                                                } else {
+                                                                    navigation.navigate('ItemsInCategories', { categoryId: category2._id, isOrder: true, currentCustomerIndex })
+                                                                }
+                                                            }}
+                                                        />)
                                                     }
-                                                }}
-                                            />
+                                                </View>
+                                            );
+                                        }
 
-                                            {category2 && (
-                                                <RoundedBox
-                                                    text={category2.name}
-                                                    onPress={() => {
-                                                        if (currentCustomerIndex == -1) {
+                                        return rowBoxes;
+                                    })()}
+                                </>
+                            }
 
-                                                        } else {
-                                                            navigation.navigate('ItemsInCategories', { categoryId: category2._id, isOrder: true, currentCustomerIndex })
-                                                        }
-                                                    }}
-                                                />)
-                                            }
-                                        </View>
-                                    );
-                                }
+                            {viewOrders &&
+                                <>
 
-                                return rowBoxes;
-                            })()}
+                                    {fetchedOrders.map((orderObject: any) => (
+                                        <OrderMadeRectangle
+                                            key={orderObject._id}
+                                            orderName={orderObject.name}
+                                            date={orderObject.dateCreated}
+                                            onPress={() => { navigation.navigate('ViewOrderDetails', { order: orderObject }) }}
+                                        />
+                                    ))}
+                                </>
+                            }
+
                         </View>
 
                     </View>

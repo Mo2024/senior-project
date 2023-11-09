@@ -22,6 +22,7 @@ import * as SecureStore from 'expo-secure-store';
 import RoundedBox from '../../../components/RoundedBox';
 import * as EmployeeApi from '../../../network/employee_api'
 import Rectangle from '../../../components/Rectangle';
+import AppLoader from '../../../components/AppLoader';
 interface props {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
@@ -34,6 +35,7 @@ function Checkout({ navigation, route }: props) {
     const [isLoading, setIsLoading] = useState(true);
 
     const [customerOrderObjects, setCustomerOrderObjects] = useState<any>([]);
+    const [customerOrderName, setCustomerOrderName] = useState<any>();
     const [customerOrdersObjects, setCustomerOrdersObjects] = useState<any>([]);
 
     const [reciptEmail, setReciptEmail] = useState<string>('')
@@ -46,9 +48,12 @@ function Checkout({ navigation, route }: props) {
                     setIsLoading(true);
                     const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
                     const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
+                    const customerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
+                    const parsedCustomersOrdersNames = JSON.parse(customerOrdersNames as string);
                     if (parsedCustomerOrdersObjects !== null) {
                         setCustomerOrdersObjects(parsedCustomerOrdersObjects)
                         setCustomerOrderObjects(parsedCustomerOrdersObjects[currentCustomerIndex]);
+                        setCustomerOrderName(parsedCustomersOrdersNames[currentCustomerIndex]);
                     }
 
                     setTotalPrice(() => {
@@ -72,7 +77,7 @@ function Checkout({ navigation, route }: props) {
         try {
 
 
-            await EmployeeApi.makeOrder({ email: reciptEmail, order: customerOrderObjects });
+            await EmployeeApi.makeOrder({ email: reciptEmail, order: customerOrderObjects, name: customerOrderName });
             const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
             let parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
             const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
@@ -84,7 +89,7 @@ function Checkout({ navigation, route }: props) {
                 parsedCustomerOrdersNames = parsedCustomerOrdersNames.filter((element: any, index: any) => index !== currentCustomerIndex);
                 await SecureStore.setItemAsync('customerOrdersNames', JSON.stringify(parsedCustomerOrdersNames));
             }
-            navigation.navigate('Orders')
+            navigation.navigate('Orders', { isReroute: true })
         } catch (error) {
             setIsError(true)
             let errorMessage = ''
@@ -162,6 +167,16 @@ function Checkout({ navigation, route }: props) {
         setCustomerOrdersObjects(updatedCustomerOrdersObjects);
         await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(updatedCustomerOrdersObjects))
     }
+
+    if (isLoading) {
+        return (
+            <>
+                <AppLoader />
+            </>
+        );
+
+    }
+
     return (
         <>
             {

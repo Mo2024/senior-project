@@ -11,6 +11,7 @@ router.route('/category')
 router.get('/items/:categoryId', EmployeesContoller.getItems);
 router.get('/itemsInBranch/:categoryId', EmployeesContoller.getItemsInBranch);
 router.post('/makeOrder', EmployeesContoller.makeOrder);
+router.get('/ordersInBranch', EmployeesContoller.getOrdersInBranch);
 
 router.route('/stock')
     .get(EmployeesContoller.getStocks)

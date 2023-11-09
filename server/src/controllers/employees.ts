@@ -361,12 +361,14 @@ export const getItemsInBranch: RequestHandler<itemsParamsI, unknown, unknown, un
 
 interface order {
     qty: number,
+    price: number,
     _id: mongoose.Types.ObjectId,
     name: string
 }
 interface orderI {
     order: order[]
     email: string
+    name: string
 }
 
 
@@ -378,19 +380,23 @@ interface ItemInBranch {
 }
 
 export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = async (req, res, next) => {
-    const { order, email } = req.body
+    const { order, email, name } = req.body
     const branchId = req.session.branchId
     const employeeId = req.session.userId
     let msg = null;
     let shouldBreak = false
     try {
 
-        if (!order || !email) {
+        if (!order || !email || !name) {
             throw createHttpError(400, "Parameter Missing")
+        }
+        if (order.length == 0) {
+            throw createHttpError(400, "Order cart is empty!")
         }
         if (!emailRegex.test(email)) {
             throw createHttpError(400, 'Invalid email format');
         }
+
         for (const item of order) {
             if (shouldBreak) {
                 break;
@@ -398,6 +404,8 @@ export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = asyn
 
             const itemFromDB = await ItemInBranchModel.findOne({ itemId: item._id, branchId: branchId }) as any;
 
+            console.log(itemFromDB.quantity);
+            console.log(item.qty);
             if (!itemFromDB) {
                 msg = `${item.name} is not available in branch!`;
                 shouldBreak = true;
@@ -406,8 +414,6 @@ export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = asyn
                 shouldBreak = true;
             }
 
-            console.log(itemFromDB.quantity);
-            console.log(item.qty);
         }
 
         if (msg !== null) {
@@ -423,7 +429,8 @@ export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = asyn
         const newOrder = new OrderModel({
             branchId,
             items: order,
-            employeeId
+            employeeId,
+            name
         });
         await newOrder.save();
 
@@ -434,6 +441,29 @@ export const makeOrder: RequestHandler<unknown, unknown, orderI, unknown> = asyn
         await sendEmail(email, 'Order', emailSubject)
 
         res.status(201).json(newOrder)
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+
+export const getOrdersInBranch: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const branchId = req.session.branchId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(branchId)
+
+        const orders = await OrderModel.find({ branchId }).sort({ dateCreated: -1 });
+
+
+        if (!orders) {
+            throw createHttpError(404, 'Items not found!')
+        }
+
+        res.status(201).json(orders)
     } catch (error) {
         next(error)
     }

@@ -14,6 +14,10 @@ const orderItemSchema = new Schema({
         type: String,
         required: true,
     },
+    price: {
+        type: Number,
+        required: true
+    }
 });
 
 const orderSchema = new Schema({
@@ -29,6 +33,10 @@ const orderSchema = new Schema({
     dateCreated: {
         type: Date,
         default: Date.now,
+    },
+    name: {
+        type: String,
+        required: true,
     },
     items: [orderItemSchema],
 });

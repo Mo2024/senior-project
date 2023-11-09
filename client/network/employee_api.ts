@@ -17,6 +17,10 @@ export async function getItemsInBranch(catId: mongoose.Types.ObjectId): Promise<
     const response = await fetchData(`${API_URL}/api/employees/itemsInBranch/${catId}`, { method: 'GET' }) as any;
     return await response.json()
 }
+export async function getOrdersInBranch(): Promise<any> {
+    const response = await fetchData(`${API_URL}/api/employees/ordersInBranch`, { method: 'GET' }) as any;
+    return await response.json()
+}
 
 export default interface newItemInBranch {
     itemId: mongoose.Types.ObjectId
@@ -69,6 +73,7 @@ export interface orderI {
 export interface makeOrderI {
     email: string,
     order: orderI[]
+    name: string
 }
 
 export async function makeOrder(orderObj: makeOrderI): Promise<any> {
