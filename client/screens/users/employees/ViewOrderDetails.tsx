@@ -23,6 +23,7 @@ import RoundedBox from '../../../components/RoundedBox';
 import * as EmployeeApi from '../../../network/employee_api'
 import Rectangle from '../../../components/Rectangle';
 import AppLoader from '../../../components/AppLoader';
+import RectangleOrderDetails from '../../../components/RectangleOrderDetails';
 interface props {
     navigation: NativeStackNavigationProp<any>
     route: RouteProp<any>
@@ -51,7 +52,7 @@ function ViewOrderDetails({ navigation, route }: props) {
 
                         return totalSum
                     })
-                    // console.log(totalPrice)
+                    console.log(order.items)
                     setIsLoading(false);
 
                 } catch (error) {
@@ -92,25 +93,20 @@ function ViewOrderDetails({ navigation, route }: props) {
 
                     <View style={styles.container}>
 
-                        <TopBar title={'Checkout'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
+                        <TopBar title={'Order Details'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
-                            {/* {customerOrderObjects.map((orderObject: any) => (
-                                <Rectangle
+                            <Text style={styles.orderNameText}>Order Name: {order.name}</Text>
+                            {order.items.map((orderObject: any) => (
+                                <RectangleOrderDetails
                                     key={orderObject._id}
                                     orderName={orderObject.name}
                                     quantity={orderObject.qty}
-                                    onIncrement={() => handleIncrement(orderObject._id)}
-                                    onDecrement={() => handleDecrement(orderObject._id)}
                                     price={orderObject.price}
                                 />
                             ))}
                             <Text style={styles.totalPriceText}>
                                 Total: ${totalPrice ? totalPrice.toFixed(2) : '0.00'}
                             </Text>
-                            <SubmitButton
-                                buttonName='Place Order'
-                                handlePress={() => { setIsPromptVisible(true) }}
-                            /> */}
 
                         </View>
 
@@ -184,6 +180,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 18, // Adjust the font size as needed
         marginTop: 10, // Adjust the margin as needed
+    },
+    orderNameText: {
+        fontWeight: 'bold',
+        fontSize: 20, // Adjust the font size as needed
+        marginBottom: 10, // Adjust the margin as needed
     },
 
 });
