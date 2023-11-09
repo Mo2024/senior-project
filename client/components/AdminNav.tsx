@@ -4,7 +4,7 @@ import Profile from '../screens/users/admins/Profile';
 import { Ionicons } from '@expo/vector-icons';
 import ManageItems from '../screens/users/admins/ManageItems';
 import ManageSelfCheckout from '../screens/users/admins/ManageSelfCheckout';
-import Statistics from '../screens/users/admins/Statistics';
+import CheckAttendance from '../screens/users/admins/CheckAttendance';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,8 +25,8 @@ const AdminNav = () => {
                     <Ionicons name="ios-basket" color={'#72063c'} size={size} />
                 ),
             }} />
-            <Tab.Screen name="Statistics" component={Statistics} options={{
-                tabBarLabel: 'Statistics',
+            <Tab.Screen name="CheckAttendance" component={CheckAttendance} options={{
+                tabBarLabel: 'Check Attendance',
                 headerShown: false,
                 tabBarIcon: ({ color, size }) => (
                     <Ionicons name="bar-chart" color={'#72063c'} size={size} />

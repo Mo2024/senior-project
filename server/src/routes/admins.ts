@@ -35,6 +35,7 @@ router.route('/table')
 
 router.get('/table/:branchId', AdminContoller.getTables);
 router.get('/attendance/:employeeId', AdminContoller.getAttendance);
+router.get('/employees/:branchId', AdminContoller.getEmployees);
 router.get('/branches', AdminContoller.getBranches);
 
 export default router;

@@ -11,7 +11,7 @@ import { assertIsDefined } from "../util/assertIsDefined";
 import { validateCouponRegex, validateEditItemRegex, validateItemRegex } from "../util/functions";
 import { businessNameRegex } from "../util/regex";
 import { IBranchId, IBusinessId, IbranchPopulate } from "./business";
-import { AttendanceUserModel } from "../models/user";
+import { AttendanceUserModel, EmployeeModel } from "../models/user";
 import attendance from "../models/attendance";
 
 export const getCoupons: RequestHandler<IBusinessId, unknown, unknown, unknown> = async (req, res, next) => {
@@ -239,10 +239,10 @@ export const getCategories: RequestHandler<IBusinessId, unknown, unknown, unknow
     }
 }
 
-interface employeeIdI {
+interface branchIdI {
     employeeId: mongoose.Types.ObjectId
 }
-export const getAttendance: RequestHandler<employeeIdI, unknown, unknown, unknown> = async (req, res, next) => {
+export const getAttendance: RequestHandler<branchIdI, unknown, unknown, unknown> = async (req, res, next) => {
     const { employeeId } = req.params
 
     try {
@@ -252,6 +252,25 @@ export const getAttendance: RequestHandler<employeeIdI, unknown, unknown, unknow
             throw createHttpError(404, 'Employee not found!')
         }
         res.status(201).json(attendanceRecords)
+    } catch (error) {
+        next(error)
+    }
+
+}
+interface branchIdI {
+    branchId: mongoose.Types.ObjectId
+}
+export const getEmployees: RequestHandler<branchIdI, unknown, unknown, unknown> = async (req, res, next) => {
+    const { branchId } = req.params
+
+    try {
+        console.log(branchId)
+        const employees = await EmployeeModel.find({ branchId }).exec();
+
+        if (!employees) {
+            throw createHttpError(404, 'Employee not found!')
+        }
+        res.status(201).json(employees)
     } catch (error) {
         next(error)
     }

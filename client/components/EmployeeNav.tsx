@@ -4,7 +4,7 @@ import Profile from '../screens/users/admins/Profile';
 import { Ionicons } from '@expo/vector-icons';
 import ManageItems from '../screens/users/admins/ManageItems';
 import ManageSelfCheckout from '../screens/users/admins/ManageSelfCheckout';
-import Statistics from '../screens/users/admins/Statistics';
+import Statistics from '../screens/users/admins/CheckAttendance';
 import ManageStock from '../screens/users/employees/ManageStock';
 import CameraScreen from '../screens/users/employees/Camera';
 import Orders from '../screens/users/employees/Orders';
