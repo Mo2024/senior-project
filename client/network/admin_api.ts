@@ -16,6 +16,10 @@ export async function getEmployees(empId: mongoose.Types.ObjectId): Promise<any>
     const response = await fetchData(`${API_URL}/api/admins/employees/${empId}`, { method: 'GET' }) as any;
     return await response.json()
 }
+export async function getAttendance(empId: mongoose.Types.ObjectId): Promise<any> {
+    const response = await fetchData(`${API_URL}/api/admins/attendance/${empId}`, { method: 'GET' }) as any;
+    return await response.json()
+}
 export async function getBranches(): Promise<any> {
     const response = await fetchData(`${API_URL}/api/admins/branches`, { method: 'GET' }) as any;
     return await response.json()

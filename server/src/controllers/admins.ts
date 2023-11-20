@@ -246,7 +246,7 @@ export const getAttendance: RequestHandler<branchIdI, unknown, unknown, unknown>
     const { employeeId } = req.params
 
     try {
-        const attendanceRecords = await attendance.find({ employeeId }).exec();
+        const attendanceRecords = await attendance.find({ employeeId }).populate('branchId').exec();
 
         if (!attendanceRecords) {
             throw createHttpError(404, 'Employee not found!')

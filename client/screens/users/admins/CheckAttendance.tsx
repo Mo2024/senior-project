@@ -38,6 +38,7 @@ function CheckAttendance({ navigation }: prop) {
     const [selectedBranchName, setSelectedBranchName] = useState('Select a branch')
     const [selectedBranchId, setSelectedBranchId] = useState<mongoose.Types.ObjectId>()
     const [selectedEmployee, setSelectedEmployee] = useState('Select an employee')
+    const [employeeAttendance, setEmployeeAttendance] = useState<any[]>([])
 
     useFocusEffect(
         React.useCallback(() => {
@@ -62,20 +63,56 @@ function CheckAttendance({ navigation }: prop) {
 
 
     async function handleBranchOptionChange(index: any) {
-        const selectedBranchName = fetchedBranchesNames[index as number]
-        const branchId = fetchedBranchesIds[index as number]
-        setSelectedBranchName(selectedBranchName)
-        setSelectedBranchId(branchId)
-        const fetchedEmployees = await AdminApi.getEmployees(branchId)
-        setFetchedEmployees(fetchedEmployees)
-        const employeesNames = fetchedEmployees.map((employee: any) => employee.fullName);
-        setFetchedEmployeesNames(employeesNames as any)
-        const employeesIds = fetchedEmployees.map((employee: any) => employee._id);
-        setFetchedEmployeesIds(employeesIds as any)
+        try {
+            const selectedBranchName = fetchedBranchesNames[index as number]
+            const branchId = fetchedBranchesIds[index as number]
+            setSelectedBranchName(selectedBranchName)
+            setSelectedBranchId(branchId)
+            const fetchedEmployees = await AdminApi.getEmployees(branchId)
+            setFetchedEmployees(fetchedEmployees)
+            const employeesNames = fetchedEmployees.map((employee: any) => employee.fullName);
+            setFetchedEmployeesNames(employeesNames as any)
+            const employeesIds = fetchedEmployees.map((employee: any) => employee._id);
+            setFetchedEmployeesIds(employeesIds as any)
+            setSelectedEmployee('Select An Employee')
+        } catch (error) {
+            console.log(error)
+        }
+
 
     }
 
+    function convertTimestampToReadableDate(timestamp: any) {
+        const date = new Date(timestamp);
+
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = (hours % 12) || 12;
+        const formattedMonth = month < 10 ? '0' + month : month;
+        const formattedDay = day < 10 ? '0' + day : day;
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+
+        const readableDate = `${year}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds} ${period}`;
+
+        return readableDate;
+    }
+
     async function handleEmployeeOptionChange(index: any) {
+        try {
+
+            const fetchedEmployeeAttendance = await AdminApi.getAttendance(fetchedEmployeesIds[index])
+            console.log(fetchedEmployeeAttendance)
+            setEmployeeAttendance(fetchedEmployeeAttendance)
+        } catch (error) {
+            console.log(error)
+        }
     }
     return (
         <>
@@ -122,6 +159,20 @@ function CheckAttendance({ navigation }: prop) {
                                 handleOptionChange={handleEmployeeOptionChange}
                             />
 
+                            <View style={styles.tableHeader}>
+                                <Text style={styles.columnHeader}>Branch Name</Text>
+                                <Text style={styles.columnHeader}>Date & Time</Text>
+                                <Text style={styles.columnHeader}>Is Late</Text>
+                            </View>
+
+
+                            {employeeAttendance.map((attendance, index) => (
+                                <View key={index} style={styles.tableRow}>
+                                    <Text style={styles.columnData}>{attendance.branchId.name}</Text>
+                                    <Text style={styles.columnData}>{convertTimestampToReadableDate(attendance.createdAt)}</Text>
+                                    <Text style={styles.columnData}>{attendance.isLate ? 'Yes' : 'No'}</Text>
+                                </View>
+                            ))}
                         </View>
                     </View>
                 </ScrollView>
@@ -169,7 +220,40 @@ const styles = StyleSheet.create({
     },
     labelView: {
         width: '75%'
-    }
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center', // Center items vertically
+        padding: 10,
+        backgroundColor: '#f0f0f0',
+        borderBottomWidth: 1,
+        borderBottomColor: '#72063c',
+        marginHorizontal: 20
+    },
+
+    columnHeader: {
+        flex: 1,
+        fontWeight: 'bold',
+        textAlign: 'center', // Center text horizontally
+        color: '#72063c'
+    },
+
+    tableRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center', // Center items vertically
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        marginHorizontal: 20
+
+    },
+
+    columnData: {
+        flex: 1,
+        textAlign: 'center', // Center text horizontally
+    },
 
 
 });
