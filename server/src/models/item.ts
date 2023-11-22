@@ -18,6 +18,9 @@ const itemSchema = new Schema({
         ref: 'Category',
         required: true
     },
+    barcode: {
+        type: String
+    }
 });
 
 type ItemType = InferSchemaType<typeof itemSchema>;

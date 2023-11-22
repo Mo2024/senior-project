@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SubmitButton from '../../../components/SubmitButton';
 import { logout } from '../../../network/user_api';
@@ -17,6 +17,8 @@ import mongoose from 'mongoose';
 import CategoryTextBox from '../../../components/CategoryTextBox';
 import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
 import Field from '../../../components/Field';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface EditItemProp {
     navigation: NativeStackNavigationProp<any>
@@ -38,12 +40,14 @@ function EditItem({ navigation, route }: EditItemProp) {
     const [selectedCategory, setSelectedCategory] = useState('Select a Category')
     const [selectedCategoryId, setSelectedCategoryId] = useState<mongoose.Types.ObjectId>()
 
-    const { itemId, name, price, description, categoryId } = route.params || {};
-
+    const { itemId, name, price, description, categoryId, barcode } = route.params || {};
+    const [hasPerms, setHasPerms] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
     const [itemData, setItemData] = useState({
         name,
         description,
         price,
+        barcode
     })
     useFocusEffect(
         React.useCallback(() => {
@@ -99,7 +103,20 @@ function EditItem({ navigation, route }: EditItemProp) {
         setSelectedCategoryId(categoryId)
 
     }
+    async function handleScanPress() {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPerms(status === 'granted')
+        setIsScanning(status === 'granted')
+    }
+    function handleBarCodeScanned({ data }: any) {
+        setItemData({ ...itemData, barcode: data })
+        setIsScanning(false)
 
+    }
+
+    function goBackBtn() {
+        setIsScanning(false)
+    }
     if (isLoading) {
         return (
             <>
@@ -107,6 +124,33 @@ function EditItem({ navigation, route }: EditItemProp) {
             </>
         );
 
+    }
+    if (isScanning) {
+        return (
+            <>
+                <StatusBar hidden={true} />
+
+                <View style={styles.topContainer}>
+                    <FontAwesome.Button
+                        name='arrow-left'
+                        backgroundColor={'rgba(0, 0, 0, 0)'}
+                        color="rgb(0,0,0)"
+                        onPress={goBackBtn}
+                        size={32}
+                        style={styles.topLeftContainer}
+                        underlayColor='transparent'
+                    />
+                    <Text style={[styles.loginTitle, styles.visibleRight]}>Go back</Text>
+
+                </View>
+                <View style={styles2.conatiner2}>
+                    <BarCodeScanner
+                        style={StyleSheet.absoluteFillObject}
+                        onBarCodeScanned={handleBarCodeScanned}
+                    />
+                </View>
+            </>
+        );
     }
     return (
         <>
@@ -124,6 +168,7 @@ function EditItem({ navigation, route }: EditItemProp) {
                                 name: "",
                                 description: "",
                                 price: "",
+                                barcode: ""
                             })
 
                         }
@@ -186,6 +231,24 @@ function EditItem({ navigation, route }: EditItemProp) {
                                 defaultValue={itemData.price.toString()}
 
                             />
+
+                            <View style={styles.labelView}>
+                                <Text style={styles.Label}>barcode</Text>
+                            </View>
+                            <Field
+                                handleChange={(updatedCredential) => {
+                                    setItemData({ ...itemData, price: updatedCredential })
+                                }}
+                                placeholder={'Barcodse'}
+                                defaultValue={itemData.barcode.toString()}
+
+                            />
+                            <TouchableOpacity
+                                onPress={() => handleScanPress()}
+                            >
+                                <Text style={styles.scanBarcodeText}>Scan Barcode</Text>
+                            </TouchableOpacity>
+
                             <SubmitButton buttonName='Edit Item' handlePress={onSubmit} />
 
 
@@ -205,6 +268,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    loginTitle: {
+        color: "#72063c",
+        fontSize: 40,
+        fontWeight: 'bold',
+        flex: 1,
+        textAlign: 'center',
+    },
     SafeAreaView: {
         flex: 1,
     },
@@ -217,6 +287,10 @@ const styles = StyleSheet.create({
         // height: 2000,
         height: '100%',
         // paddingBottom: '100%'
+
+    },
+    visibleRight: {
+        right: 25
 
     },
     formBoxTitle: {
@@ -236,9 +310,49 @@ const styles = StyleSheet.create({
     },
     labelView: {
         width: '75%'
+    },
+    scanBarcodeText: {
+        color: '#72063c',
+        marginTop: 10,
+        textAlign: 'center',
+        textDecorationLine: 'underline',
+    },
+
+    camera: {
+        height: 200,
+        width: '100%',
+    },
+    topContainer: {
+        // marginTop: '10%',
+        // flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        // backgroundColor: 'black'
+    },
+    topLeftContainer: {
+        position: 'relative',
+        left: 0,
     }
 
+});
 
+const styles2 = StyleSheet.create({
+    conatiner2: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    text: {
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
 });
 
 export default EditItem;

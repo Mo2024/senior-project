@@ -14,3 +14,4 @@ export const couponAmounteRegex = /^\s*(?=.*[1-9])\d*(?:\.\d{1,2})?\s*$/;
 export const openingClosingTimeRegex = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export const qtyRegex = /^(0|[1-9]\d*)$/;
+export const barcodeRegex = /^[0-9a-zA-Z]+$/

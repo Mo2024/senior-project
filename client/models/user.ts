@@ -96,4 +96,5 @@ export interface newItem {
     description?: string,
     price?: string,
     categoryId?: mongoose.Types.ObjectId
+    barcode?: string
 }

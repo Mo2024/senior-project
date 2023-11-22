@@ -366,9 +366,10 @@ interface ICreateItemBody {
     description?: string,
     price?: number,
     categoryId?: Types.ObjectId
+    barcode?: string
 }
 export const createItem: RequestHandler<unknown, unknown, ICreateItemBody, unknown> = async (req, res, next) => {
-    const { name, description, price, categoryId } = req.body;
+    const { name, description, price, categoryId, barcode } = req.body;
     const authenticatedUserId = req.session.userId;
     const adminBusinessId = req.session.businessId;
 
@@ -380,7 +381,7 @@ export const createItem: RequestHandler<unknown, unknown, ICreateItemBody, unkno
             throw createHttpError(400, "Parameter Missing")
         }
 
-        validateItemRegex(name, description, price, categoryId)
+        validateItemRegex(name, description, price, categoryId, barcode as string)
 
         const category = await CategoryModel.findById(categoryId)
             .populate({ path: "businessId", select: "status" })
@@ -395,7 +396,7 @@ export const createItem: RequestHandler<unknown, unknown, ICreateItemBody, unkno
             throw createHttpError(401, 'Your business is locked!')
         }
 
-        const newItem = await ItemModel.create({ name, categoryId, description, price });
+        const newItem = await ItemModel.create({ name, categoryId, description, price, barcode });
 
         res.status(201).json(newItem)
     } catch (error) {
@@ -530,10 +531,11 @@ interface IEditItem extends INameBody {
     name?: string,
     description?: string,
     price?: number,
-    categoryId?: Types.ObjectId
+    categoryId?: Types.ObjectId,
+    barcode?: string
 }
 export const editItem: RequestHandler<unknown, unknown, IEditItem, unknown> = async (req, res, next) => {
-    const { itemId, name, description, categoryId, price } = req.body;
+    const { itemId, name, description, categoryId, price, barcode } = req.body;
     const authenticatedUserId = req.session.userId;
     const adminBusinessId = req.session.businessId;
     try {
@@ -542,7 +544,7 @@ export const editItem: RequestHandler<unknown, unknown, IEditItem, unknown> = as
         if (!itemId || !name || !description || !price || !categoryId) {
             throw createHttpError(400, "Parameter Missing")
         }
-        validateEditItemRegex(name, description, price, categoryId, itemId)
+        validateEditItemRegex(name, description, price, categoryId, itemId, barcode as string)
 
         const category = await CategoryModel.findById(categoryId)
             .populate({ path: "businessId", select: "status" }) as ICategoryPopulate | null;
@@ -566,6 +568,7 @@ export const editItem: RequestHandler<unknown, unknown, IEditItem, unknown> = as
         item.description = description;
         item.price = price;
         item.categoryId = categoryId;
+        item.barcode = barcode
         await item.save();
 
         res.status(200).json(item)

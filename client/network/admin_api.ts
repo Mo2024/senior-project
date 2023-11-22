@@ -74,6 +74,7 @@ interface IEditItem {
     description?: string,
     price?: string,
     categoryId?: mongoose.Types.ObjectId
+    barcode?: string
 }
 export async function editItem(editItem: IEditItem): Promise<any> {
     const respone = await fetchData(`${API_URL}/api/admins/item`, {

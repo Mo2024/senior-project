@@ -1,5 +1,5 @@
 import mongoose, { Schema, Types } from "mongoose";
-import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex, openingClosingTimeRegex } from "../util/regex";
+import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex, businessNameRegex, descriptionRegex, couponNameRegex, couponPercentageRegex, couponAmounteRegex, openingClosingTimeRegex, barcodeRegex } from "../util/regex";
 import createHttpError from "http-errors";
 import nodemailer from 'nodemailer';
 import env from '../util/validateEnv';
@@ -143,7 +143,7 @@ export function validateCouponRegex(name: string, amount: number, type: string) 
     }
 
 }
-export function validateItemRegex(name: string, description: string, price: number, categoryId: Types.ObjectId) {
+export function validateItemRegex(name: string, description: string, price: number, categoryId: Types.ObjectId, barcode: string) {
     if (!businessNameRegex.test(name)) {
         throw createHttpError(400, 'Invalid Business name');
     }
@@ -153,11 +153,14 @@ export function validateItemRegex(name: string, description: string, price: numb
     if (!couponAmounteRegex.test(price.toString())) {
         throw createHttpError(400, 'Amount must be a number only & two decimal places max!');
     }
+    if (!barcodeRegex.test(barcode.toString()) && barcode !== '') {
+        throw createHttpError(404, 'Invalid barcode!')
+    }
     if (!mongoose.isValidObjectId(categoryId)) {
         throw createHttpError(404, 'Invalid category id!')
     }
 }
-export function validateEditItemRegex(name: string, description: string, price: number, categoryId: Types.ObjectId, itemId: Types.ObjectId) {
+export function validateEditItemRegex(name: string, description: string, price: number, categoryId: Types.ObjectId, itemId: Types.ObjectId, barcode: string) {
     if (!businessNameRegex.test(name)) {
         throw createHttpError(400, 'Invalid Business name');
     }
@@ -172,6 +175,9 @@ export function validateEditItemRegex(name: string, description: string, price: 
     }
     if (!mongoose.isValidObjectId(itemId)) {
         throw createHttpError(404, 'Invalid item id!')
+    }
+    if (!barcodeRegex.test(barcode.toString()) && barcode !== '') {
+        throw createHttpError(404, 'Invalid barcode!')
     }
 }
 

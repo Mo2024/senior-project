@@ -17,13 +17,14 @@ interface RoundedBoxItem {
     price: string,
     categoryId: mongoose.Types.ObjectId
     handleMessage: (isErrorParam: boolean, isVisibleParam: boolean, message: string) => void
+    barcode: string
 
 
 }
 const windowWidth = Dimensions.get('window').width;
 
 
-const RoundedBoxItem = ({ categoryId, price, description, navigation, itemId, deleteItem: deleteItem, name, handleMessage }: RoundedBoxItem) => {
+const RoundedBoxItem = ({ categoryId, price, description, navigation, itemId, deleteItem: deleteItem, name, handleMessage, barcode }: RoundedBoxItem) => {
     async function deleteBranch(itemId: mongoose.Types.ObjectId): Promise<void> {
         try {
             console.log('clicked')
@@ -48,7 +49,7 @@ const RoundedBoxItem = ({ categoryId, price, description, navigation, itemId, de
         }
     }
     return (
-        <TouchableOpacity onPress={() => { navigation.navigate('EditItem', { itemId, name, price, description, categoryId }) }}>
+        <TouchableOpacity onPress={() => { navigation.navigate('EditItem', { itemId, name, price, description, categoryId, barcode }) }}>
 
             <View style={styles.container}>
                 <View style={styles.roundedBox}>

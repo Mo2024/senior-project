@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SubmitButton from '../../../components/SubmitButton';
 import { logout } from '../../../network/user_api';
@@ -17,6 +17,8 @@ import mongoose from 'mongoose';
 import CategoryTextBox from '../../../components/CategoryTextBox';
 import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
 import Field from '../../../components/Field';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface ManageItemsProp {
     navigation: NativeStackNavigationProp<any>
@@ -29,6 +31,7 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
         name: "",
         description: "",
         price: "",
+        barcode: "",
     })
     const [isError, setIsError] = useState(false);
     const [isMessageVisible, setIsMessageVisible] = useState(false);
@@ -44,6 +47,10 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
     const [categoryIds, setCategoryIds] = useState([])
     const [selectedCategory, setSelectedCategory] = useState('Select a Category')
     const [selectedCategoryId, setSelectedCategoryId] = useState<mongoose.Types.ObjectId>()
+
+    const [hasPerms, setHasPerms] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
+
 
     useFocusEffect(
         React.useCallback(() => {
@@ -61,6 +68,7 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
                     setCategoryIds(categoryIds as any)
 
                     setIsLoading(false);
+
 
                 } catch (error) {
                     console.log(error)
@@ -114,6 +122,20 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
 
     }
 
+    async function handleScanPress() {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPerms(status === 'granted')
+        setIsScanning(status === 'granted')
+    }
+    function handleBarCodeScanned({ data }: any) {
+        setItemData({ ...itemData, barcode: data })
+        setIsScanning(false)
+
+    }
+
+    function goBackBtn() {
+        setIsScanning(false)
+    }
     if (isLoading) {
         return (
             <>
@@ -122,6 +144,35 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
         );
 
     }
+
+    if (isScanning) {
+        return (
+            <>
+                <StatusBar hidden={true} />
+
+                <View style={styles.topContainer}>
+                    <FontAwesome.Button
+                        name='arrow-left'
+                        backgroundColor={'rgba(0, 0, 0, 0)'}
+                        color="rgb(0,0,0)"
+                        onPress={goBackBtn}
+                        size={32}
+                        style={styles.topLeftContainer}
+                        underlayColor='transparent'
+                    />
+                    <Text style={[styles.loginTitle, styles.visibleRight]}>Go back</Text>
+
+                </View>
+                <View style={styles2.conatiner2}>
+                    <BarCodeScanner
+                        style={StyleSheet.absoluteFillObject}
+                        onBarCodeScanned={handleBarCodeScanned}
+                    />
+                </View>
+            </>
+        );
+    }
+
     return (
         <>
             {
@@ -138,6 +189,7 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
                                 name: "",
                                 description: "",
                                 price: "",
+                                barcode: ""
                             })
 
                         }
@@ -222,6 +274,24 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
                                         defaultValue={itemData.price}
 
                                     />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>barcode</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setItemData({ ...itemData, barcode: updatedCredential })
+                                        }}
+                                        placeholder={'Barcode'}
+                                        defaultValue={itemData.barcode}
+
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => handleScanPress()}
+                                    >
+                                        <Text style={styles.scanBarcodeText}>Scan Barcode</Text>
+                                    </TouchableOpacity>
+
                                     <SubmitButton buttonName='Create Item' handlePress={onSubmit} />
 
                                 </>
@@ -257,6 +327,8 @@ function ManageItems({ navigation, route }: ManageItemsProp) {
         </>
 
     );
+
+
 }
 
 const styles = StyleSheet.create({
@@ -269,6 +341,7 @@ const styles = StyleSheet.create({
     SafeAreaView: {
         flex: 1,
     },
+
     formBox: {
         // backgroundColor: "#72063c",
         flex: 9,
@@ -297,9 +370,58 @@ const styles = StyleSheet.create({
     },
     labelView: {
         width: '75%'
-    }
+    },
+    scanBarcodeText: {
+        color: '#72063c',
+        marginTop: 10,
+        textAlign: 'center',
+        textDecorationLine: 'underline',
+    },
 
+    camera: {
+        height: 200,
+        width: '100%',
+    },
+    topContainer: {
+        // marginTop: '10%',
+        // flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        // backgroundColor: 'black'
+    },
+    topLeftContainer: {
+        position: 'relative',
+        left: 0,
+    },
+    loginTitle: {
+        color: "#72063c",
+        fontSize: 40,
+        fontWeight: 'bold',
+        flex: 1,
+        textAlign: 'center',
+    },
+    visibleRight: {
+        right: 25
 
+    },
 });
 
+const styles2 = StyleSheet.create({
+    conatiner2: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    text: {
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+});
 export default ManageItems;

@@ -105,6 +105,7 @@ function ViewCategory({ navigation, route }: ViewCategoryProp) {
                                                 deleteItem={deleteItem}
                                                 description={item.description}
                                                 price={item.price}
+                                                barcode={item.barcode}
                                                 categoryId={item.categoryId}
                                             />
                                         </React.Fragment>
