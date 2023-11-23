@@ -484,6 +484,7 @@ export interface IitemPopulate extends Document {
             status: boolean;
         };
     };
+    barcode: string
 }
 export const deleteItem: RequestHandler<unknown, unknown, IdeleteCategory, unknown> = async (req, res, next) => {
     const { itemId } = req.body;

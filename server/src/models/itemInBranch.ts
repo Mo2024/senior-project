@@ -25,6 +25,9 @@ const itemInBranchSchema = new Schema({
         ref: 'Category',
         required: true
     },
+    barcode: {
+        type: String,
+    },
 });
 const ItemInBranchModel = model("ItemInBranchModel", itemInBranchSchema);
 export { ItemInBranchModel };

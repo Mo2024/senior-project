@@ -205,7 +205,7 @@ export const addStock: RequestHandler<unknown, unknown, IitemIdBody, unknown> = 
             throw createHttpError(409, 'Item in branch already exists!')
         }
 
-        const newItemInBranch = await ItemInBranchModel.create({ branchId: userBranchId, itemId: item._id, quantity: qty, categoryId })
+        const newItemInBranch = await ItemInBranchModel.create({ branchId: userBranchId, itemId: item._id, quantity: qty, categoryId, barcode: item.barcode })
 
         res.status(201).json(newItemInBranch)
     } catch (error) {
@@ -452,10 +452,31 @@ export const getOrdersInBranch: RequestHandler<unknown, unknown, unknown, unknow
 
 
         if (!orders) {
-            throw createHttpError(404, 'Items not found!')
+            throw createHttpError(404, 'Orders not found!')
         }
 
         res.status(201).json(orders)
+    } catch (error) {
+        next(error)
+    }
+
+}
+export const getItemsWithoutCategory: RequestHandler<unknown, unknown, unknown, unknown> = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId;
+    const branchId = req.session.branchId;
+
+    try {
+        assertIsDefined(authenticatedUserId)
+        assertIsDefined(branchId)
+
+        const items = await ItemInBranchModel.find({ branchId }).populate('itemId');
+
+
+        if (!items) {
+            throw createHttpError(404, 'Items not found!')
+        }
+
+        res.status(201).json(items)
     } catch (error) {
         next(error)
     }
