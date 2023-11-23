@@ -15,7 +15,7 @@ import { Businesses, Category, Employee, newAdmin, newEmployee } from '../../../
 import SelectDropdownIndex from '../../../components/SelectDropdownIndex';
 import mongoose from 'mongoose';
 import SelectDropdownComponent from '../../../components/SelectDropdownComponent';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { Alert } from 'react-bootstrap';
 import PromptBox from '../../../components/PromptBox';
 import * as SecureStore from 'expo-secure-store';
@@ -24,6 +24,7 @@ import * as EmployeeApi from '../../../network/employee_api'
 import AppLoader from '../../../components/AppLoader';
 import Rectangle from '../../../components/Rectangle';
 import OrderMadeRectangle from '../../../components/OrderMadeRectangle';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 
 interface ManageEmployeeProp {
@@ -43,7 +44,8 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
     const [customerOrdersObjects, setCustomerOrdersObjects] = useState<any>([]);
     const [currentCustomerOrder, setCurrentCustomerOrder] = useState('Select An Order');
     const [currentCustomerIndex, setCurrentCustomerIndex] = useState<number>(-1);
-
+    const [hasPerms, setHasPerms] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
     const [createOrders, setCreateOrders] = useState(true)
     const [viewOrders, setViewOrders] = useState(false)
     const [newOrderName, setNewOrderName] = useState<string>('')
@@ -90,7 +92,6 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
             // Your code here will run when the screen gains focus
             async function fetchItemsNeeded() {
                 // if (isReroute === true) {
-                console.log('works')
                 // }
                 // Fetch data or perform tasks here
                 const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
@@ -138,6 +139,21 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
         setCurrentCustomerOrder('Select An Order')
         setCurrentCustomerIndex(-1)
     }
+
+    async function handleScanPress() {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPerms(status === 'granted')
+        setIsScanning(status === 'granted')
+    }
+    function handleBarCodeScanned({ data }: any) {
+        console.log(data)
+        setIsScanning(false)
+
+    }
+
+    function goBackBtn() {
+        setIsScanning(false)
+    }
     if (isLoading) {
         return (
             <>
@@ -146,6 +162,35 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
         );
 
     }
+
+    if (isScanning) {
+        return (
+            <>
+                <StatusBar hidden={true} />
+
+                <View style={styles.topContainer}>
+                    <FontAwesome.Button
+                        name='arrow-left'
+                        backgroundColor={'rgba(0, 0, 0, 0)'}
+                        color="rgb(0,0,0)"
+                        onPress={goBackBtn}
+                        size={32}
+                        style={styles.topLeftContainer}
+                        underlayColor='transparent'
+                    />
+                    <Text style={[styles.loginTitle, styles.visibleRight]}>Go back</Text>
+
+                </View>
+                <View style={styles2.conatiner2}>
+                    <BarCodeScanner
+                        style={StyleSheet.absoluteFillObject}
+                        onBarCodeScanned={handleBarCodeScanned}
+                    />
+                </View>
+            </>
+        );
+    }
+
     return (
         <>
             {
@@ -216,6 +261,9 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
                                         }
                                         }>
                                             <Ionicons name="ios-cart" color={'#72063c'} size={30} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={handleScanPress}>
+                                            <Ionicons name="ios-barcode" color={'#72063c'} style={styles.icon} size={30} />
                                         </TouchableOpacity>
                                     </View>
                                     <SelectDropdownIndex
@@ -345,8 +393,52 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+    camera: {
+        height: 200,
+        width: '100%',
+    },
+    topContainer: {
+        // marginTop: '10%',
+        // flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        // backgroundColor: 'black'
+    },
+    topLeftContainer: {
+        position: 'relative',
+        left: 0,
+    },
+    loginTitle: {
+        color: "#72063c",
+        fontSize: 40,
+        fontWeight: 'bold',
+        flex: 1,
+        textAlign: 'center',
+    },
+    visibleRight: {
+        right: 25
+
+    },
 
 });
 
+const styles2 = StyleSheet.create({
+    conatiner2: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    text: {
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+});
 
 export default Orders;
