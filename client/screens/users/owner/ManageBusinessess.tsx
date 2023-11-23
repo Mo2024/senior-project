@@ -25,26 +25,29 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
     const [message, setMessage] = useState('');
     const [currentSubScreen, setCurrentSubScreen] = useState('viewBusiness');
     const [isLoading, setIsLoading] = useState(true);
-    const [fetchedBusinessess, setFetchedBusinessess] = useState<Businesses>([])
+    const [fetchedBusinessess, setFetchedBusinessess] = useState<any>([])
     const [businessess, setBusinessess] = useState<Businesses>([])
-
+    const [hasFetched, setHasFetched] = useState(false)
     useFocusEffect(
         React.useCallback(() => {
             async function fetchLoggedInUserInfo() {
                 try {
                     setIsLoading(true);
-                    if (fetchedBusinessess.length === 0) {
-                        const fetchedBusinessess = await OwnerApi.getMyBusinessess() as Businesses
-                        setFetchedBusinessess(fetchedBusinessess)
-                    }
-                    const editedInfoString = await SecureStore.getItemAsync('updatedBusiness');
-                    if (editedInfoString) {
-                        const editedInfo = JSON.parse(editedInfoString);
-                        updateBusinessState(editedInfo.name, editedInfo.description, editedInfo.businessId)
-                        await SecureStore.deleteItemAsync('updatedBusiness');
-                    }
+                    // if (fetchedBusinessess.length === 0) {
+                    //     if (!hasFetched) {
+                    //         const fetchedBusinessess = await OwnerApi.getMyBusinessess() as Businesses
+                    //         setFetchedBusinessess(fetchedBusinessess)
+                    //         setHasFetched(true);
+                    //     }
+                    // }
+                    // const editedInfoString = await SecureStore.getItemAsync('updatedBusiness');
+                    // if (editedInfoString) {
+                    //     const editedInfo = JSON.parse(editedInfoString);
+                    //     updateBusinessState(editedInfo.name, editedInfo.description, editedInfo.businessId)
+                    //     await SecureStore.deleteItemAsync('updatedBusiness');
+                    // }
 
-                    setBusinessess(fetchedBusinessess)
+                    setBusinessess(await OwnerApi.getMyBusinessess() as Businesses)
 
                     setIsLoading(false);
 
@@ -53,12 +56,12 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                 }
             }
             fetchLoggedInUserInfo()
-        }, [fetchedBusinessess])
+        }, [])
     )
 
     function updateBusinessState(newName: string, newDesc: string, businessId: mongoose.Types.ObjectId) {
-        setFetchedBusinessess((prevBusinesses) => {
-            return prevBusinesses.map((business) => {
+        setFetchedBusinessess((prevBusinesses: any) => {
+            return prevBusinesses.map((business: any) => {
                 if (business._id === businessId) {
                     business.name = newName;
                     business.description = newDesc;
@@ -71,8 +74,8 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
         setBusinessess((prevBusinesses) => {
             return prevBusinesses.filter((business) => business._id !== businessId);
         });
-        setFetchedBusinessess((prevBusinesses) => {
-            return prevBusinesses.filter((business) => business._id !== businessId);
+        setFetchedBusinessess((prevBusinesses: any) => {
+            return prevBusinesses.filter((business: any) => business._id !== businessId);
         });
     }
     function handleMessage(isErrorParam: boolean, isVisibleParam: boolean, message: string) {
@@ -129,6 +132,7 @@ function ManageBusinessess({ navigation, route }: ManageBusinessessProp) {
                                     )
                                 )
                             }
+
                             <SubmitButton buttonName='Create Business' handlePress={() => { setFetchedBusinessess([]); navigation.navigate('CreateBusiness') }} />
                         </View>
                     </View>

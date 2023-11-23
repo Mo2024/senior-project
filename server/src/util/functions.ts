@@ -3,7 +3,7 @@ import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex,
 import createHttpError from "http-errors";
 import nodemailer from 'nodemailer';
 import env from '../util/validateEnv';
-import { UserModel } from "../models/user";
+import { AttendanceUserModel, HighestCountModel, HighestCountModelSE, SeUserModel, UserModel } from "../models/user";
 
 export function generatePassword(length = 10) {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-';
@@ -54,13 +54,13 @@ export function validateOwnerRegex(username: string, email: string, password: st
     if (!fullNameRegex.test(area)) {
         throw createHttpError(400, 'Invalid area format');
     }
-    if (!fullNameRegex.test(road)) {
+    if (!addressRegex.test(road)) {
         throw createHttpError(400, 'Invalid road format');
     }
-    if (!fullNameRegex.test(block)) {
+    if (!addressRegex.test(block)) {
         throw createHttpError(400, 'Invalid block format');
     }
-    if (!fullNameRegex.test(building)) {
+    if (!addressRegex.test(building)) {
         throw createHttpError(400, 'Invalid building format');
     }
     if (ownerCpr && !ownerCprRegex.test(ownerCpr.toString())) {
@@ -263,3 +263,63 @@ export async function validatePassword(newPwd: string) {
 //         throw createHttpError(400, 'Invalid road');
 //     }
 // }
+
+import bcrypt from 'bcryptjs';
+
+export async function createSeAndBranchUser(newBranch: any, e: string) {
+    const aCountDocument = await HighestCountModel.findOne();
+    let aCount;
+    if (!aCountDocument) {
+        // If the document doesn't exist, create a new one with the default value
+        const newCountDocument = await HighestCountModel.create({ highestCount: 0 });
+        aCount = newCountDocument.highestCount;
+    } else {
+        // If the document exists, get the highest count
+        aCount = aCountDocument.highestCount;
+    }
+    const generatedPassword = generatePassword();
+    const passwordHashed = await bcrypt.hash(generatedPassword, 10)
+
+    const newAttendanceUser = new AttendanceUserModel({
+        username: `branch${aCount}`,
+        password: passwordHashed,
+        branchId: newBranch._id as mongoose.Types.ObjectId,
+    });
+
+    await newAttendanceUser.save({ validateBeforeSave: false });
+    await HighestCountModel.updateOne({ /* your query */ }, { highestCount: aCount + 1 }).exec();
+
+
+    const aCountDocumentSE = await HighestCountModel.findOne();
+    let aCountSE;
+    if (!aCountDocumentSE) {
+        // If the document doesn't exist, create a new one with the default value
+        const newCountDocument = await HighestCountModelSE.create({ highestCount: 0 });
+        aCountSE = newCountDocument.highestCount;
+    } else {
+        // If the document exists, get the highest count
+        aCountSE = aCountDocumentSE.highestCount;
+    }
+    const generatedPasswordSE = generatePassword();
+    const passwordHashedSE = await bcrypt.hash(generatedPasswordSE, 10)
+
+    const newSeUser = new SeUserModel({
+        username: `se${aCountSE}`,
+        password: passwordHashedSE,
+        branchId: newBranch._id as mongoose.Types.ObjectId,
+    });
+
+    await newSeUser.save({ validateBeforeSave: false });
+    await HighestCountModelSE.updateOne({ /* your query */ }, { highestCount: aCount + 1 }).exec();
+
+    const email = e as string
+    const subject = "New Branch & Self-checkout User"
+    const text = `Your username for branch ${name} is branch${aCount} & password is ${generatedPassword}
+    
+    \n\n
+    Your username for self-checkout of branch ${name} is se${aCountDocumentSE} & password is ${generatedPasswordSE}
+    `
+    if (!sendEmail(email, subject, text)) {
+        throw createHttpError(500, 'Failed to send email.');
+    }
+}

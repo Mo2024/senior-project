@@ -66,7 +66,7 @@ export interface SignupCredentials {
     road?: string,
     block?: string,
     building?: string,
-    ownerCpr?: number,
+    cpr?: number,
 }
 
 export async function signup(credentials: SignupCredentials): Promise<UserModel> {

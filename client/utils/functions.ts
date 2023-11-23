@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import * as UserApi from "../network/user_api";
-import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex } from "./regex";
+import { emailRegex, ownerCprRegex, passwordRegex, usernameRegex, fullNameRegex, telephoneRegex, addressRegex } from "./regex";
 
 
 export default async function fetchData(input: RequestInfo, init?: RequestInit) {
@@ -35,10 +35,21 @@ export async function validateSignup(credentials: UserApi.SignupCredentials) {
         road,
         block,
         building,
-        ownerCpr,
+        cpr
     } = credentials
+    console.log("Username:", username);
+    console.log("Email:", email);
+    console.log("Password:", password);
+    console.log("Confirm Password:", confirmPassword);
+    console.log("Full Name:", fullName);
+    console.log("Telephone:", telephone);
+    console.log("Area:", area);
+    console.log("Road:", road);
+    console.log("Block:", block);
+    console.log("Building:", building);
+    console.log("Owner CPR:", cpr);
 
-    if (!username || !email || !password || !confirmPassword || !fullName || !telephone || !area || !road || !block || !building || !ownerCpr) {
+    if (!username || !email || !password || !confirmPassword || !fullName || !telephone || !area || !road || !block || !building || !cpr) {
         throw Error("Parameter Missing")
     }
 
@@ -67,16 +78,16 @@ export async function validateSignup(credentials: UserApi.SignupCredentials) {
     if (!fullNameRegex.test(area)) {
         throw Error('Invalid area format');
     }
-    if (!fullNameRegex.test(road)) {
+    if (!addressRegex.test(road)) {
         throw Error('Invalid road format');
     }
-    if (!fullNameRegex.test(block)) {
+    if (!addressRegex.test(block)) {
         throw Error('Invalid block format');
     }
-    if (!fullNameRegex.test(building)) {
+    if (!addressRegex.test(building)) {
         throw Error('Invalid building format');
     }
-    if (ownerCpr && !ownerCprRegex.test(ownerCpr.toString())) {
+    if (cpr && !ownerCprRegex.test(cpr.toString())) {
         throw Error('Invalid owner CPR format');
     }
 

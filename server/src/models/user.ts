@@ -116,6 +116,26 @@ const attendanceUserSchema = new Schema({
 type AttendanceUserType = InferSchemaType<typeof attendanceUserSchema>;
 const AttendanceUserModel = model<AttendanceUserType>("AttendanceUser", attendanceUserSchema);
 
+const seUserSchema = new Schema({
+    branchId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Branch',
+        required: true
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    password: {
+        type: String,
+        required: true,
+        select: false,
+    },
+});
+type SeUserType = InferSchemaType<typeof seUserSchema>;
+const SeUserModel = model<SeUserType>("SEUser", seUserSchema);
+
 // attendanceUserSchema.add(userSchema);
 
 // const AttendanceUser = User.discriminator("AttendanceUser", attendanceUserSchema);
@@ -130,7 +150,14 @@ const highestCountSchema = new Schema({
         default: 0,
     },
 });
+const highestCountSchemaSE = new Schema({
+    highestCount: {
+        type: Number,
+        default: 0,
+    },
+});
 
 const HighestCountModel = model('HighestCount', highestCountSchema);
+const HighestCountModelSE = model('HighestCountSE', highestCountSchemaSE);
 
-export { HighestCountModel, UserModel, OwnerModel, EmployeeModel, AdminModel, AttendanceUserModel }
+export { HighestCountModelSE, HighestCountModel, SeUserModel, UserModel, OwnerModel, EmployeeModel, AdminModel, AttendanceUserModel }

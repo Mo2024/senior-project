@@ -87,6 +87,7 @@ function SignUpScreen({ navigation }: SignUpScreenProps) {
             formBoxTitle="Welcome!"
             isMessageVisible={isMessageVisible}
             isError={isError}
+            login={false}
             message={message}
             onClose={() => {
                 setIsMessageVisible(false)

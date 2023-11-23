@@ -112,7 +112,9 @@ function Profile({ navigation }: LoggedInScreenProps) {
         }
     }
 
-    function logoutBtn() {
+    async function logoutBtn() {
+        await UserApi.logout();
+
         navigation.dispatch(
             CommonActions.reset({
                 index: 0,

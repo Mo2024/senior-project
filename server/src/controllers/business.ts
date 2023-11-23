@@ -7,7 +7,7 @@ import { BranchModel } from "../models/branch";
 import { BusinessModel } from '../models/business';
 import { AdminModel, AttendanceUserModel, EmployeeModel, HighestCountModel, UserModel } from "../models/user";
 import { assertIsDefined } from '../util/assertIsDefined';
-import { generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateEmployeeRegex } from "../util/functions";
+import { createSeAndBranchUser, generatePassword, sendEmail, validateBranchRegex, validateBusinessRegex, validateEmployeeRegex } from "../util/functions";
 
 
 export const getBusinesses: RequestHandler = async (req, res, next) => {
@@ -210,34 +210,8 @@ export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown>
             { $push: { branches: newBranch._id } }
         ).exec();
 
-        const aCountDocument = await HighestCountModel.findOne();
-        let aCount;
-        if (!aCountDocument) {
-            // If the document doesn't exist, create a new one with the default value
-            const newCountDocument = await HighestCountModel.create({ highestCount: 0 });
-            aCount = newCountDocument.highestCount;
-        } else {
-            // If the document exists, get the highest count
-            aCount = aCountDocument.highestCount;
-        }
-        const generatedPassword = generatePassword();
-        const passwordHashed = await bcrypt.hash(generatedPassword, 10)
+        createSeAndBranchUser(newBranch, req.session.email as string)
 
-        const newAttendanceUser = new AttendanceUserModel({
-            username: `branch${aCount}`,
-            password: passwordHashed,
-            branchId: newBranch._id as mongoose.Types.ObjectId,
-        });
-
-        await newAttendanceUser.save({ validateBeforeSave: false });
-        await HighestCountModel.updateOne({ /* your query */ }, { highestCount: aCount + 1 }).exec();
-
-        const email = req.session.email as string
-        const subject = "New Branch User"
-        const text = `Your username for branch ${name} is branch${aCount} & password is ${generatedPassword}`
-        if (!sendEmail(email, subject, text)) {
-            throw createHttpError(500, 'Failed to send email.');
-        }
         res.status(201).json(newBranch)
     } catch (error) {
         next(error)
