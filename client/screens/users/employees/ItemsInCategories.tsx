@@ -86,6 +86,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
         setFetchedItems((prevItems) => {
             return prevItems.filter((item) => item.itemId._id !== itemId);
         });
+
     }
 
     async function handleAddToCartItem(qty: number, name: string, _id: mongoose.Types.ObjectId, price: number) {

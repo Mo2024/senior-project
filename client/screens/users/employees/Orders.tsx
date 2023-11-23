@@ -25,7 +25,11 @@ import AppLoader from '../../../components/AppLoader';
 import Rectangle from '../../../components/Rectangle';
 import OrderMadeRectangle from '../../../components/OrderMadeRectangle';
 import { BarCodeScanner } from 'expo-barcode-scanner';
-
+import { v4 } from 'uuid';
+import { Audio } from 'expo-av';
+import { throttle } from 'lodash';
+import { DeviceEventEmitter } from 'react-native';
+import KeyEvent from 'react-native-keyevent';
 
 interface ManageEmployeeProp {
     navigation: NativeStackNavigationProp<any>
@@ -50,7 +54,15 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
     const [viewOrders, setViewOrders] = useState(false)
     const [newOrderName, setNewOrderName] = useState<string>('')
     const [fetchedOrders, setFetchedOrders] = useState<any>()
+    const [fetchedItemsWithoutCat, setFetchedItemsWithoutCat] = useState<any[]>([])
     const { isReroute } = route.params || {}
+    let playSound = async () => {
+        const { sound } = await Audio.Sound.createAsync(
+            require('../../../assets/barcode.mp3')
+        );
+        await sound.playAsync();
+    };
+
     useEffect(() => {
         async function fetchItemsNeeded() {
             try {
@@ -76,6 +88,9 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
 
                 const fetchedOrders = await EmployeeApi.getOrdersInBranch() as Businesses
                 setFetchedOrders(fetchedOrders)
+
+                const fetchedItemsWithoutCat = await EmployeeApi.getItemsWithoutCategory()
+                setFetchedItemsWithoutCat(fetchedItemsWithoutCat)
 
 
 
@@ -113,6 +128,7 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
     );
     function handleCurrentCustomerChange(index: any) {
         setCurrentCustomerIndex(index)
+        setCurrentCustomerOrder(customerOrdersNames[index])
     }
 
     async function handleAddIconPress() {
@@ -144,14 +160,60 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
         const { status } = await BarCodeScanner.requestPermissionsAsync();
         setHasPerms(status === 'granted')
         setIsScanning(status === 'granted')
+        if (status === 'granted') {
+            if (currentCustomerIndex == -1) {
+                const newUUID: string = v4();
+                const index = customerOrdersNames.length
+                await SecureStore.setItemAsync('customerOrdersNames', JSON.stringify([...customerOrdersNames, newUUID]));
+                await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify([...customerOrdersObjects, []]));
+
+                setCustomerOrdersNames([...customerOrdersNames, newUUID]);
+                setCustomerOrdersObjects([...customerOrdersObjects, []]);
+                setCurrentCustomerIndex(index)
+                setCurrentCustomerOrder(newUUID)
+            }
+        }
     }
-    function handleBarCodeScanned({ data }: any) {
-        console.log(data)
-        setIsScanning(false)
+    async function handleBarCodeScanned({ data }: any) {
+        setIsLoading(true)
+        // console.log(fetchedCategories)
+        // const foundItem = fetchedI.find(item => item.barcode == data);
+        const foundItem = fetchedItemsWithoutCat.find(item => item.barcode == data);
+
+        if (foundItem) {
+            const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
+            const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
+            const existingItemIndex = parsedCustomerOrdersObjects[currentCustomerIndex].findIndex((item: any) => item._id === foundItem.itemId._id);
+
+            if (existingItemIndex !== -1) {
+                parsedCustomerOrdersObjects[currentCustomerIndex][existingItemIndex].qty++;
+
+            } else {
+                const newItem = { name: foundItem.itemId.name, _id: foundItem.itemId._id, qty: 1, price: foundItem.itemId.price };
+                parsedCustomerOrdersObjects[currentCustomerIndex].push(newItem);
+            }
+            // console.log(foundItem)
+            await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(parsedCustomerOrdersObjects));
+            setCustomerOrdersObjects(parsedCustomerOrdersObjects)
+            console.log(parsedCustomerOrdersObjects)
+            console.log(parsedCustomerOrdersObjects[currentCustomerIndex])
+
+            playSound()
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+        } else {
+            setIsLoading(false);
+            setIsError(true)
+            setIsMessageVisible(true)
+            setMessage(`Item not available in branch!`)
+        }
 
     }
 
     function goBackBtn() {
+        console.log(currentCustomerOrder)
+        console.log(currentCustomerIndex)
         setIsScanning(false)
     }
     if (isLoading) {
@@ -167,7 +229,18 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
         return (
             <>
                 <StatusBar hidden={true} />
+                {
+                    isMessageVisible &&
 
+                    <MessageBox
+                        type={isError}
+                        message={message}
+                        onClose={() => {
+                            setIsMessageVisible(false)
+                        }}
+
+                    />
+                }
                 <View style={styles.topContainer}>
                     <FontAwesome.Button
                         name='arrow-left'

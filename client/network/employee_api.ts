@@ -13,6 +13,10 @@ export async function getItems(catId: mongoose.Types.ObjectId): Promise<any> {
     const response = await fetchData(`${API_URL}/api/employees/items/${catId}`, { method: 'GET' }) as any;
     return await response.json()
 }
+export async function getItemsWithoutCategory(): Promise<any> {
+    const response = await fetchData(`${API_URL}/api/employees/items`, { method: 'GET' }) as any;
+    return await response.json()
+}
 export async function getItemsInBranch(catId: mongoose.Types.ObjectId): Promise<any> {
     const response = await fetchData(`${API_URL}/api/employees/itemsInBranch/${catId}`, { method: 'GET' }) as any;
     return await response.json()
