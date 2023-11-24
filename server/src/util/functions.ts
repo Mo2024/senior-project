@@ -314,10 +314,10 @@ export async function createSeAndBranchUser(newBranch: any, e: string) {
 
     const email = e as string
     const subject = "New Branch & Self-checkout User"
-    const text = `Your username for branch ${name} is branch${aCount} & password is ${generatedPassword}
+    const text = `Your username for branch ${newBranch.name} is branch${aCount} & password is ${generatedPassword}
     
     \n\n
-    Your username for self-checkout of branch ${name} is se${aCountDocumentSE} & password is ${generatedPasswordSE}
+    Your username for self-checkout of branch ${newBranch.name} is se${aCountSE} & password is ${generatedPasswordSE}
     `
     if (!sendEmail(email, subject, text)) {
         throw createHttpError(500, 'Failed to send email.');

@@ -210,7 +210,8 @@ export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown>
             { $push: { branches: newBranch._id } }
         ).exec();
 
-        createSeAndBranchUser(newBranch, req.session.email as string)
+        //THE PROBLEM IS  HERE
+        await createSeAndBranchUser(newBranch, req.session.email as string)
 
         res.status(201).json(newBranch)
     } catch (error) {

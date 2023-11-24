@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-import { AdminModel, AttendanceUserModel, EmployeeModel, OwnerModel, UserModel } from '../models/user';
+import { AdminModel, AttendanceUserModel, EmployeeModel, OwnerModel, SeUserModel, UserModel } from '../models/user';
 import { checkIfCredentialsIsTaken, checkIfCredentialsIsTakenUpdate, sendEmail, validateOwnerRegex, validatePassword, validateUpdateOwnerRegex, validateUpdateUserRegex } from '../util/functions';
 import { BusinessModel } from '../models/business';
 import { BranchModel } from '../models/branch';
@@ -10,17 +10,20 @@ import { assertIsDefined } from '../util/assertIsDefined';
 import { ownerCprRegex } from '../util/regex';
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
-    const role = req.session.role;
+    const role = req.session.role || req.session.roleSe;
     try {
         let user;
+
         if (role == 'AttendanceUser') {
             user = await AttendanceUserModel.findById(authenticatedUserId).select('_id');
-            res.status(201).json({ _id: user?._id, __t: 'AttendanceUser' })
+            user = { _id: user?._id, __t: 'AttendanceUser' };
+        } else if (role == 'SeUser') {
+            user = await SeUserModel.findById(authenticatedUserId).select('_id');
+            user = { _id: user?._id, __t: 'SeUser' };
         } else {
             user = await UserModel.findById(authenticatedUserId).select('_id __t');
-            res.status(201).json(user)
         }
-
+        res.status(201).json(user);
 
     } catch (error) {
         next(error)
@@ -130,7 +133,7 @@ interface IUser {
     username: string;
     email: string;
     password: string;
-    __t: 'Employee' | 'Owner' | "Admin";
+    __t: 'Employee' | 'Owner' | "Admin" | 'SeUser' | 'AttendanceUser';
     __v: number;
 }
 
@@ -149,6 +152,9 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
         } else if (type == 'AttendanceUser') {
             user = await AttendanceUserModel.findOne({ username })
                 .select('+password').exec() as any;
+        } else if (type == 'SeUser') {
+            user = await SeUserModel.findOne({ username })
+                .select('+password').exec() as any;
         }
 
         if (!user) {
@@ -165,21 +171,22 @@ export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async
             const branch = await BranchModel.findById(user.branchId).exec()
             req.session.branchId = user.branchId;
             req.session.businessId = branch?.businessId;
-        }
-        if (user.__t === "Admin") {
+        } else if (user.__t === "Admin") {
             req.session.businessId = user.businessId;
-        }
-        req.session.userId = user._id;
-        if (type == 'AttendanceUser') {
+        } else if (type == 'AttendanceUser') {
             req.session.role = 'AttendanceUser';
+            req.session.branchId = user.branchId;
+        } else if (type == 'SeUser') {
+            req.session.roleSe = type;
+            console.log(req.session)
             req.session.branchId = user.branchId;
         }
         if (type !== 'AttendanceUser') {
             req.session.email = user.email;
             req.session.role = user.__t;
-
         }
 
+        req.session.userId = user._id;
         const userObj = { _id: user._id, __t: user.__t }
         res.status(201).json(userObj)
     } catch (error) {
