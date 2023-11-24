@@ -24,7 +24,7 @@ export const isEmployee: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
     const employee = await EmployeeModel.findById(authenticatedUserId).exec();
 
-    if (employee) {
+    if (employee || req.session.roleSe == 'SeUser') {
         next()
     } else {
         next(createHttpError(401, 'User not Authorized'))
