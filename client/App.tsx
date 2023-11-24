@@ -31,6 +31,7 @@ import EditProductItem from "./screens/users/employees/EditProductItem";
 import AttendanceQrCode from "./screens/AttendanceQrCode";
 import Checkout from "./screens/users/employees/Checkout";
 import ViewOrderDetails from "./screens/users/employees/ViewOrderDetails";
+import SelfCheckout from "./screens/SelfCheckout";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,7 +44,9 @@ export default function App() {
   useEffect(() => {
     async function fetchLoggedInUser() {
       try {
+        console.log('a')
         const user = await UserApi.getLoggedInUser()
+        console.log('b')
         if (!user) await SecureStore.deleteItemAsync('userInfo'); setIsLoggedIn(false);
         // setUserType(user.__t)
         console.log(user)
@@ -82,6 +85,7 @@ export default function App() {
           <Stack.Screen name="LogInScreen" component={LogInScreen} />
           <Stack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
           <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
+          <Stack.Screen name="SelfCheckout" component={SelfCheckout} />
           <Stack.Screen name="AttendanceQrCode" component={AttendanceQrCode} />
           <Stack.Screen name="ManageBranches" component={ManageBranches} />
           <Stack.Screen name="ManageBranch" component={ManageBranch} />

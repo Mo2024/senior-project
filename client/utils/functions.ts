@@ -107,5 +107,7 @@ export async function userRouter(userType: string) {
         return 'AdminNav'
     } else if (userType == 'AttendanceUser') {
         return 'AttendanceQrCode'
+    } else if (userType == 'SeUser') {
+        return 'SelfCheckout'
     }
 }

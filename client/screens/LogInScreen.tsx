@@ -25,9 +25,15 @@ function LogInScreen({ navigation }: LogInScreenProps) {
             if (/^branch\d+/.test(credentialsObject.username)) {
                 let creds = { ...credentials, type: "AttendanceUser" }
                 user = await UserApi.login(creds as UserApi.LoginCredentials);
-                // user.__t = 'AttendanceUser'
                 user = { ...user, __t: 'AttendanceUser' }
                 navResult = await userRouter('AttendanceUser') as string
+
+            } else if (/^se\d+/.test(credentialsObject.username)) {
+                let creds = { ...credentials, type: "SeUser" }
+                user = await UserApi.login(creds as UserApi.LoginCredentials);
+                console.log(user)
+                user = { ...user, __t: 'SeUser' }
+                navResult = await userRouter('SeUser') as string
 
             } else {
                 let creds = { ...credentials, type: "normal" }
