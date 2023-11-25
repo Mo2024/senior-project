@@ -8,6 +8,7 @@ import { BusinessModel } from '../models/business';
 import { BranchModel } from '../models/branch';
 import { assertIsDefined } from '../util/assertIsDefined';
 import { ownerCprRegex } from '../util/regex';
+import Stripe from 'stripe';
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
     const authenticatedUserId = req.session.userId;
     const role = req.session.role || req.session.roleSe;
@@ -477,4 +478,60 @@ export const getQrCode: RequestHandler = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+
+interface paymentIntent {
+    totalAmount: number
+}
+
+import env from '../util/validateEnv';
+
+const stripe = new Stripe(env.secret_key);
+
+export const paymentIntent: RequestHandler<unknown, unknown, paymentIntent, unknown> = async (req, res, next) => {
+    const { totalAmount } = req.body
+    // try {
+
+    //     if (!totalAmount) {
+    //         throw createHttpError(400, "Parameter Missing");
+    //     }
+
+    //     const paymentIntent = await stripe.paymentIntents.create({
+    //         amount: (totalAmount / 100), //lowest denomination of particular currency
+    //         currency: "usd",
+    //         payment_method_types: ["card"], //by default
+    //     });
+
+    //     const clientSecret = paymentIntent.client_secret;
+
+    //     res.json({
+    //         clientSecret: clientSecret,
+    //     });
+    // } catch (error) {
+    //     next(error);
+    // }
+
+    const customer = await stripe.customers.create();
+    const ephemeralKey = await stripe.ephemeralKeys.create(
+        { customer: customer.id },
+        { apiVersion: '2023-10-16' }
+    );
+    console.log(totalAmount)
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: (totalAmount * 100),
+        currency: 'usd',
+        customer: customer.id,
+        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+        automatic_payment_methods: {
+            enabled: true,
+        },
+    });
+
+    res.json({
+        paymentIntent: paymentIntent.client_secret,
+        ephemeralKey: ephemeralKey.secret,
+        customer: customer.id,
+        publishableKey: env.pk
+    });
+
 }

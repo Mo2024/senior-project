@@ -7,4 +7,6 @@ export default cleanEnv(process.env, {
     session_secret: str(),
     smtpEmail: str(),
     smtpPassword: str(),
+    secret_key: str(),
+    pk: str(),
 }) 

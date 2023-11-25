@@ -29,6 +29,7 @@
     "-": "^0.0.1",
     "@types/http-errors": "^2.0.1",
     "@types/multer": "^1.4.8",
+    "@types/stripe": "^8.0.417",
     "@types/uuid": "^9.0.4",
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^5.0.0",
@@ -42,6 +43,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.3",
+    "stripe": "^14.5.0",
     "uuid": "^9.0.1"
   }
 }

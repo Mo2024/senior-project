@@ -21,6 +21,7 @@ router.patch('/forgotPasswordCode', UserContoller.forgotPasswordCode);
 router.get('/QrCode', isAttendanceUser, UserContoller.getQrCode);
 router.get('/branches/generateVCode', isOwner, UserContoller.generateVerificationCode);
 router.post('/branches/updateUserPwd', isOwner, UserContoller.updateAttendanceUserPassword);
+router.post('/payment-sheet', UserContoller.paymentIntent);
 
 
 export default router;
