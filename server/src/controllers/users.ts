@@ -516,9 +516,8 @@ export const paymentIntent: RequestHandler<unknown, unknown, paymentIntent, unkn
         { customer: customer.id },
         { apiVersion: '2023-10-16' }
     );
-    console.log(totalAmount)
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: (totalAmount * 100),
+        amount: 1099,
         currency: 'usd',
         customer: customer.id,
         // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
@@ -526,6 +525,9 @@ export const paymentIntent: RequestHandler<unknown, unknown, paymentIntent, unkn
             enabled: true,
         },
     });
+
+    console.log(env.pk)
+    console.log(env.secret_key)
 
     res.json({
         paymentIntent: paymentIntent.client_secret,

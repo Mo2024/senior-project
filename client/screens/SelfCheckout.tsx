@@ -26,7 +26,7 @@ import { v4 } from 'uuid';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
 import { StripeProvider } from '@stripe/stripe-react-native';
-import { API_URL, secret_key } from '@env';
+import { API_URL, secret_key, pk } from '@env';
 import { CardField, useStripe, useConfirmPayment } from '@stripe/stripe-react-native';
 import { Button } from 'react-bootstrap';
 
@@ -43,18 +43,18 @@ function Checkout({ navigation, route }: props) {
 
     const [customerOrderObjects, setCustomerOrderObjects] = useState<any>([]);
     const [customerOrderName, setCustomerOrderName] = useState<any>();
+    const [isPaying, setIsPaying] = useState(false); // New state
 
     const [email, setEmail] = useState<string>('');
-    const [cardDetails, setCardDetails] = useState<any>();
-    const { confirmPayment, loading } = useConfirmPayment();
-    const { initPaymentSheet, presentPaymentSheet } = useStripe();
-
-    const { currentCustomerIndex } = route.params || {};
-    const [totalPrice, setTotalPrice] = useState<number>(30)
+    const [totalPrice, setTotalPrice] = useState<number>(0)
     const [hasPerms, setHasPerms] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [fetchedItemsWithoutCat, setFetchedItemsWithoutCat] = useState<any[]>([])
-
+    const [cardDetails, setCardDetails] = useState({
+        number: '',
+        expirationDate: '',
+        cvv: '',
+    })
     let playSound = async () => {
         const { sound } = await Audio.Sound.createAsync(
             require('../assets/barcode.mp3')
@@ -73,7 +73,6 @@ function Checkout({ navigation, route }: props) {
                     setCustomerOrderName(v4());
                     const fetchedItemsWithoutCat = await EmployeeApi.getItemsWithoutCategory()
                     setFetchedItemsWithoutCat(fetchedItemsWithoutCat)
-                    initializePaymentSheet();
                     setIsLoading(false);
 
                 } catch (error) {
@@ -87,28 +86,41 @@ function Checkout({ navigation, route }: props) {
     async function handleConfirmOrder() {
         try {
 
-            const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const cardNumberRegex = /^[0-9]{16}$/;
+            const expirationDateRegex = /^(0[1-9]|1[0-2])\/[0-9]{2}$/;
+            const cvvRegex = /^[0-9]{3}$/;
 
-            // const initializePaymentSheet = async () => {
-            //     await initPaymentSheet({
-            //         paymentIntentClientSecret: secret_key, // Replace with the actual client secret
-            //     });
-            // };
-
-            // await EmployeeApi.makeOrder({ email: reciptEmail, order: customerOrderObjects, name: customerOrderName });
-            // const fetchedCustomerOrdersObjects = await SecureStore.getItemAsync('customerOrdersObjects')
-            // let parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
-            // const fetchedCustomerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
-            // let parsedCustomerOrdersNames = JSON.parse(fetchedCustomerOrdersNames as string);
-            // if (parsedCustomerOrdersObjects !== null) {
-            //     console.log(parsedCustomerOrdersObjects)
-            //     parsedCustomerOrdersObjects = parsedCustomerOrdersObjects.filter((element: any, index: any) => index !== currentCustomerIndex);
-            //     await SecureStore.setItemAsync('customerOrdersObjects', JSON.stringify(parsedCustomerOrdersObjects));
-            //     parsedCustomerOrdersNames = parsedCustomerOrdersNames.filter((element: any, index: any) => index !== currentCustomerIndex);
-            //     await SecureStore.setItemAsync('customerOrdersNames', JSON.stringify(parsedCustomerOrdersNames));
-            // }
-            // setReciptEmail('')
-            // navigation.navigate('Orders', { isReroute: true })
+            if (!emailRegex.test(email)) {
+                setIsLoading(false);
+                setIsError(true)
+                setIsMessageVisible(true)
+                setMessage(`Invalid Email`)
+            } else if (!cardNumberRegex.test(cardDetails.number)) {
+                setIsLoading(false);
+                setIsError(true)
+                setIsMessageVisible(true)
+                setMessage(`Invalid Card Number`)
+            } else if (!expirationDateRegex.test(cardDetails.expirationDate)) {
+                setIsLoading(false);
+                setIsError(true)
+                setIsMessageVisible(true)
+                setMessage(`Invalid Expiration Date`)
+            } else if (!cvvRegex.test(cardDetails.cvv)) {
+                setIsLoading(false);
+                setIsError(true)
+                setIsMessageVisible(true)
+                setMessage(`Invalid CVV`)
+            } else {
+                console.log('All inputs are valid');
+                await EmployeeApi.makeOrder({ email: email, order: customerOrderObjects, name: customerOrderName });
+                navigation.dispatch(
+                    CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: 'SelfCheckout' }],
+                    })
+                );
+            }
         } catch (error) {
             setIsError(true)
             let errorMessage = ''
@@ -124,24 +136,38 @@ function Checkout({ navigation, route }: props) {
 
     async function handleIncrement(_id: mongoose.Types.ObjectId) {
         let updatedCustomerOrderObjects: any;
+        const foundItem = fetchedItemsWithoutCat.find(item => item.itemId._id == _id);
+        let isError = false
         setCustomerOrderObjects((prevCustomerOrderObjects: any) => {
             updatedCustomerOrderObjects = prevCustomerOrderObjects.map((orderObject: any) => {
                 if (orderObject._id.toString() === _id.toString()) {
-                    return { ...orderObject, qty: orderObject.qty + 1 };
+                    if (foundItem.quantity <= orderObject.qty) {
+                        isError = true
+                        setIsLoading(false);
+                        setIsError(true)
+                        setIsMessageVisible(true)
+                        setMessage(`Only ${foundItem.quantity} quantity is available for this item`)
+                        return { ...orderObject, qty: foundItem.quantity };
+                    } else {
+                        return { ...orderObject, qty: orderObject.qty + 1 };
+                    }
                 }
                 return orderObject;
             });
             return updatedCustomerOrderObjects
         });
 
-        setTotalPrice(() => {
-            let totalSum = 0
-            updatedCustomerOrderObjects.map((item: any) => {
-                console.log(item)
-                totalSum += item.qty * item.price
+        if (!isError) {
+            setTotalPrice(() => {
+                let totalSum = 0
+                updatedCustomerOrderObjects.map((item: any) => {
+                    // console.log(item)
+                    totalSum += item.qty * item.price
+                })
+                return totalSum
             })
-            return totalSum
-        })
+        }
+
     }
     async function handleBarCodeScanned({ data }: any) {
         setIsLoading(true)
@@ -153,7 +179,15 @@ function Checkout({ navigation, route }: props) {
             const existingItemIndex = customerOrderObjects.findIndex((item: any) => item._id === foundItem.itemId._id);
 
             if (existingItemIndex !== -1) {
-                customerOrderObjects[existingItemIndex].qty++;
+                if (foundItem.quantity <= customerOrderObjects[existingItemIndex].qty) {
+                    setIsLoading(false);
+                    setIsError(true)
+                    setIsMessageVisible(true)
+                    setMessage(`Only ${foundItem.quantity} quantity is available for this item`)
+                    return
+                } else {
+                    customerOrderObjects[existingItemIndex].qty++;
+                }
 
             } else {
                 const newItem = { name: foundItem.itemId.name, _id: foundItem.itemId._id, qty: 1, price: foundItem.itemId.price };
@@ -185,6 +219,7 @@ function Checkout({ navigation, route }: props) {
     }
     async function handleDecrement(_id: mongoose.Types.ObjectId) {
         let updatedCustomerOrderObjects: any;
+
         setCustomerOrderObjects((prevCustomerOrderObjects: any) => {
             updatedCustomerOrderObjects = prevCustomerOrderObjects.map((orderObject: any) => {
                 if (orderObject._id.toString() === _id.toString() && orderObject.qty > 0) {
@@ -213,100 +248,6 @@ function Checkout({ navigation, route }: props) {
         setHasPerms(status === 'granted')
         setIsScanning(status === 'granted')
     }
-
-    // const fetchPaymentIntentClientSecret = async () => {
-    //     const response = await fetch(`${API_URL}/api/users/create-payment-intent`, {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //         },
-    //     });
-    //     const { clientSecret, error } = await response.json();
-    //     return { clientSecret, error };
-    // };
-
-    // const handlePayPress = async () => {
-    //     //1.Gather the customer's billing information (e.g., email)
-    //     if (!cardDetails?.complete || !email) {
-    //         Alert.alert("Please enter Complete card details and Email");
-    //         return;
-    //     }
-    //     const billingDetails = {
-    //         email: email,
-    //     };
-    //     //2.Fetch the intent client secret from the backend
-    //     try {
-    //         const { clientSecret, error } = await fetchPaymentIntentClientSecret();
-    //         //2. confirm the payment
-    //         if (error) {
-    //             console.log("Unable to process payment");
-    //         } else {
-    //             const { paymentIntent, error } = await confirmPayment(clientSecret, {
-    //                 card: cardDetails,
-    //                 billingDetails: billingDetails,
-    //             });
-    //             if (error) {
-    //                 alert(`Payment Confirmation Error ${error.message}`);
-    //             } else if (paymentIntent) {
-    //                 alert("Payment Successful");
-    //                 console.log("Payment successful ", paymentIntent);
-    //             }
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    //     //3.Confirm the payment with the card details
-    // };
-    const fetchPaymentSheetParams = async () => {
-        const response = await fetch(`${API_URL}/api/users/payment-sheet`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ totalAmount: totalPrice })
-        });
-        const { paymentIntent, ephemeralKey, customer } = await response.json();
-
-        return {
-            paymentIntent,
-            ephemeralKey,
-            customer,
-        };
-    };
-
-    const initializePaymentSheet = async () => {
-        const {
-            paymentIntent,
-            ephemeralKey,
-            customer,
-        } = await fetchPaymentSheetParams();
-
-        const { error } = await initPaymentSheet({
-            merchantDisplayName: "Example, Inc.",
-            customerId: customer,
-            customerEphemeralKeySecret: ephemeralKey,
-            paymentIntentClientSecret: paymentIntent,
-            // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
-            //methods that complete payment after a delay, like SEPA Debit and Sofort.
-            allowsDelayedPaymentMethods: true,
-            defaultBillingDetails: {
-                name: 'Jane Doe',
-            }
-        });
-        if (!error) {
-            setIsLoading(true);
-        }
-    };
-
-    const openPaymentSheet = async () => {
-        const { error } = await presentPaymentSheet();
-
-        if (error) {
-            Alert.alert(`Error code: ${error.code}`, error.message);
-        } else {
-            Alert.alert('Success', 'Your order is confirmed!');
-        }
-    };
 
     if (isLoading) {
         return (
@@ -357,37 +298,9 @@ function Checkout({ navigation, route }: props) {
         );
     }
 
-    if (true) {
-        return (
-            <View style={styles3.container}>
-                <TextInput
-                    autoCapitalize="none"
-                    placeholder="E-mail"
-                    keyboardType="email-address"
-                    onChange={value => setEmail(value.nativeEvent.text)}
-                    style={styles3.input}
-                />
-                <CardField
-                    postalCodeEnabled={false}
-                    placeholders={{
-                        number: "4242 4242 4242 4242",
-                    }}
-                    cardStyle={styles3.card}
-                    style={styles3.cardContainer}
-                    onCardChange={(cardDetails: any) => {
-                        setCardDetails(cardDetails);
-                    }}
-                />
-                <TouchableOpacity style={styles3.button} onPress={openPaymentSheet}>
-                    <Text style={styles3.buttonText}>Submit</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
 
     return (
 
-        // <StripeProvider publishableKey={secret_key}>
 
         <>
             {
@@ -422,26 +335,94 @@ function Checkout({ navigation, route }: props) {
 
                         <TopBar title={'Self Checkout'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={false} />
                         <View style={styles.formBox}>
-                            <TouchableOpacity onPress={handleScanPress}>
-                                <Ionicons name="ios-barcode" color={'#72063c'} style={styles.icon} size={30} />
-                            </TouchableOpacity>
-                            {customerOrderObjects.map((orderObject: any) => (
-                                <Rectangle
-                                    key={orderObject._id}
-                                    orderName={orderObject.name}
-                                    quantity={orderObject.qty}
-                                    onIncrement={() => handleIncrement(orderObject._id)}
-                                    onDecrement={() => handleDecrement(orderObject._id)}
-                                    price={orderObject.price}
-                                />
-                            ))}
-                            <Text style={styles.totalPriceText}>
-                                Total: ${totalPrice ? totalPrice.toFixed(2) : '0.00'}
-                            </Text>
-                            <SubmitButton
-                                buttonName='Place Order'
-                                handlePress={handleConfirmOrder}
-                            />
+                            {isPaying && (
+                                <>
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Email</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setEmail(updatedCredential);
+                                        }}
+                                        placeholder={'Email'}
+                                    />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Card Number</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setCardDetails({ ...cardDetails, number: updatedCredential });
+                                        }}
+                                        placeholder={'Card Number'}
+                                    />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>Expiration Date</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setCardDetails({ ...cardDetails, expirationDate: updatedCredential });
+                                        }}
+                                        placeholder={'Expiration Date'}
+                                    />
+
+                                    <View style={styles.labelView}>
+                                        <Text style={styles.Label}>CVV</Text>
+                                    </View>
+                                    <Field
+                                        handleChange={(updatedCredential) => {
+                                            setCardDetails({ ...cardDetails, cvv: updatedCredential });
+                                        }}
+                                        placeholder={'CVV'}
+                                    />
+                                    <SubmitButton
+                                        buttonName='Submit Payment'
+                                        handlePress={handleConfirmOrder}
+                                    />
+                                    <SubmitButton
+                                        buttonName='Cancel'
+                                        handlePress={() => { setIsPaying(false) }}
+                                    />
+                                </>
+                            )
+
+                            }
+                            {!isPaying && (
+                                <>
+                                    <TouchableOpacity onPress={handleScanPress}>
+                                        <Ionicons name="ios-barcode" color={'#72063c'} style={styles.icon} size={30} />
+                                    </TouchableOpacity>
+                                    {customerOrderObjects.map((orderObject: any) => (
+                                        <Rectangle
+                                            key={orderObject._id}
+                                            orderName={orderObject.name}
+                                            quantity={orderObject.qty}
+                                            onIncrement={() => handleIncrement(orderObject._id)}
+                                            onDecrement={() => handleDecrement(orderObject._id)}
+                                            price={orderObject.price}
+                                        />
+                                    ))}
+                                    <Text style={styles.totalPriceText}>
+                                        Total: ${totalPrice ? totalPrice.toFixed(2) : '0.00'}
+                                    </Text>
+                                    <SubmitButton
+                                        buttonName='Place Order'
+                                        handlePress={() => {
+                                            if (totalPrice == 0) {
+                                                setIsError(true)
+                                                setIsMessageVisible(true)
+                                                setMessage(`Cart is Empty`)
+
+                                            } else {
+                                                setIsPaying(true)
+                                            }
+                                        }}
+                                    />
+                                </>
+                            )
+                            }
+
 
                         </View>
 
@@ -449,8 +430,6 @@ function Checkout({ navigation, route }: props) {
                 </ScrollView>
             </SafeAreaView>
         </>
-        // {/* </StripeProvider> */ }
-
 
     );
 }
@@ -561,38 +540,6 @@ const styles2 = StyleSheet.create({
     },
 });
 
-const styles3 = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        margin: 20,
-    },
-    input: {
-        backgroundColor: "#efefefef",
-        borderRadius: 8,
-        fontSize: 20,
-        height: 50,
-        padding: 10,
-        marginBottom: 10, // Add margin bottom for spacing
-    },
-    card: {
-        backgroundColor: "#efefefef",
-    },
-    cardContainer: {
-        height: 50,
-        marginVertical: 10, // Adjust margin for spacing
-    },
-    button: {
-        backgroundColor: "#4CAF50",
-        borderRadius: 8,
-        padding: 15,
-        alignItems: "center",
-    },
-    buttonText: {
-        color: "white",
-        fontSize: 18,
-    },
-});
 
 
 export default Checkout;

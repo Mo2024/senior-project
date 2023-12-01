@@ -186,8 +186,15 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
             const existingItemIndex = parsedCustomerOrdersObjects[currentCustomerIndex].findIndex((item: any) => item._id === foundItem.itemId._id);
 
             if (existingItemIndex !== -1) {
-                parsedCustomerOrdersObjects[currentCustomerIndex][existingItemIndex].qty++;
-
+                if (foundItem.quantity <= parsedCustomerOrdersObjects[currentCustomerIndex][existingItemIndex].qty) {
+                    setIsLoading(false);
+                    setIsError(true)
+                    setIsMessageVisible(true)
+                    setMessage(`Only ${foundItem.quantity} quantity is available for this item`)
+                    return
+                } else {
+                    parsedCustomerOrdersObjects[currentCustomerIndex][existingItemIndex].qty++;
+                }
             } else {
                 const newItem = { name: foundItem.itemId.name, _id: foundItem.itemId._id, qty: 1, price: foundItem.itemId.price };
                 parsedCustomerOrdersObjects[currentCustomerIndex].push(newItem);

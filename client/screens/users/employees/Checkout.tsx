@@ -41,6 +41,8 @@ function Checkout({ navigation, route }: props) {
     const [reciptEmail, setReciptEmail] = useState<string>('')
     const { currentCustomerIndex } = route.params || {};
     const [totalPrice, setTotalPrice] = useState<number>()
+    const [fetchedItemsWithoutCat, setFetchedItemsWithoutCat] = useState<any[]>([])
+
     useFocusEffect(
         React.useCallback(() => {
             async function fetchItemsNeeded() {
@@ -50,6 +52,8 @@ function Checkout({ navigation, route }: props) {
                     const parsedCustomerOrdersObjects = JSON.parse(fetchedCustomerOrdersObjects as string);
                     const customerOrdersNames = await SecureStore.getItemAsync('customerOrdersNames')
                     const parsedCustomersOrdersNames = JSON.parse(customerOrdersNames as string);
+                    const fetchedItemsWithoutCat = await EmployeeApi.getItemsWithoutCategory()
+                    setFetchedItemsWithoutCat(fetchedItemsWithoutCat)
                     if (parsedCustomerOrdersObjects !== null) {
                         setCustomerOrdersObjects(parsedCustomerOrdersObjects)
                         setCustomerOrderObjects(parsedCustomerOrdersObjects[currentCustomerIndex]);
@@ -105,10 +109,21 @@ function Checkout({ navigation, route }: props) {
 
     async function handleIncrement(_id: mongoose.Types.ObjectId) {
         let updatedCustomerOrderObjects: any;
+        const foundItem = fetchedItemsWithoutCat.find(item => item.itemId._id == _id);
+        let isError = false
         setCustomerOrderObjects((prevCustomerOrderObjects: any) => {
             updatedCustomerOrderObjects = prevCustomerOrderObjects.map((orderObject: any) => {
                 if (orderObject._id.toString() === _id.toString()) {
-                    return { ...orderObject, qty: orderObject.qty + 1 };
+                    if (foundItem.quantity <= orderObject.qty) {
+                        isError = true
+                        setIsLoading(false);
+                        setIsError(true)
+                        setIsMessageVisible(true)
+                        setMessage(`Only ${foundItem.quantity} quantity is available for this item`)
+                        return { ...orderObject, qty: foundItem.quantity };
+                    } else {
+                        return { ...orderObject, qty: orderObject.qty + 1 };
+                    }
                 }
                 return orderObject;
             });
@@ -226,7 +241,16 @@ function Checkout({ navigation, route }: props) {
                             </Text>
                             <SubmitButton
                                 buttonName='Place Order'
-                                handlePress={() => { setIsPromptVisible(true) }}
+                                handlePress={() => {
+                                    if (totalPrice == 0) {
+                                        setIsError(true)
+                                        setIsMessageVisible(true)
+                                        setMessage(`Cart is Empty`)
+
+                                    } else {
+                                        setIsPromptVisible(true)
+                                    }
+                                }}
                             />
 
                         </View>
