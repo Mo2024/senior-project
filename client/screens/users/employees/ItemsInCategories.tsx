@@ -83,7 +83,7 @@ function ItemsInCategories({ navigation, route }: ItemsInCategoriesProp) {
     }
 
     function deleteItemInCategory(itemId: mongoose.Types.ObjectId) {
-        setFetchedItems((prevItems) => {
+        setFetchedItemsInBranch((prevItems) => {
             return prevItems.filter((item) => item.itemId._id !== itemId);
         });
 
