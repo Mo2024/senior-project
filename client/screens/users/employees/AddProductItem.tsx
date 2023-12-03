@@ -45,12 +45,18 @@ function AddProductItem({ navigation, route }: AddProductItemProp) {
 
                     console.log(categoryId)
                     const fetchedItems = await EmployeeApi.getItems(categoryId) as any
-                    setFetchedItems(fetchedItems)
+                    const fetchedItemsInBranch = await EmployeeApi.getItemsInBranch(categoryId) as any
+                    console.log(fetchedItems)
+                    console.log(fetchedItemsInBranch)
+                    const filteredItems = fetchedItems.filter((item: any) =>
+                        !fetchedItemsInBranch.some((branchItem: any) => branchItem.itemId._id === item._id)
+                    );
+                    setFetchedItems(filteredItems)
 
 
-                    const itemNames = fetchedItems.map((item: { name: any; }) => item.name);
+                    const itemNames = filteredItems.map((item: { name: any; }) => item.name);
                     setItemNames(itemNames as any)
-                    const itemIds = fetchedItems.map((item: { _id: any; }) => item._id);
+                    const itemIds = filteredItems.map((item: { _id: any; }) => item._id);
                     setItemIds(itemIds as any)
 
                     setIsLoading(false);

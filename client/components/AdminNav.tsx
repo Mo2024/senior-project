@@ -18,13 +18,6 @@ const AdminNav = () => {
                     <Ionicons name="ios-folder" color={'#72063c'} size={size} />
                 ),
             }} />
-            <Tab.Screen name="ManageSelfCheckout" component={ManageSelfCheckout} options={{
-                tabBarLabel: 'Self-Checkout',
-                headerShown: false,
-                tabBarIcon: ({ color, size }) => (
-                    <Ionicons name="ios-basket" color={'#72063c'} size={size} />
-                ),
-            }} />
             <Tab.Screen name="CheckAttendance" component={CheckAttendance} options={{
                 tabBarLabel: 'Check Attendance',
                 headerShown: false,

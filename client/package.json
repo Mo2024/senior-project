@@ -36,6 +36,7 @@
     "react-native-qrcode-svg": "^6.2.0",
     "react-native-select-dropdown": "^3.3.4",
     "react-native-sound": "^0.11.2",
+    "react-native-svg": "^14.0.0",
     "react-native-vector-icons": "^10.0.0",
     "react-native-volume-manager": "^1.10.0"
   },

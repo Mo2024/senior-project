@@ -180,7 +180,7 @@ function ManageEmployee({ navigation }: ManageEmployeeProp) {
 
             setIsError(false)
             setIsMessageVisible(true)
-            setMessage('Employee Created Successfully')
+            setMessage('Employee Transferred Successfully')
         } catch (error) {
             setIsError(true)
             let errorMessage = ''

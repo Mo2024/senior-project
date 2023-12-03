@@ -212,7 +212,8 @@ export const createBranch: RequestHandler<unknown, unknown, BranchBody, unknown>
 
         //THE PROBLEM IS  HERE
         await createSeAndBranchUser(newBranch, req.session.email as string)
-
+        console.log('tes')
+        console.log(req.session.email)
         res.status(201).json(newBranch)
     } catch (error) {
         next(error)

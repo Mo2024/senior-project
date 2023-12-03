@@ -29,7 +29,7 @@ const RoundedBoxBranch = ({ title, handleMessage, branchId, deleteBranchProp, na
             console.log('clicked')
             await OwnerApi.deleteBranch(branchId)
             deleteBranchProp(branchId)
-            handleMessage(false, true, 'Business Deleted successfully')
+            handleMessage(false, true, 'Branch Deleted successfully')
             // setIsError(false)
             // setIsMessageVisible(true)
             // setMessage('Business Deleted successfully')
