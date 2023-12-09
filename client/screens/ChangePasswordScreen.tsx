@@ -60,7 +60,7 @@ function ChangePasswordScreen({ navigation, route }: ForgetPasswordScreenProps) 
 
                     <View style={styles.container}>
 
-                        <TopBar title={'Forget Password'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
+                        <TopBar title={'Change Password'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
 
 
