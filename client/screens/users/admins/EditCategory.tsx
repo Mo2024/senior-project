@@ -94,7 +94,7 @@ function EditCategory({ navigation, route }: EditCategoryProps) {
 
                     <View style={styles.container}>
 
-                        <TopBar title={'Edit Business'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
+                        <TopBar title={'Edit Category'} bgColor="rgba(0, 0, 0, 0)" navigation={navigation} navBtnVisible={true} />
                         <View style={styles.formBox}>
                             {Object.keys(credentialsObject).map(key =>
                                 <React.Fragment key={key}>

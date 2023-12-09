@@ -86,9 +86,6 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
                 const fetchedCategories = await EmployeeApi.getCategories() as Category[]
                 setFetchedCategories(fetchedCategories)
 
-                const fetchedOrders = await EmployeeApi.getOrdersInBranch() as Businesses
-                setFetchedOrders(fetchedOrders)
-
                 const fetchedItemsWithoutCat = await EmployeeApi.getItemsWithoutCategory()
                 setFetchedItemsWithoutCat(fetchedItemsWithoutCat)
 
@@ -121,6 +118,9 @@ function Orders({ navigation, route }: ManageEmployeeProp) {
                 if (parsedCustomerOrdersObjects !== null) {
                     setCustomerOrdersObjects(parsedCustomerOrdersObjects);
                 }
+
+                const fetchedOrders = await EmployeeApi.getOrdersInBranch() as Businesses
+                setFetchedOrders(fetchedOrders)
 
             }
             fetchItemsNeeded();
